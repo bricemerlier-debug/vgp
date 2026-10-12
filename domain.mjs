@@ -60,3 +60,16 @@ export function reminders(equipment) {
     {kind:'week',label:'Une semaine avant',date:before(7)},
     {kind:'deadline',label:'Jour de l’échéance',date:deadline}].map(r=>({...r,deadline,equipmentId:equipment.id}));
 }
+
+export function monthlyProgress(equipment,year,today) {
+  const months=Array.from({length:12},(_,index)=>({month:index+1,total:0,done:0,remaining:0,overdue:0,percent:null,entries:[]}));
+  let unknownHistory=0;
+  for(const e of equipment.filter(e=>!e.archived)){
+    const entries=new Map();
+    for(const c of e.controls){if(!c.plannedDate){unknownHistory++;continue}entries.set(c.plannedDate,{equipmentId:e.id,identifier:e.identifier,name:e.designation,date:c.plannedDate,done:true,controlDate:c.date})}
+    const next=due(e);if(next&&!entries.has(next))entries.set(next,{equipmentId:e.id,identifier:e.identifier,name:e.designation,date:next,done:false});
+    for(const entry of entries.values()){if(Number(entry.date.slice(0,4))!==Number(year))continue;const month=months[Number(entry.date.slice(5,7))-1];month.entries.push({...entry,overdue:!entry.done&&entry.date<today})}
+  }
+  for(const m of months){m.total=m.entries.length;m.done=m.entries.filter(e=>e.done).length;m.remaining=m.total-m.done;m.overdue=m.entries.filter(e=>e.overdue).length;m.percent=m.total?Math.round(m.done/m.total*100):null}
+  return {months,unknownHistory};
+}

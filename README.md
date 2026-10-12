@@ -156,3 +156,13 @@ Planifié = plus d’un mois avant l’échéance ; À faire = depuis un mois ca
 ## Commentaires équipement
 
 La fiche comporte les onglets Fiche et Commentaires. À chaque création, le commentaire est initialisé à « Mise en service le JJ/MM/AAAA », avec la date locale du jour. Il peut être modifié, complété ou effacé puis enregistré. Une modification ultérieure de la fiche ne régénère pas et n’écrase pas ce commentaire. Les anciennes fiches reçoivent un commentaire vide, sans inventer une date de mise en service. Les commentaires sont conservés dans les sauvegardes et restent disponibles pour les archives.
+
+## KPI mensuels sur 12 mois
+
+Une courbe affiche les pourcentages par mois de l’année choisie (année courante par défaut). Le dénominateur est le nombre de contrôles prévus dans le mois, pour les équipements actuellement actifs ; le numérateur est le nombre de ces contrôles réalisés. Un contrôle réalisé après la date prévue reste rattaché au mois de son échéance d’origine. Ce graphique mesure l’avancement actuel, pas le taux de réalisation dans les délais ni la conformité. Les mois sans contrôle prévu affichent —, pas 0 ou 100 %.
+
+Le bouton de la part non réalisée ouvre les équipements correspondants avec leur date prévue, leur état et un accès à la fiche. Les dates futures ne sont pas qualifiées de retard. Par exemple, trois contrôles réalisés sur quatre prévus donnent 75 %, et le bouton 25 % montre le quatrième.
+
+Lors de l’enregistrement d’un nouveau dernier contrôle (date strictement plus récente que le dernier contrôle enregistré, ou premier contrôle), la date d’échéance actuelle est conservée dans `plannedDate` sur le contrôle avant de recalculer la prochaine. Les ajouts historiques antérieurs et les anciens contrôles sans planning connu ne reçoivent pas de date prévue inventée : ils sont exclus et leur nombre est signalé. Le total mensuel déduplique les contrôles pour un même équipement et une même date prévue. La courbe reflète le parc actuellement actif, pas une photographie du parc à chaque mois passé. Les équipements archivés sont exclus comme dans les autres KPI.
+
+Tests : `node --test tests/monthly.test.mjs` et `python tests/monthly.py` avec serveur sur le port 8000.
