@@ -1,3 +1,7 @@
+## Présentation Goodyear Amiens
+
+Le site porte le nom « Vérification générale périodique Goodyear Amiens », avec une présentation bleu et jaune. Le logo officiel importé dans **⚙ > Rapports** apparaît aussi au centre de l’en-tête. En son absence, le nom GOODYEAR est affiché en texte ; aucune image de logo officiel n’est inventée. Les sauvegardes et la clé locale restent inchangées.
+
 ## Connexion Supabase (préparée, désactivée par défaut)
 
 Le [guide Supabase](docs/SUPABASE.md) décrit le stockage actuel, les scripts SQL, Auth/RLS, la migration sans suppression du local, l’import Excel et les futurs rappels J-30/J-14/J-7/J0. Aucun projet ni envoi n’est activé.

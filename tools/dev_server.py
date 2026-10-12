@@ -56,7 +56,7 @@ if __name__ == '__main__':
         server = ThreadingHTTPServer(('127.0.0.1', args.port), Handler)
     except OSError as error:
         raise SystemExit(f'Impossible de démarrer sur le port {args.port} : {error}. Fermez le serveur précédent, puis réessayez.')
-    print(f'Métrologie : http://localhost:{args.port}', flush=True)
+    print(f'Vérification générale périodique Goodyear Amiens : http://localhost:{args.port}', flush=True)
     print('Rechargement automatique actif. Ctrl+C pour arrêter. Gardez la même adresse pour retrouver vos données.', flush=True)
     try:
         server.serve_forever()
