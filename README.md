@@ -174,3 +174,11 @@ Les cartes Parc actif, Jamais contrôlés, Contrôles à faire, Contrôles réal
 L’archivage approuvé distingue désormais Mis au rebut (fond gris foncé, texte clair) et Équipement perdu (violet), avec un libellé visible en plus de la couleur. Le motif est lu depuis le dernier archivage validé, sans modifier les historiques. La distinction est visible dans Matériel, les fiches propriétaires et les listes KPI. Dans Archivés, le filtre Motif d’archivage sépare les deux cas. Désarchiver restaure l’apparence active.
 
 Test : `python tests/kpi_lists.py` avec serveur sur le port 8000.
+
+## Paramètres de mails (roue dentée en haut à droite)
+
+Le menu ⚙ contient Mails. Cette page permet de personnaliser l’objet et le corps des quatre modèles (un mois, deux semaines, une semaine, échéance) et d’afficher un aperçu avec un équipement actif. Les champs automatiques sont `{{nom_equipement}}`, `{{numero_interne}}`, `{{id_vgp}}`, `{{nom_proprietaire}}`, `{{date_controle}}`, `{{secteur}}`, `{{zone}}`. Ils sont remplacés avec les valeurs de la fiche au moment de l’aperçu, sans exécution de code ni interprétation HTML. Les champs inconnus sont signalés lors de l’enregistrement. Les modèles sont inclus dans les sauvegardes et les aperçus de rappels sur les fiches propriétaires les utilisent.
+
+Aucun envoi réel n’est activé. Pour l’automatisation Microsoft 365, prévoir avec l’informatique une boîte expéditrice autorisée, un traitement côté serveur avec stockage partagé, une connexion Microsoft Graph adaptée et un historique d’envoi avec prévention des doublons. Aucune clé ni aucun mot de passe n’est demandé dans les modèles ou dans le chat. Un mail type peut être transmis sous forme de texte avec des noms fictifs puis transformé en modèle à variables.
+
+Test : `python tests/mail_templates.py` avec serveur sur le port 8000.

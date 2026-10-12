@@ -1,0 +1,10 @@
+from playwright.sync_api import sync_playwright,expect
+with sync_playwright() as p:
+ b=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox']);page=b.new_page();errors=[]
+ page.on('pageerror',lambda e:errors.append(str(e)))
+ page.goto('http://127.0.0.1:8000/prototype-vgp.html');page.get_by_role('button',name='Ouvrir les paramètres').click();expect(page.locator('#settingsToggle')).to_have_attribute('aria-expanded','true');page.get_by_role('button',name='Mails',exact=True).click();expect(page.locator('#mailSettingsView')).to_be_visible();expect(page.locator('#settingsMenu')).not_to_be_visible()
+ page.locator('#mailSubject').fill('Contrôle de {{nom_equipement}}');page.locator('#mailBody').fill('Bonjour {{nom_proprietaire}}, merci de présenter {{numero_interne}} avant le {{date_controle}}.');page.get_by_role('button',name='Enregistrer le modèle').click();expect(page.locator('#mailTemplateSaved')).to_contain_text('enregistré');assert 'DEMO-AR-001' in page.locator('#mailSettingsPreview').inner_text();assert '{{' not in page.locator('#mailSettingsPreview').inner_text();assert 'Simulation' in page.locator('#mailSettingsView').inner_text() or 'SIMULATION' in page.locator('#mailSettingsView').inner_text()
+ page.reload();page.get_by_role('button',name='Ouvrir les paramètres').click();page.get_by_role('button',name='Mails',exact=True).click();assert page.locator('#mailSubject').input_value()=='Contrôle de {{nom_equipement}}'
+ page.locator('#mailBody').fill('Champ inconnu {{mot_inconnu}}');page.get_by_role('button',name='Enregistrer le modèle').click();expect(page.locator('#mailTemplateError')).to_contain_text('mot_inconnu');page.locator('#mailTemplateKind').select_option('deadline');assert 'suspension' in page.locator('#mailSubject').input_value()
+ page.set_viewport_size({'width':390,'height':844});assert page.locator('body').evaluate('(e)=>e.scrollWidth<=window.innerWidth')
+ assert not errors,errors;b.close();print('PASS: menu paramètres droit, modèles personnalisés, variables substituées, persistance, validation et mobile')

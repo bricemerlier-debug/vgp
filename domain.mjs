@@ -73,3 +73,5 @@ export function monthlyProgress(equipment,year,today) {
   for(const m of months){m.total=m.entries.length;m.done=m.entries.filter(e=>e.done).length;m.remaining=m.total-m.done;m.overdue=m.entries.filter(e=>e.overdue).length;m.percent=m.total?Math.round(m.done/m.total*100):null}
   return {months,unknownHistory};
 }
+
+export function fillEmailTemplate(template,values){return template.replace(/\{\{\s*([a-z_]+)\s*\}\}/g,(match,key)=>Object.hasOwn(values,key)?String(values[key]):match)}
