@@ -19,3 +19,5 @@ input[aria-invalid="true"]{border:2px solid #b2372b;background:#fff3f1}input[ari
 .owner-equipment-list,.association-list{overflow:auto}.association-list{margin-top:20px}.owner-equipment-list table{min-width:600px}.association-list table{min-width:430px}button:disabled{cursor:default;opacity:.55}#ownerProfile{margin:26px 0}#ownerProfile .toolbar>div{margin-right:auto}#ownerProfileName{font-size:26px;margin:8px 0}
 
 .owner-card[data-owner-card]{cursor:pointer}
+
+.owner-contact{display:flex;gap:14px;align-items:end;flex-wrap:wrap;border-top:1px solid #e1e9e4;padding:20px 0}.owner-contact label{flex:1;min-width:200px}.owner-contact .error{flex-basis:100%;margin:0}.owner-reminders{border-top:1px solid #e1e9e4;margin-top:26px;padding-top:16px}#emailPreviewBody{min-height:300px;font-size:14px;line-height:1.6}

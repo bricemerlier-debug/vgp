@@ -53,3 +53,13 @@ export function dashboard(equipment,today,anticipation) {
     results:['Bon état','Mauvais état — réparable','Mauvais état — à jeter','Introuvable'].map(result=>({label:result,count:controlled.filter(e=>latest(e).result===result).length})),
     sectors:['A1','A2','B1','B2','B3',''].map(sector=>{const items=active.filter(e=>(e.sector||'')===sector);return {sector,total:items.length,controlled:items.filter(e=>latest(e)).length}})};
 }
+
+export function reminders(equipment) {
+  if(equipment.archived)return [];
+  const deadline=due(equipment);if(!deadline)return [];
+  const before=days=>{const d=new Date(deadline+'T00:00:00Z');d.setUTCDate(d.getUTCDate()-days);return d.toISOString().slice(0,10)};
+  return [{kind:'month',label:'Un mois avant',date:addMonths(deadline,-1)},
+    {kind:'twoWeeks',label:'Deux semaines avant',date:before(14)},
+    {kind:'week',label:'Une semaine avant',date:before(7)},
+    {kind:'deadline',label:'Jour de l’échéance',date:deadline}].map(r=>({...r,deadline,equipmentId:equipment.id}));
+}
