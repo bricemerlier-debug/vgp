@@ -6,7 +6,7 @@ export function addMonths(date, months) {
   return target.toISOString().slice(0,10);
 }
 export function latest(e) { return [...e.controls].sort((a,b)=>b.date.localeCompare(a.date)||b.created-a.created)[0]; }
-export function due(e) { const c=latest(e); return c ? addMonths(c.date,e.months):(e.firstControlDate??null); }
+export function due(e) { const c=latest(e); if(e.manualNextControlDate&&(e.manualControlId??null)===(c?.id??null))return e.manualNextControlDate; return c ? addMonths(c.date,e.months):(e.firstControlDate??null); }
 export function status(e,today,anticipation) {
   if(e.archived)return 'Archivé';
   const date=due(e); if(!date)return 'À définir';

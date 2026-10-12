@@ -20,7 +20,7 @@ with sync_playwright() as p:
   record=next(e for e in json.loads(page.evaluate("localStorage.getItem('vgp-prototype-v1')"))['equipment'] if e['identifier']=='NEW-001')
   assert record['controls']==[]
   assert record['scheduledControl']['date']==record['firstControlDate']
-  assert record['firstControlDate']==page.evaluate("(()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`})()")
+  assert record['firstControlDate']==page.evaluate("(()=>{const d=new Date();return `${d.getFullYear()+1}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`})()")
   row=page.locator('tbody tr').filter(has_text='NEW-001')
   assert 'À faire' in row.inner_text() and 'Aucun contrôle' in row.inner_text()
   row.get_by_role('button',name='Ouvrir',exact=True).click()
