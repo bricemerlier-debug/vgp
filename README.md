@@ -116,3 +116,9 @@ Le site s’appelle Métrologie. Dans le menu, VGP regroupe Matériel, Propriét
 VGP et Contenant sont deux activités distinctes ; les pages Contenant n’utilisent pas le parc ou les KPI VGP. Une fiche VGP reçoit désormais un ID VGP numérique automatique, distinct du numéro interne d’équipement saisi et de son numéro de série. Cet ID est conservé au fil des modifications, archivages et désarchivages, et inclus dans les sauvegardes. Les anciennes fiches reçoivent un ID lors de la migration sans suppression des données. Le compteur porte sur tout le parc VGP, archives comprises, pour ne pas réattribuer leur numéro. Il est local à ce jeu de données et ne constitue pas un identifiant partagé entre utilisateurs.
 
 Matériel VGP propose Actifs et Archivés avec des compteurs séparés. Par défaut seuls les actifs sont affichés. Le total Équipements actifs exclut toutes les archives ; une carte Archivés affiche leur nombre et ouvre l’onglet correspondant. Les archives conservent leur historique et restent grisées dans leur vue. Lors de la validation d’un archivage ou désarchivage, la liste bascule sur la vue correspondante. Les KPI d’échéance restent calculés sur les actifs et les comptes de contrôles historiques restent conservés.
+
+## Fiche VGP simplifiée
+
+Le formulaire utilise Nom au lieu de Désignation. Numéro interne et numéro de série sont placés côte à côte sur ordinateur. Catégorie et salarié/service d’affectation ne sont plus demandés ; les anciennes valeurs restent conservées dans les sauvegardes des fiches existantes.
+
+Sans dernier contrôle renseigné, la création ajoute automatiquement un contrôle à réaliser daté du jour, visible dans la fiche. Il ne possède aucun résultat et ne compte pas comme réalisé dans les KPI. L’enregistrement du premier vrai contrôle clôt cette attente et crée une ligne d’historique avec son PDF. Aucun contrôle réalisé n’est inventé.
