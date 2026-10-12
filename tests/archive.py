@@ -79,6 +79,7 @@ with sync_playwright() as p:
  approve=page.locator('#approveArchive')
  approve.locator('[name=approver]').fill('Signataire')
  approve.locator('[name=confirmed]').check()
+ approve.locator('[name=intervenant]').fill('Contrôleur rebut')
  approve.locator('[name=signedAttachment]').set_input_files({'name':'rebut.pdf','mimeType':'application/pdf','buffer':b'%PDF-1.4 test'})
  approve.get_by_role('button',name='Valider l’archivage').click()
  expect(page.locator('#archiveDialog')).not_to_be_visible()
@@ -90,7 +91,7 @@ with sync_playwright() as p:
  page.get_by_text('Sauvegarde importée.',exact=True).wait_for()
  record=json.loads(page.evaluate("localStorage.getItem('vgp-prototype-v1')"))['equipment'][0]
  assert record['siteId']==1
- assert record['archived'] and len(record['archiveHistory'])==3 and len(record['controls'])==2
+ assert record['archived'] and len(record['archiveHistory'])==3 and len(record['controls'])==3
  assert record['archiveHistory'][0]['snapshot']['location']=='Atelier A (fictif)'
  assert not errors,errors
  b.close()

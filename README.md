@@ -182,3 +182,11 @@ Le menu ⚙ contient Mails. Cette page permet de personnaliser l’objet et le c
 Aucun envoi réel n’est activé. Pour l’automatisation Microsoft 365, prévoir avec l’informatique une boîte expéditrice autorisée, un traitement côté serveur avec stockage partagé, une connexion Microsoft Graph adaptée et un historique d’envoi avec prévention des doublons. Aucune clé ni aucun mot de passe n’est demandé dans les modèles ou dans le chat. Un mail type peut être transmis sous forme de texte avec des noms fictifs puis transformé en modèle à variables.
 
 Test : `python tests/mail_templates.py` avec serveur sur le port 8000.
+
+## Contrôle de mise au rebut et présentation du matériel
+
+Une nouvelle mise au rebut exige, en plus de l’approbation signée, la saisie du contrôle : date, intervenant et résultat Mauvais état — à jeter. La validation enregistre le contrôle dans l’historique avec son compte rendu PDF, l’associe à l’archivage et maintient l’équipement archivé. Une perte ne crée pas de contrôle automatique. Les anciennes mises au rebut sans contrôle associé affichent « Mis au rebut — contrôle à compléter » et proposent un bouton pour renseigner les informations réelles, sans fabriquer une date ni un intervenant ; l’archive reste conservée.
+
+La liste présente le nom en première ligne avec la taille de police principale, puis le numéro interne, le numéro de série et l’ID VGP en petites lignes compactes. Une série absente reste explicitement Non renseigné. La même présentation est utilisée dans les listes propriétaires et les listes KPI.
+
+Test : `python tests/scrap.py` avec serveur sur le port 8000.
