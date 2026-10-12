@@ -16,7 +16,7 @@ with sync_playwright() as p:
  form.get_by_role('button',name='Enregistrer l’équipement').click()
  assert 'DMCR' in page.locator('tbody tr').filter(has_text='ZONE-01').inner_text()
  data=json.loads(page.evaluate("localStorage.getItem('vgp-prototype-v1')"))
- second=dict(data['equipment'][-1]);second.update(id='zone02',identifier='ZONE-02',zone='Yuzer',team='A')
+ second=dict(data['equipment'][-1]);second.update(id='zone02',siteId=data['nextVgpId'],identifier='ZONE-02',zone='Yuzer',team='A');data['nextVgpId']+=1
  data['equipment'].append(second)
  page.evaluate('(d)=>localStorage.setItem("vgp-prototype-v1",JSON.stringify(d))',data)
  page.reload()

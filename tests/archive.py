@@ -30,12 +30,16 @@ with sync_playwright() as p:
  assert page.get_by_role('button',name='+ Enregistrer un contrôle').count()==0
  page.locator('#detail [data-close]').click()
  assert page.locator('tr.archived-row').count()==1
+ assert page.locator('#activeEquipmentTab').inner_text()=='Actifs (1)'
+ assert page.locator('#archivedEquipmentTab').inner_text()=='Archivés (1)'
+ assert page.locator('#stats [data-status-filter=""] strong').inner_text()=='1'
  page.get_by_role('button',name='Ouvrir le menu',exact=True).click()
  page.locator('[data-view=kpi]').click()
  expect(page.locator('#kpi-performed')).to_have_text('1')
  expect(page.locator('#kpi-todo')).to_have_text('1')
  page.get_by_role('button',name='Ouvrir le menu',exact=True).click()
  page.locator('[data-view=material]').click()
+ page.locator('#archivedEquipmentTab').click()
  page.get_by_role('button',name='Ouvrir',exact=True).first.click()
  page.get_by_role('button',name='Modifier la fiche').click()
  page.locator('#equipmentForm [name=location]').fill('Changement pendant archivage')
@@ -85,6 +89,7 @@ with sync_playwright() as p:
  page.locator('#import').set_input_files('/tmp/vgp-archive-backup.json')
  page.get_by_text('Sauvegarde importée.',exact=True).wait_for()
  record=json.loads(page.evaluate("localStorage.getItem('vgp-prototype-v1')"))['equipment'][0]
+ assert record['siteId']==1
  assert record['archived'] and len(record['archiveHistory'])==3 and len(record['controls'])==2
  assert record['archiveHistory'][0]['snapshot']['location']=='Atelier A (fictif)'
  assert not errors,errors

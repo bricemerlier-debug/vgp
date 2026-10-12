@@ -106,3 +106,9 @@ Test : `python tests/preview.py` sert le fichier autonome dans une iframe sandbo
 ## Métrologie : navigation par activité
 
 Le site s’appelle Métrologie. Dans le menu, VGP regroupe Matériel, Propriétaires et KPI. Contenant regroupe Matériel et KPI : ces deux pages sont pour l’instant des espaces à compléter, sans gestion de contenants ni indicateurs calculés. Les équipements VGP, leurs contrôles et leurs sauvegardes gardent le même format et la même clé de stockage.
+
+## Identifiants VGP et séparation des archives
+
+VGP et Contenant sont deux activités distinctes ; les pages Contenant n’utilisent pas le parc ou les KPI VGP. Une fiche VGP reçoit désormais un ID VGP numérique automatique, distinct du numéro interne d’équipement saisi et de son numéro de série. Cet ID est conservé au fil des modifications, archivages et désarchivages, et inclus dans les sauvegardes. Les anciennes fiches reçoivent un ID lors de la migration sans suppression des données. Le compteur porte sur tout le parc VGP, archives comprises, pour ne pas réattribuer leur numéro. Il est local à ce jeu de données et ne constitue pas un identifiant partagé entre utilisateurs.
+
+Matériel VGP propose Actifs et Archivés avec des compteurs séparés. Par défaut seuls les actifs sont affichés. Le total Équipements actifs exclut toutes les archives ; une carte Archivés affiche leur nombre et ouvre l’onglet correspondant. Les archives conservent leur historique et restent grisées dans leur vue. Lors de la validation d’un archivage ou désarchivage, la liste bascule sur la vue correspondante. Les KPI d’échéance restent calculés sur les actifs et les comptes de contrôles historiques restent conservés.
