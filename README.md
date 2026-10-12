@@ -202,3 +202,13 @@ Les conclusions dépendent du résultat : Bon état = déclaration du vérificat
 Le logo officiel Goodyear n’a pas pu être téléchargé : les sites officiels et Wikimedia sont bloqués par le réseau de l’environnement, et les sources GitHub consultées ne le fournissent pas. ⚙ → Rapports permet d’importer un PNG/JPEG officiel fourni par l’entreprise (2 Mo maximum). Il est intégré dans le PDF hors ligne et inclus dans les sauvegardes. Sans import, l’en-tête est un texte GOODYEAR provisoire, explicitement identifié comme tel, pas un faux logo officiel.
 
 Tests : `python tests/reports.py`, `node --test tests/report_pdf.test.mjs`, validation par pdfinfo/pdftotext et intégration du logo par pdfimages.
+
+## Calendrier hebdomadaire et cloche de notifications
+
+Le bandeau gris de la page Matériel est remplacé par un calendrier du lundi au dimanche. La semaine courante est affichée par défaut ; les flèches permettent de changer de semaine et Cette semaine revient au présent. Chaque jour liste les échéances des équipements VGP actifs, avec accès à la fiche. Les contrôles réalisés dont la date prévue a été conservée restent visibles en vert pour suivre le travail de la semaine. Les archives sont exclues.
+
+La cloche près de la roue dentée affiche les échéances À faire (un mois avant) et En retard. Cliquer ouvre la fiche et ferme la liste de notifications. Les alertes sont recalculées après chaque enregistrement ; un contrôle réalisé qui repousse l’échéance hors du mois fait disparaître l’alerte sans suppression manuelle. Un simple ajout historique ancien ne résout pas une échéance toujours due. Le calendrier et les notifications se rafraîchissent aussi chaque minute pour tenir compte du passage des dates.
+
+Aucun mail n’est actuellement envoyé et aucune notification de mail fictif n’est affichée. La cloche le précise. Les confirmations d’envoi ne pourront être ajoutées qu’après connexion réelle de la messagerie Microsoft 365 et du traitement serveur. Les données restent locales au navigateur comme auparavant.
+
+Tests : `node --test tests/weekly.test.mjs` et `python tests/weekly.py` avec serveur sur le port 8000.
