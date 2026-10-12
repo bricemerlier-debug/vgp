@@ -12,11 +12,11 @@ test('historique distinct de la couverture actuelle, indépendance du résultat'
 test('parc vide : pourcentage absent ; parc sans contrôle : zéro pour cent',()=>{
  assert.equal(indicators([],'2026-10-12').percent,null);
  assert.equal(indicators([{months:3,controls:[]}],'2026-10-12').percent,0);
- assert.equal(indicators([{months:3,controls:[]}],'2026-10-12').toDo,1);
+ assert.equal(indicators([{months:3,controls:[]}],'2026-10-12').toDo,0);
 });
 test('archives exclues du suivi actuel, historique préservé',()=>{
  const equipment=[{archived:true,months:3,controls:[{date:'2026-01-01',created:1}]},{months:3,controls:[]}];
- assert.deepEqual(indicators(equipment,'2026-10-12'),{total:1,performed:1,actions:1,covered:0,missing:1,overdue:0,toDo:1,percent:0});
+ assert.deepEqual(indicators(equipment,'2026-10-12'),{total:1,performed:1,actions:1,covered:0,missing:1,overdue:0,toDo:0,percent:0});
 });
 test('première échéance sans contrôle ne compte pas comme contrôle réalisé',()=>{
  const equipment=[{months:12,firstControlDate:'2026-10-12',controls:[]}];

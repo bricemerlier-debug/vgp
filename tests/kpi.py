@@ -11,7 +11,7 @@ with sync_playwright() as p:
  expect(page.locator('#materialView')).to_be_hidden()
  expect(page.locator('#kpi-performed')).to_have_text('1')
  expect(page.locator('#kpi-actions')).to_have_text('1')
- expect(page.locator('#kpi-todo')).to_have_text('2')
+ expect(page.locator('#kpi-todo')).to_have_text('1')
  expect(page.locator('#kpi-percent')).to_have_text('50 %')
  assert page.locator('#kpiTitle').evaluate('(e)=>e===document.activeElement')
  # A new control updates both the historical count and current coverage.

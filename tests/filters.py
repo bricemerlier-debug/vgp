@@ -32,7 +32,7 @@ with sync_playwright() as p:
  assert page.locator('#sectorFilter').input_value()==''
  page.locator('#stats [data-status-filter="without-control"]').click()
  expect(page.locator('tbody tr')).to_have_count(3)
- page.locator('#stats [data-status-filter="À venir"]').click()
+ page.locator('#stats [data-status-filter="À faire"]').click()
  expect(page.get_by_text('Aucun équipement correspondant.',exact=True)).to_be_visible()
  page.locator('#stats [data-status-filter=""]').click()
  expect(page.locator('tbody tr')).to_have_count(4)

@@ -22,7 +22,7 @@ with sync_playwright() as p:
   assert record['scheduledControl']['date']==record['firstControlDate']
   assert record['firstControlDate']==page.evaluate("(()=>{const d=new Date();return `${d.getFullYear()+1}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`})()")
   row=page.locator('tbody tr').filter(has_text='NEW-001')
-  assert 'À faire' in row.inner_text() and 'Aucun contrôle' in row.inner_text()
+  assert 'Planifié' in row.inner_text() and 'Aucun contrôle' in row.inner_text()
   row.get_by_role('button',name='Ouvrir',exact=True).click()
   assert page.get_by_role('button',name='Télécharger le PDF').count()==0
   assert 'Contrôle à réaliser' in page.locator('#detailContent').inner_text()
@@ -35,7 +35,7 @@ with sync_playwright() as p:
   page.get_by_role('button',name='Ouvrir le menu',exact=True).click()
   page.locator('[data-view=kpi]').click()
   expect(page.locator('#kpi-performed')).to_have_text('1')
-  expect(page.locator('#kpi-todo')).to_have_text('3')
+  expect(page.locator('#kpi-todo')).to_have_text('1')
   expect(page.locator('#kpi-percent')).to_have_text('33 %')
   assert not errors,errors
   page.close()

@@ -148,3 +148,7 @@ La barre de recherche de Matériel VGP retrouve les équipements par ID VGP, num
 À la création VGP sans dernier contrôle : date manuelle vide = échéance périodique et fiche de contrôle À réaliser créée automatiquement ; date manuelle renseignée = échéance manuelle et aucun contrôle automatique. Dans les deux cas, aucun contrôle réalisé n’est inventé. Les contrôles passés réellement saisis restent dans l’historique. Les fiches déjà existantes sont conservées.
 
 Le statut À définir est cliquable depuis la liste du matériel, une fiche équipement ou la fiche propriétaire. Il ouvre une saisie de date du prochain contrôle, sauvegardée comme échéance manuelle, sans créer de résultat ni de contrôle réalisé.
+
+## Statuts d’échéance harmonisés
+
+Planifié = plus d’un mois avant l’échéance ; À faire = depuis un mois calendaire avant l’échéance jusqu’au jour de l’échéance inclus ; En retard = lendemain et au-delà. Ce calcul ne dépend plus de la présence d’un contrôle passé : un équipement neuf à échéance dans un an est Planifié. Sans date, le statut reste À définir. Les dates et historiques déjà saisis sont conservés. L’ancienne anticipation configurable en jours n’est plus utilisée pour ces statuts, afin de respecter le seuil fixe d’un mois demandé. Les KPI À faire et la répartition des échéances utilisent le même calcul, et n’assimilent plus jamais contrôlé à dû immédiatement. Le pourcentage de contrôles enregistrés reste distinct.

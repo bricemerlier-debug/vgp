@@ -36,7 +36,7 @@ with sync_playwright() as p:
  page.get_by_role('button',name='Ouvrir le menu',exact=True).click()
  page.locator('[data-view=kpi]').click()
  expect(page.locator('#kpi-performed')).to_have_text('1')
- expect(page.locator('#kpi-todo')).to_have_text('1')
+ expect(page.locator('#kpi-todo')).to_have_text('0')
  page.get_by_role('button',name='Ouvrir le menu',exact=True).click()
  page.locator('[data-view=material]').click()
  page.locator('#archivedEquipmentTab').click()
