@@ -38,11 +38,15 @@ Test complémentaire avec serveur actif : `python tests/equipment_fields.py`.
 
 Le bouton à trois barres en haut à gauche ouvre le menu « Matériel » / « Propriétaires ». Matériel réinitialise les filtres et affiche tous les équipements. Propriétaires affiche les propriétaires enregistrés, leur nombre d’équipements et un accès au matériel associé. Les équipements sans propriétaire sont regroupés séparément. Les propriétaires sans matériel restent visibles. La navigation fonctionne sur ordinateur et mobile ; Échap ou un clic hors du panneau ferme le menu. Test : `python tests/navigation.py` avec serveur actif.
 
-## KPI
+## KPI visuels VGP
 
-Le menu propose un onglet KPI, calculé sur tout le parc indépendamment des filtres. Contrôles réalisés = tous les enregistrements de l’historique ; actions réalisées = le même nombre, selon la définition actuelle d’une action. À faire = nombre d’équipements sans contrôle enregistré ou dont l’échéance est dépassée. Avancement = équipements actifs avec un contrôle enregistré et une échéance non dépassée / total des équipements actifs, arrondi à l’entier. Le jour de l’échéance est inclus. Sans équipement, le pourcentage est indéfini (—). Les contrôles à venir ne sont pas encore en retard. Les résultats n’influencent pas ce pourcentage : il ne mesure pas la conformité. Le décompte des contrôles réalisés peut dépasser le nombre d’équipements en raison de l’historique. Le prototype suit actuellement un type de contrôle par équipement, les réglementaires.
+Le pourcentage principal est le nombre d’équipements actifs ayant au moins un contrôle enregistré divisé par le nombre total d’équipements actifs. Chaque équipement compte une fois, même avec plusieurs contrôles. Les archives sont exclues du dénominateur. Sans équipement actif, le pourcentage est indéfini (—). Contrairement à l’ancien indicateur, ce pourcentage ne dépend pas de l’échéance : un équipement contrôlé mais en retard reste dans la part contrôlée.
 
-Tests : `node --test tests/domain.test.mjs tests/kpi.test.mjs` et, avec le serveur actif, `python tests/kpi.py`.
+L’anneau montre les parts contrôlée et jamais contrôlée. Les cartes donnent le parc actif, les équipements jamais contrôlés, les contrôles à faire et les contrôles enregistrés dans tout l’historique. Les actions réalisées reprennent le nombre de contrôles enregistrés.
+
+Le graphique des échéances répartit les actifs en catégories sans doublon : jamais contrôlés, contrôlés en retard, contrôlés à venir dans le délai d’anticipation configurable, contrôlés à échéance plus lointaine. Un équipement jamais contrôlé avec une première échéance dépassée reste dans la catégorie jamais contrôlé de ce graphique. Le graphique des résultats utilise seulement le dernier résultat de chaque équipement contrôlé actif ; il ne certifie pas la conformité. Le suivi par secteur présente contrôlés / total actif et permet d’ouvrir la liste correspondante, y compris pour les secteurs non renseignés. Les graphiques se mettent à jour après chaque enregistrement et restent distincts des pages Contenant.
+
+Tests : `node --test tests/dashboard.test.mjs tests/domain.test.mjs tests/kpi.test.mjs`, puis `python tests/kpi.py` avec un serveur sur le port 8000. Les tests couvrent résultats, échéances, archives, doublons historiques, parc vide et affichage mobile.
 
 ## Archivage, désarchivage et documents
 

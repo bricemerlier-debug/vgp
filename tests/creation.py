@@ -34,7 +34,7 @@ with sync_playwright() as p:
   page.locator('[data-view=kpi]').click()
   expect(page.locator('#kpi-performed')).to_have_text('1')
   expect(page.locator('#kpi-todo')).to_have_text('3')
-  expect(page.locator('#kpi-percent')).to_have_text('0 %')
+  expect(page.locator('#kpi-percent')).to_have_text('33 %')
   assert not errors,errors
   page.close()
  b.close()

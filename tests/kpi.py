@@ -12,7 +12,7 @@ with sync_playwright() as p:
  expect(page.locator('#kpi-performed')).to_have_text('1')
  expect(page.locator('#kpi-actions')).to_have_text('1')
  expect(page.locator('#kpi-todo')).to_have_text('2')
- expect(page.locator('#kpi-percent')).to_have_text('0 %')
+ expect(page.locator('#kpi-percent')).to_have_text('50 %')
  assert page.locator('#kpiTitle').evaluate('(e)=>e===document.activeElement')
  # A new control updates both the historical count and current coverage.
  page.get_by_role('button',name='Ouvrir le menu',exact=True).click()
@@ -30,7 +30,7 @@ with sync_playwright() as p:
  expect(page.locator('#kpi-performed')).to_have_text('2')
  expect(page.locator('#kpi-actions')).to_have_text('2')
  expect(page.locator('#kpi-todo')).to_have_text('1')
- expect(page.locator('#kpi-percent')).to_have_text('50 %')
+ expect(page.locator('#kpi-percent')).to_have_text('100 %')
  page.set_viewport_size({'width':390,'height':844})
  assert page.locator('body').evaluate('(e)=>e.scrollWidth <= window.innerWidth')
  assert not errors,errors

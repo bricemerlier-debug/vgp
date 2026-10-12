@@ -38,3 +38,18 @@ export function generatePdf(lines) {
   objects[1]=`<< /Type /Pages /Kids [${kids.join(' ')}] /Count ${pages.length} >>`;
   let out='%PDF-1.4\n',offsets=[0];objects.forEach((object,i)=>{offsets.push(encode(out).length);out+=`${i+1} 0 obj\n${object}\nendobj\n`});const xref=encode(out).length;out+=`xref\n0 ${objects.length+1}\n0000000000 65535 f \n${offsets.slice(1).map(n=>String(n).padStart(10,'0')+' 00000 n \n').join('')}trailer\n<< /Size ${objects.length+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;return encode(out);
 }
+
+export function dashboard(equipment,today,anticipation) {
+  const active=equipment.filter(e=>!e.archived),controlled=active.filter(e=>latest(e));
+  const limit=new Date(today+'T00:00:00Z');limit.setUTCDate(limit.getUTCDate()+Number(anticipation));
+  const limitDate=limit.toISOString().slice(0,10);
+  const overdue=controlled.filter(e=>due(e)<today).length;
+  const soon=controlled.filter(e=>due(e)>=today&&due(e)<=limitDate).length;
+  const planned=controlled.length-overdue-soon;
+  const missing=active.length-controlled.length;
+  return {total:active.length,archived:equipment.length-active.length,controlled:controlled.length,missing,
+    percent:active.length?Math.round(controlled.length/active.length*100):null,overdue,soon,planned,
+    performed:equipment.reduce((n,e)=>n+e.controls.length,0),
+    results:['Bon état','Mauvais état — réparable','Mauvais état — à jeter','Introuvable'].map(result=>({label:result,count:controlled.filter(e=>latest(e).result===result).length})),
+    sectors:['A1','A2','B1','B2','B3',''].map(sector=>{const items=active.filter(e=>(e.sector||'')===sector);return {sector,total:items.length,controlled:items.filter(e=>latest(e)).length}})};
+}
