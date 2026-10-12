@@ -152,3 +152,7 @@ Le statut À définir est cliquable depuis la liste du matériel, une fiche équ
 ## Statuts d’échéance harmonisés
 
 Planifié = plus d’un mois avant l’échéance ; À faire = depuis un mois calendaire avant l’échéance jusqu’au jour de l’échéance inclus ; En retard = lendemain et au-delà. Ce calcul ne dépend plus de la présence d’un contrôle passé : un équipement neuf à échéance dans un an est Planifié. Sans date, le statut reste À définir. Les dates et historiques déjà saisis sont conservés. L’ancienne anticipation configurable en jours n’est plus utilisée pour ces statuts, afin de respecter le seuil fixe d’un mois demandé. Les KPI À faire et la répartition des échéances utilisent le même calcul, et n’assimilent plus jamais contrôlé à dû immédiatement. Le pourcentage de contrôles enregistrés reste distinct.
+
+## Commentaires équipement
+
+La fiche comporte les onglets Fiche et Commentaires. À chaque création, le commentaire est initialisé à « Mise en service le JJ/MM/AAAA », avec la date locale du jour. Il peut être modifié, complété ou effacé puis enregistré. Une modification ultérieure de la fiche ne régénère pas et n’écrase pas ce commentaire. Les anciennes fiches reçoivent un commentaire vide, sans inventer une date de mise en service. Les commentaires sont conservés dans les sauvegardes et restent disponibles pour les archives.
