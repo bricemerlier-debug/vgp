@@ -166,3 +166,11 @@ Le bouton de la part non réalisée ouvre les équipements correspondants avec l
 Lors de l’enregistrement d’un nouveau dernier contrôle (date strictement plus récente que le dernier contrôle enregistré, ou premier contrôle), la date d’échéance actuelle est conservée dans `plannedDate` sur le contrôle avant de recalculer la prochaine. Les ajouts historiques antérieurs et les anciens contrôles sans planning connu ne reçoivent pas de date prévue inventée : ils sont exclus et leur nombre est signalé. Le total mensuel déduplique les contrôles pour un même équipement et une même date prévue. La courbe reflète le parc actuellement actif, pas une photographie du parc à chaque mois passé. Les équipements archivés sont exclus comme dans les autres KPI.
 
 Tests : `node --test tests/monthly.test.mjs` et `python tests/monthly.py` avec serveur sur le port 8000.
+
+## Listes depuis les KPI et motifs d’archivage
+
+Les cartes Parc actif, Jamais contrôlés, Contrôles à faire, Contrôles réalisés et Actions réalisées sont cliquables. Les légendes et le pourcentage de couverture ouvrent aussi les listes ; les barres d’échéances et de résultats ouvrent leur catégorie. Les listes permettent d’ouvrir les fiches et les échéances À définir restent éditables. Les compteurs d’historique affichent les contrôles individuels, archives comprises, plutôt qu’une liste d’équipements dédupliquée.
+
+L’archivage approuvé distingue désormais Mis au rebut (fond gris foncé, texte clair) et Équipement perdu (violet), avec un libellé visible en plus de la couleur. Le motif est lu depuis le dernier archivage validé, sans modifier les historiques. La distinction est visible dans Matériel, les fiches propriétaires et les listes KPI. Dans Archivés, le filtre Motif d’archivage sépare les deux cas. Désarchiver restaure l’apparence active.
+
+Test : `python tests/kpi_lists.py` avec serveur sur le port 8000.
