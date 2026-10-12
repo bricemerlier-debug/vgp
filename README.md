@@ -1,3 +1,7 @@
+## Connexion Supabase (préparée, désactivée par défaut)
+
+Le [guide Supabase](docs/SUPABASE.md) décrit le stockage actuel, les scripts SQL, Auth/RLS, la migration sans suppression du local, l’import Excel et les futurs rappels J-30/J-14/J-7/J0. Aucun projet ni envoi n’est activé.
+
 # Métrologie — prototype
 
 Application française sans dépendance ni installation nécessaire sur le PC.

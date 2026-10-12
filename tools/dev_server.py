@@ -6,7 +6,7 @@ import json
 import argparse
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCES = ('index.html', 'app.js', 'domain.mjs', 'style.css')
+SOURCES = ('index.html', 'app.js', 'domain.mjs', 'style.css', 'cloud.mjs', 'excel.mjs', 'cloud-config.js', 'vendor/excel.js')
 RELOAD = b'''<script>
 (()=>{let version=null,reloading=false;
 async function check(){try{const response=await fetch('/__dev/version',{cache:'no-store'});if(!response.ok)return;const next=await response.json();if(version===null){version=next.version;return;}if(next.version===version||reloading)return;
@@ -32,7 +32,7 @@ class Handler(SimpleHTTPRequestHandler):
         elif path in ('/', '/index.html'):
             body = (ROOT / 'index.html').read_bytes().replace(b'</html>', RELOAD + b'</html>')
             content_type = 'text/html; charset=utf-8'
-        elif path.lstrip('/') in SOURCES and path.count('/') == 1:
+        elif path.lstrip('/') in SOURCES:
             body = (ROOT / path.lstrip('/')).read_bytes()
             content_type = 'text/css; charset=utf-8' if path.endswith('.css') else 'text/javascript; charset=utf-8'
         else:
