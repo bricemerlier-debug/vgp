@@ -21,3 +21,5 @@ input[aria-invalid="true"]{border:2px solid #b2372b;background:#fff3f1}input[ari
 .owner-card[data-owner-card]{cursor:pointer}
 
 .owner-contact{display:flex;gap:14px;align-items:end;flex-wrap:wrap;border-top:1px solid #e1e9e4;padding:20px 0}.owner-contact label{flex:1;min-width:200px}.owner-contact .error{flex-basis:100%;margin:0}.owner-reminders{border-top:1px solid #e1e9e4;margin-top:26px;padding-top:16px}#emailPreviewBody{min-height:300px;font-size:14px;line-height:1.6}
+
+.material-search{margin:12px 0 20px;font-weight:600}.material-search input{width:100%;font-weight:400;padding:14px}

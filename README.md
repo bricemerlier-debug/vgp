@@ -142,3 +142,5 @@ Tests : `node --test tests/reminders.test.mjs` et `python tests/owner_email.py` 
 ## Prochaine échéance automatique ou manuelle
 
 Pour les nouvelles fiches, sans contrôle antérieur, la première date prévue est désormais la date de création + la périodicité choisie (12 mois = l’année suivante), sans création de contrôle réalisé fictif. Avec un contrôle antérieur, l’échéance reste dernier contrôle + périodicité. Le bouton Date manuelle du prochain contrôle affiche une date facultative qui prime sur le calcul automatique ; effacer la date revient au calcul. Après un nouveau dernier contrôle, la date manuelle ne s’applique plus et l’échéance est recalculée. Les échéances déjà enregistrées sur les anciennes fiches ne sont pas déplacées automatiquement. Ces périodicités restent des paramètres internes à valider, pas des règles réglementaires inventées.
+
+La barre de recherche de Matériel VGP retrouve les équipements par ID VGP, numéro interne et nom, en ignorant la casse et les accents. Les résultats se mettent à jour pendant la saisie dans la vue Actifs ou Archivés sélectionnée, en combinaison avec les autres filtres.
