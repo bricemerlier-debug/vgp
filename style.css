@@ -34,3 +34,5 @@ input[aria-invalid="true"]{border:2px solid #b2372b;background:#fff3f1}input[ari
 .mail-settings-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.mail-settings-grid .panel{min-width:0}.mail-settings-grid input,.mail-settings-grid select,.mail-settings-grid textarea{width:100%;min-width:0}@media(max-width:700px){.mail-settings-grid{grid-template-columns:minmax(0,1fr)}}
 
 .equipment-name{display:block;max-width:240px;line-height:1.35;overflow-wrap:anywhere}.equipment-name~small{font-size:11px;line-height:1.25;margin-top:4px}#list td:first-child{min-width:190px}
+
+.report-reference{display:block;overflow-wrap:anywhere;font-size:11px;color:#68796e;margin:8px 0}#reportLogoPreview{max-width:320px;width:100%;max-height:120px;object-fit:contain;display:block;margin:24px 0}.settings-menu>button{margin-top:8px}

@@ -1,0 +1,17 @@
+from playwright.sync_api import sync_playwright,expect
+import json,subprocess
+with sync_playwright() as p:
+ b=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox']);page=b.new_page();errors=[]
+ page.on('pageerror',lambda e:errors.append(str(e)))
+ page.goto('http://127.0.0.1:8000/prototype-vgp.html');page.get_by_role('button',name='+ Ajouter un équipement').click();f=page.locator('#equipmentForm');f.locator('[name=identifier]').fill('PDF-001');f.locator('[name=designation]').fill('Anneau de retournement M30');f.locator('[name=serialNumber]').fill('SERIE-ABCD');f.locator('[name=sector]').select_option('B2');f.locator('[name=zone]').select_option('DMCR');f.get_by_role('button',name='Enregistrer l’équipement').click()
+ page.locator('#list tbody tr').filter(has_text='PDF-001').get_by_role('button',name='Ouvrir',exact=True).click();page.get_by_role('button',name='+ Enregistrer un contrôle').click();c=page.locator('#controlForm');c.locator('[name=result]').select_option('Bon état');c.get_by_role('button',name='Enregistrer le contrôle',exact=True).click();expect(page.locator('#control')).to_be_visible();expect(c.locator('[name=intervenant]')).to_have_attribute('required','')
+ page.on('dialog',lambda d:d.accept('Vérificateur de test'));c.get_by_role('button',name='+ Ajouter un vérificateur').click();assert c.locator('[name=intervenant]').input_value()=='Vérificateur de test';c.locator('[name=observations]').fill('Examen réalisé. Aucun défaut signalé.');c.get_by_role('button',name='Enregistrer le contrôle',exact=True).click();expect(page.locator('#control')).not_to_be_visible()
+ data=json.loads(page.evaluate("localStorage.getItem('vgp-prototype-v1')"));e=data['equipment'][-1];record=e['controls'][0];assert record['reportId'] and record['equipmentSnapshot']['zone']=='DMCR';assert 'Vérificateur de test' in data['verifiers']
+ with page.expect_download() as download:page.get_by_role('button',name='Télécharger le PDF').click()
+ download.value.save_as('/tmp/report-styled.pdf');subprocess.run(['pdftotext','/tmp/report-styled.pdf','/tmp/report-styled.txt'],check=True);text=open('/tmp/report-styled.txt').read()
+ for expected in ['RAPPORT DE VÉRIFICATION','Anneau de retournement M30','SERIE-ABCD','B2 / DMCR','Vérificateur de test',record['reportId'],'bon état','Signature']:assert expected in text,expected
+ page.get_by_role('button',name='Modifier la fiche').click();f.locator('[name=designation]').fill('Nom changé après contrôle');f.get_by_role('button',name='Enregistrer l’équipement').click()
+ with page.expect_download() as download:page.get_by_role('button',name='Télécharger le PDF').click()
+ download.value.save_as('/tmp/report-styled-after.pdf');assert open('/tmp/report-styled.pdf','rb').read()==open('/tmp/report-styled-after.pdf','rb').read()
+ page.reload();page.locator('#list tbody tr').filter(has_text='PDF-001').get_by_role('button',name='Ouvrir',exact=True).click();assert record['reportId'] in page.locator('#detailContent').inner_text()
+ assert not errors,errors;b.close();print('PASS: vérificateur obligatoire et ajout/listes, référence stable unique, PDF structuré et accents, données figées après modification/rechargement')

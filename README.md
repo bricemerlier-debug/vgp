@@ -190,3 +190,15 @@ Une nouvelle mise au rebut exige, en plus de l’approbation signée, la saisie 
 La liste présente le nom en première ligne avec la taille de police principale, puis le numéro interne, le numéro de série et l’ID VGP en petites lignes compactes. Une série absente reste explicitement Non renseigné. La même présentation est utilisée dans les listes propriétaires et les listes KPI.
 
 Test : `python tests/scrap.py` avec serveur sur le port 8000.
+
+## Rapports PDF structurés et vérificateurs
+
+Le rapport A4 utilise un en-tête bleu/jaune, quatre sections (identification, vérification, observations, conclusion), une référence unique, une zone de signature et un pied de page. Le numéro de rapport `VGP-date-UUID` est enregistré sur le contrôle et réutilisé pour chaque téléchargement. Les nouveaux contrôles conservent les informations de l’équipement au moment de la vérification, pour éviter qu’un changement de nom ou de zone modifie un ancien rapport. Les contrôles antérieurs sans copie de fiche sont explicitement signalés comme utilisant les informations actuelles. Les longs commentaires sont répartis sur plusieurs pages. Le code identifie le rapport ; ce n’est pas une signature cryptographique ou une preuve d’identité.
+
+Le champ Vérificateur est une liste de suggestions avec saisie de nom et bouton Ajouter un vérificateur. Il est obligatoire pour un contrôle réalisé, y compris les contrôles de mise au rebut ou désarchivage ; les nouveaux noms sont conservés et proposés ensuite. Les noms historiques restent disponibles. La sélection d’un nom n’est pas une authentification utilisateur.
+
+Les conclusions dépendent du résultat : Bon état = déclaration du vérificateur limitée au constat et aux observations ; Réparable = mauvais état avec réparation nécessaire, sans avis favorable ; À jeter = orientation vers mise au rebut, sans avis favorable ; Introuvable = aucun examen possible et aucune conclusion de conformité. Le modèle et les critères applicables doivent être validés par l’entreprise avant usage officiel. Le PDF prévoit une signature manuelle ; le prototype ne signe pas le document à la place du vérificateur.
+
+Le logo officiel Goodyear n’a pas pu être téléchargé : les sites officiels et Wikimedia sont bloqués par le réseau de l’environnement, et les sources GitHub consultées ne le fournissent pas. ⚙ → Rapports permet d’importer un PNG/JPEG officiel fourni par l’entreprise (2 Mo maximum). Il est intégré dans le PDF hors ligne et inclus dans les sauvegardes. Sans import, l’en-tête est un texte GOODYEAR provisoire, explicitement identifié comme tel, pas un faux logo officiel.
+
+Tests : `python tests/reports.py`, `node --test tests/report_pdf.test.mjs`, validation par pdfinfo/pdftotext et intégration du logo par pdfimages.

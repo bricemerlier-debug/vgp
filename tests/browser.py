@@ -26,7 +26,7 @@ with sync_playwright() as p:
     assert page.locator('.history').count()==2
     with page.expect_popup() as popup:
         page.get_by_role('button',name='Compte rendu / PDF').first.click()
-    assert 'Introuvable' in popup.value.locator('body').inner_text()
+    assert popup.value.url.startswith('blob:')
     page.reload()
     page.locator('#search').fill('TEST-001')
     assert 'Introuvable' in page.locator('tbody').inner_text()
