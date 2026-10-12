@@ -38,7 +38,7 @@ with sync_playwright() as p:
  page.locator('#detail [data-close]').click()
  page.locator('#search').fill('pas de résultat')
  page.get_by_role('button',name='Ouvrir le menu',exact=True).click()
- page.get_by_role('button',name='Matériel',exact=True).click()
+ page.locator('[data-view=material]').click()
  assert page.locator('tbody tr').count()==3
  assert page.locator('#ownerFilterBar').is_hidden()
  page.set_viewport_size({'width':390,'height':844})

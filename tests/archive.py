@@ -31,11 +31,11 @@ with sync_playwright() as p:
  page.locator('#detail [data-close]').click()
  assert page.locator('tr.archived-row').count()==1
  page.get_by_role('button',name='Ouvrir le menu',exact=True).click()
- page.get_by_role('button',name='KPI',exact=True).click()
+ page.locator('[data-view=kpi]').click()
  expect(page.locator('#kpi-performed')).to_have_text('1')
  expect(page.locator('#kpi-todo')).to_have_text('1')
  page.get_by_role('button',name='Ouvrir le menu',exact=True).click()
- page.get_by_role('button',name='Matériel',exact=True).click()
+ page.locator('[data-view=material]').click()
  page.get_by_role('button',name='Ouvrir',exact=True).first.click()
  page.get_by_role('button',name='Modifier la fiche').click()
  page.locator('#equipmentForm [name=location]').fill('Changement pendant archivage')

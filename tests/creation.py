@@ -31,7 +31,7 @@ with sync_playwright() as p:
   page.reload()
   expect(page.locator('tbody tr').filter(has_text='NEW-001')).to_be_visible()
   page.get_by_role('button',name='Ouvrir le menu',exact=True).click()
-  page.get_by_role('button',name='KPI',exact=True).click()
+  page.locator('[data-view=kpi]').click()
   expect(page.locator('#kpi-performed')).to_have_text('1')
   expect(page.locator('#kpi-todo')).to_have_text('3')
   expect(page.locator('#kpi-percent')).to_have_text('0 %')
