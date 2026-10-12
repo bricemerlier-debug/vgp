@@ -122,3 +122,9 @@ Matériel VGP propose Actifs et Archivés avec des compteurs séparés. Par déf
 Le formulaire utilise Nom au lieu de Désignation. Numéro interne et numéro de série sont placés côte à côte sur ordinateur. Catégorie et salarié/service d’affectation ne sont plus demandés ; les anciennes valeurs restent conservées dans les sauvegardes des fiches existantes.
 
 Sans dernier contrôle renseigné, la création ajoute automatiquement un contrôle à réaliser daté du jour, visible dans la fiche. Il ne possède aucun résultat et ne compte pas comme réalisé dans les KPI. L’enregistrement du premier vrai contrôle clôt cette attente et crée une ligne d’historique avec son PDF. Aucun contrôle réalisé n’est inventé.
+
+## Fiche propriétaire / employé et association
+
+Depuis Propriétaires, cliquer sur la personne ou sur Ouvrir la fiche affiche son matériel VGP, actifs et archives séparés dans les compteurs. Chaque équipement peut être ouvert directement. Le bouton Associer un équipement existant présente les matériels VGP actifs, avec recherche et propriétaire actuel. Un équipement déjà associé à cette personne est indiqué et ne peut pas être ajouté deux fois. S’il appartient à une autre personne, la réaffectation exige confirmation et le retire de la fiche précédente. Les associations utilisent le même champ propriétaire que le formulaire équipement et sont incluses dans les sauvegardes. Les archives sont consultables sur la fiche, mais ne sont pas proposées pour de nouvelles associations. Aucun matériel Contenant n’est utilisé.
+
+Test : `python tests/owner_association.py` avec serveur sur le port 8000.

@@ -20,8 +20,10 @@ with sync_playwright() as p:
  card=page.locator('.owner-card').filter(has=page.get_by_role('heading',name='Entreprise A',exact=True))
  assert '0 équipement' in card.inner_text()
  card.get_by_role('button').click()
- assert page.locator('#ownerFilterLabel').inner_text()=='Propriétaire : Entreprise A'
- assert page.get_by_text('Aucun équipement correspondant.',exact=True).is_visible()
+ assert page.locator('#ownerProfileName').inner_text()=='Entreprise A'
+ expect(page.get_by_text('Aucun équipement associé à cette personne.',exact=True)).to_be_visible()
+ page.get_by_role('button',name='Ouvrir le menu',exact=True).click()
+ page.locator('[data-view=material]').click()
  page.get_by_role('button',name='+ Ajouter un équipement').click()
  form=page.locator('#equipmentForm')
  form.locator('[name=identifier]').fill('NAV-1')
@@ -33,10 +35,9 @@ with sync_playwright() as p:
  page.get_by_role('button',name='Propriétaires',exact=True).click()
  assert '1 équipement' in card.inner_text()
  card.get_by_role('button').click()
- page.get_by_role('button',name='Ouvrir',exact=True).click()
+ page.locator('#ownerProfile').get_by_role('button',name='Ouvrir',exact=True).click()
  assert 'Entreprise A' in page.locator('#detailContent').inner_text()
  page.locator('#detail [data-close]').click()
- page.locator('#search').fill('pas de résultat')
  page.get_by_role('button',name='Ouvrir le menu',exact=True).click()
  page.locator('[data-view=material]').click()
  assert page.locator('tbody tr').count()==3
