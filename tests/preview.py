@@ -4,7 +4,7 @@ with sync_playwright() as p:
  b=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox'])
  page=b.new_page();errors=[]
  page.on('pageerror',lambda e:errors.append(str(e)))
- page.goto('http://127.0.0.1:8000')
+ page.route('**/cloud-config.js',lambda r:r.fulfill(body="window.VGP_CLOUD={enabled:false};",content_type='text/javascript'));page.goto('http://127.0.0.1:8000'+'#material')
  html=Path('prototype-vgp.html').read_text()
  page.evaluate('html=>{document.body.innerHTML="";const frame=document.createElement("iframe");frame.id="preview";frame.setAttribute("sandbox","allow-scripts allow-forms allow-modals allow-popups allow-downloads");frame.srcdoc=html;document.body.append(frame)}',html)
  frame=page.frame_locator('#preview')

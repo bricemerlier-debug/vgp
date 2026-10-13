@@ -4,7 +4,7 @@ with sync_playwright() as p:
     page=browser.new_page()
     errors=[]
     page.on('pageerror',lambda e:errors.append(str(e)))
-    page.goto('http://127.0.0.1:8000')
+    page.route('**/cloud-config.js',lambda r:r.fulfill(body="window.VGP_CLOUD={enabled:false};",content_type='text/javascript'));page.goto('http://127.0.0.1:8000'+'#material')
     page.get_by_role('button',name='+ Ajouter un équipement').click()
     form=page.locator('#equipmentForm')
     form.locator('#initial summary').click()

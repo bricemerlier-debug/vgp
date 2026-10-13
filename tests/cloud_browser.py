@@ -38,7 +38,7 @@ with sync_playwright() as p:
   context=b.new_context();context.route('**/cloud-config.js',lambda r:r.fulfill(body=config,content_type='text/javascript'));context.route('https://test.supabase.co/**',api)
   page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
   page.add_init_script("localStorage.setItem('vgp-prototype-v1',JSON.stringify({original:'preserved'}))")
-  page.goto('http://127.0.0.1:8000/');expect(page.locator('main')).not_to_be_visible();expect(page.locator('#authGate')).to_be_visible()
+  page.goto('http://127.0.0.1:8000/#material');expect(page.locator('main')).not_to_be_visible();expect(page.locator('#authGate')).to_be_visible()
   page.locator('#loginForm [name=email]').fill('test@example.fr');page.locator('#loginForm [name=password]').fill('test');page.locator('#loginForm button').first.click();expect(page.locator('main')).to_be_visible();pages.append(page)
  page=pages[0];page.locator('#add').click() if page.locator('#add').count() else page.get_by_role('button',name='+ Ajouter un équipement').click()
  page.locator('#equipmentForm [name=identifier]').fill('CLOUD-1');page.locator('#equipmentForm [name=designation]').fill('Anneau partagé');page.locator('#equipmentForm button').filter(has_text='Enregistrer l’équipement').click();expect(page.locator('#editor')).not_to_be_visible()

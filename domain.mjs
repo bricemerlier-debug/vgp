@@ -117,3 +117,14 @@ export function weeklySchedule(equipment,start){const days=Array.from({length:7}
  return days;
 }
 export function equipmentAlerts(equipment,today){return equipment.filter(e=>!e.archived&&['À faire','En retard'].includes(status(e,today))).map(e=>({equipmentId:e.id,name:e.designation,identifier:e.identifier,date:due(e),state:status(e,today)})).sort((a,b)=>a.date.localeCompare(b.date)||a.identifier.localeCompare(b.identifier,'fr'))}
+
+// Tableau de bord opérationnel : contrôle réalisé et conformité restent distincts.
+export function homeSummary(equipment,today){
+ const active=equipment.filter(e=>!e.archived),year=Number(today.slice(0,4)),month=Number(today.slice(5,7));
+ const progress=monthlyProgress(equipment,year,today),current=progress.months[month-1];
+ const overdue=active.filter(e=>status(e,today)==='En retard'),soon=active.filter(e=>status(e,today)==='À faire'),undefinedDates=active.filter(e=>!due(e));
+ const week=active.filter(e=>due(e)&&due(e)>=today&&due(e)<=shiftDate(today,7));
+ const priorities=[...overdue,...soon].sort((a,b)=>due(a).localeCompare(due(b))||a.identifier.localeCompare(b.identifier,'fr',{numeric:true}));
+ const issues=active.filter(e=>latest(e)&&latest(e).result!=='Bon état');
+ return {current,unknownHistory:progress.unknownHistory,activeCount:active.length,overdue,soon,week,undefinedDates,priorities,issues};
+}

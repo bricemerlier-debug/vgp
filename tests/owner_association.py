@@ -3,7 +3,7 @@ import json
 with sync_playwright() as p:
  b=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox']);page=b.new_page();errors=[]
  page.on('pageerror',lambda e:errors.append(str(e)))
- page.goto('http://127.0.0.1:8000')
+ page.route('**/cloud-config.js',lambda r:r.fulfill(body="window.VGP_CLOUD={enabled:false};",content_type='text/javascript'));page.goto('http://127.0.0.1:8000'+'#material')
  page.get_by_role('button',name='+ Ajouter un équipement').click();f=page.locator('#equipmentForm');f.locator('[name=identifier]').fill('ASSOC-001');f.locator('[name=designation]').fill('Anneau à associer');f.get_by_role('button',name='Enregistrer l’équipement').click()
  data=json.loads(page.evaluate("localStorage.getItem('vgp-prototype-v1')"));data['owners']=['Alice','Bob'];data['equipment'][0]['owner']='Bob';page.evaluate('(d)=>localStorage.setItem("vgp-prototype-v1",JSON.stringify(d))',data);page.reload()
  page.get_by_role('button',name='Ouvrir le menu',exact=True).click();page.get_by_role('button',name='Propriétaires',exact=True).click()

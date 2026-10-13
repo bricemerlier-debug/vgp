@@ -3,7 +3,7 @@ import json
 with sync_playwright() as p:
  b=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox']);page=b.new_page();errors=[]
  page.on('pageerror',lambda e:errors.append(str(e)))
- page.goto('http://127.0.0.1:8000/prototype-vgp.html');page.get_by_role('button',name='Ouvrir le menu',exact=True).click();page.locator('[data-view=kpi]').click()
+ page.route('**/cloud-config.js',lambda r:r.fulfill(body="window.VGP_CLOUD={enabled:false};",content_type='text/javascript'));page.goto('http://127.0.0.1:8000/prototype-vgp.html'+'#material');page.get_by_role('button',name='Ouvrir le menu',exact=True).click();page.locator('[data-view=kpi]').click()
  for kind,count in [('active',2),('missing',1),('controlled',1),('todo',1),('history',1),('overdue',1),('undefined',1),('result:Bon état',1)]:
   page.locator('#kpiVisual').locator('[data-kpi-list="'+kind+'"]').first.click();expect(page.locator('#kpiListContent tbody tr')).to_have_count(count);page.locator('#kpiListDialog [data-close]').click()
  # Prepare valid archival records without modifying tracked fixtures.

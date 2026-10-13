@@ -6,7 +6,7 @@ with sync_playwright() as p:
   page=b.new_page();errors=[]
   page.on('pageerror',lambda e:errors.append(str(e)))
   page.add_init_script('crypto.randomUUID=undefined')
-  page.goto('http://127.0.0.1:8000'+path)
+  page.route('**/cloud-config.js',lambda r:r.fulfill(body="window.VGP_CLOUD={enabled:false};",content_type='text/javascript'));page.goto('http://127.0.0.1:8000'+path+'#material')
   page.locator('#search').fill('Filtre qui masque tout')
   page.locator('#filter').select_option('Archivé')
   page.get_by_role('button',name='+ Ajouter un équipement').click()

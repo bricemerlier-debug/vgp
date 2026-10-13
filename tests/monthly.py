@@ -3,7 +3,7 @@ import json
 with sync_playwright() as p:
  b=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox']);page=b.new_page();errors=[]
  page.on('pageerror',lambda e:errors.append(str(e)))
- page.goto('http://127.0.0.1:8000/prototype-vgp.html')
+ page.route('**/cloud-config.js',lambda r:r.fulfill(body="window.VGP_CLOUD={enabled:false};",content_type='text/javascript'));page.goto('http://127.0.0.1:8000/prototype-vgp.html'+'#material')
  for i in range(1,5):
   page.get_by_role('button',name='+ Ajouter un équipement').click();f=page.locator('#equipmentForm');f.locator('[name=identifier]').fill('JUIN-'+str(i));f.locator('[name=designation]').fill('Anneau juin '+str(i));page.get_by_role('button',name='Date manuelle du prochain contrôle').click();f.locator('[name=manualNextControlDate]').fill('2026-06-20');f.get_by_role('button',name='Enregistrer l’équipement').click()
   if i<4:

@@ -1,6 +1,6 @@
 # Passer de votre prototype local à Supabase
 
-La préparation est fournie, mais **aucun projet Supabase n'a été créé ni connecté**. `cloud-config.js` contient `enabled:false` : votre site continue à fonctionner comme auparavant. Aucun mail VGP n'est envoyé. Ne transmettez jamais un mot de passe, une clé `service_role`, une clé `sb_secret_…` ou une sauvegarde contenant vos données dans une conversation ou un dépôt public.
+Les scripts et la connexion sont fournis. **Le mode utilisé dépend de votre configuration `cloud-config.js`** : `enabled:false` conserve le mode local ; `enabled:true` utilise le projet Supabase que vous avez configuré. Ne remplacez pas une configuration déjà connectée lorsque vous mettez à jour le site. Aucun mail VGP n'est envoyé. Ne transmettez jamais un mot de passe, une clé `service_role`, une clé `sb_secret_…` ou une sauvegarde contenant vos données dans une conversation ou un dépôt public.
 
 ## 1. Ce que contient actuellement l'application
 
@@ -28,7 +28,7 @@ Le navigateur utilise Supabase Auth (e-mail/mot de passe), puis appelle trois fo
 
 Chaque utilisateur doit être membre de l'espace de travail : `admin`, `editor` ou `reader`. Une simple inscription ne donne aucun accès. Les politiques RLS limitent les lectures aux membres ; les fonctions vérifient aussi les droits. Les visiteurs anonymes n'ont aucun accès aux données. Les vues utilisent `security_invoker` pour respecter RLS (PostgreSQL 15 ou supérieur).
 
-Chaque enregistrement porte une révision. Si un autre appareil a enregistré entre-temps, l'enregistrement est refusé avec `REVISION_CONFLICT`. Notez vos modifications, puis utilisez **Actualiser** et ressaisissez-les. Le site charge les données à la connexion et au rechargement ; il n'utilise pas encore Supabase Realtime. Pas de sauvegarde hors ligne en mode cloud, ni de retour automatique vers la copie locale en cas de panne.
+Chaque enregistrement porte une révision. Si un autre appareil a enregistré entre-temps, l'enregistrement est refusé avec `REVISION_CONFLICT`. Notez vos modifications, puis utilisez **Actualiser** et ressaisissez-les. Le site charge les données à la connexion et au rechargement, puis les vérifie automatiquement toutes les 20 secondes et au retour sur la page. Les dialogues ouverts et saisies non enregistrées suspendent cette actualisation ; la révision n’est adoptée qu’après validation des données. L’heure de dernière réception et les erreurs sont affichées sur l’accueil. Il n’utilise pas de connexion Supabase Realtime : les 20 secondes sont un intervalle de vérification, pas une garantie de délai réseau. Pas de sauvegarde hors ligne en mode cloud, ni de retour automatique vers la copie locale en cas de panne.
 
 Cette phase convient à un prototype avec un nombre limité d'utilisateurs. Elle relit et enregistre l'ensemble du parc à chaque modification. Les pièces jointes sont dupliquées dans les projections et le journal : surveillez le volume. Limite serveur d'un instantané : 20 Mo ; le proxy du projet peut imposer une limite inférieure. Avant un grand déploiement, passer à des opérations SQL par fiche et déplacer les justificatifs dans un bucket **privé** Supabase Storage, avec des politiques par espace, des URL temporaires et une migration vérifiée. Aucun bucket public n'est créé ici.
 
@@ -61,14 +61,14 @@ if(window.VGP_CLOUD.enabled)document.documentElement.classList.add('cloud-locked
 
 Les textes ci-dessus sont des emplacements à remplacer, pas des identifiants utilisables. Le code refuse les clés secrètes et les JWT `service_role`. Cette vérification ne peut pas annuler l'exposition d'une clé que quelqu'un aurait déjà publiée : en pareil cas, révoquez-la dans Supabase et traitez l'historique Git avec l'informatique.
 
-Pour GitHub Pages, publiez `cloud-config.js`, `cloud.mjs`, `excel.mjs`, `vendor/excel.js` **avec** `app.js`, `index.html`, `domain.mjs`, `style.css`. Tous sont fournis dans le dépôt. Le verrou de connexion apparaît avant l'affichage des équipements. Ne retirez pas les scripts nouveaux. La version autonome générée incorpore sa propre copie de la configuration : si vous l'utilisez, régénérez-la après la configuration, sinon elle reste en mode local.
+Pour GitHub Pages, publiez `cloud-config.js`, `cloud.mjs`, `excel.mjs`, `vendor/excel.js` **avec** `app.js`, `index.html`, `domain.mjs`, `style.css`. Tous sont fournis dans le dépôt. Le verrou de connexion apparaît avant l'affichage des équipements. Ne retirez pas les scripts nouveaux. La version autonome générée incorpore sa propre copie de la configuration : si vous l'utilisez, régénérez-la avec `python tools/build.py --cloud` après la configuration, sinon elle reste en mode local.
 
 Pour le développement, Node/npm servent uniquement à régénérer le lecteur Excel et à tester PostgreSQL localement. Cela installe des dépendances dans le dossier du projet ; ce n'est pas nécessaire pour consulter le site. Aucune installation automatique n'est effectuée sur votre PC. Dans l'environnement de développement :
 
 ```sh
 npm ci --cache /tmp/vgp-npm-cache
 node tools/check_config.mjs
-npm run build
+npm run build # HTML autonome local ; pour le cloud : python tools/build.py --cloud
 npm run test:cloud
 python tools/dev_server.py
 ```

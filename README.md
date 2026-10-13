@@ -1,10 +1,18 @@
+## Accueil de pilotage VGP
+
+Le logo Goodyear et le menu **Accueil** ouvrent le tableau de bord : avancement des contrôles prévus dans le mois, retards, échéances des 7 prochains jours, dates à définir, agenda hebdomadaire et équipements prioritaires avec accès direct au contrôle. Les résultats nécessitant une action (réparable, à jeter, introuvable) restent distincts de l’avancement. Les archives sont exclues des indicateurs actifs ; un équipement neuf ne reçoit aucun contrôle réalisé fictif. Les écrans utilisent désormais le libellé **ID**.
+
+En mode Supabase, les données sont vérifiées automatiquement toutes les 20 secondes, après chaque enregistrement depuis cet appareil et au retour sur la page. L’heure de dernière réception et les erreurs réseau sont visibles. L’actualisation attend la fin des dialogues et des saisies non enregistrées. Les liens `#home`, `#material`, `#kpi` permettent de retrouver l’écran après rechargement.
+
+Le build `python tools/build.py` produit un HTML autonome **local** pour préserver les tests et copies hors ligne ; utilisez `python tools/build.py --cloud` uniquement si vous souhaitez y intégrer la configuration publique Supabase. GitHub Pages utilise toujours `cloud-config.js`, inchangé par ce choix.
+
 ## Présentation Goodyear Amiens
 
 Le site porte le nom « Vérification générale périodique Goodyear Amiens », avec une présentation bleu et jaune. Le logo officiel importé dans **⚙ > Rapports** apparaît aussi au centre de l’en-tête. En son absence, le nom GOODYEAR est affiché en texte ; aucune image de logo officiel n’est inventée. Les sauvegardes et la clé locale restent inchangées.
 
 ## Connexion Supabase (préparée, désactivée par défaut)
 
-Le [guide Supabase](docs/SUPABASE.md) décrit le stockage actuel, les scripts SQL, Auth/RLS, la migration sans suppression du local, l’import Excel et les futurs rappels J-30/J-14/J-7/J0. Aucun projet ni envoi n’est activé.
+Le [guide Supabase](docs/SUPABASE.md) décrit le stockage actuel, les scripts SQL, Auth/RLS, la migration sans suppression du local, l’import Excel et les futurs rappels J-30/J-14/J-7/J0. La connexion utilise les valeurs publiques de `cloud-config.js` ; sa configuration existante est conservée. Les rappels VGP restent désactivés.
 
 # Métrologie — prototype
 
