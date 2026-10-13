@@ -1,3 +1,4 @@
+export function equipmentName(e){return e.standardName||e.designation;}
 export function addMonths(date, months) {
   const [y,m,d]=date.split('-').map(Number);
   const target=new Date(Date.UTC(y,m-1+Number(months),1));
@@ -90,10 +91,10 @@ export function buildReportPdf(report,logo){
 export function shiftDate(date,days){const d=new Date(date+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+days);return d.toISOString().slice(0,10)}
 export function weekStart(date){const d=new Date(date+'T00:00:00Z');return shiftDate(date,-((d.getUTCDay()+6)%7))}
 export function weeklySchedule(equipment,start){const days=Array.from({length:7},(_,i)=>({date:shiftDate(start,i),entries:[]}));const end=days[6].date;
- for(const e of equipment.filter(e=>!e.archived)){const entries=new Map();for(const c of e.controls.filter(isInspection))if(c.plannedDate&&c.plannedDate>=start&&c.plannedDate<=end)entries.set(c.plannedDate,{equipmentId:e.id,name:e.designation,identifier:e.identifier,done:true,late:c.date>c.plannedDate,date:c.plannedDate});const date=due(e);if(date&&date>=start&&date<=end&&!entries.has(date))entries.set(date,{equipmentId:e.id,name:e.designation,identifier:e.identifier,done:false,date});for(const entry of entries.values())days.find(d=>d.date===entry.date).entries.push(entry)}
+ for(const e of equipment.filter(e=>!e.archived)){const entries=new Map();for(const c of e.controls.filter(isInspection))if(c.plannedDate&&c.plannedDate>=start&&c.plannedDate<=end)entries.set(c.plannedDate,{equipmentId:e.id,name:equipmentName(e),identifier:e.identifier,done:true,late:c.date>c.plannedDate,date:c.plannedDate});const date=due(e);if(date&&date>=start&&date<=end&&!entries.has(date))entries.set(date,{equipmentId:e.id,name:equipmentName(e),identifier:e.identifier,done:false,date});for(const entry of entries.values())days.find(d=>d.date===entry.date).entries.push(entry)}
  return days;
 }
-export function equipmentAlerts(equipment,today){return equipment.filter(e=>!e.archived&&['À faire','En retard'].includes(status(e,today))).map(e=>({equipmentId:e.id,name:e.designation,identifier:e.identifier,date:due(e),state:status(e,today)})).sort((a,b)=>a.date.localeCompare(b.date)||a.identifier.localeCompare(b.identifier,'fr'))}
+export function equipmentAlerts(equipment,today){return equipment.filter(e=>!e.archived&&['À faire','En retard'].includes(status(e,today))).map(e=>({equipmentId:e.id,name:equipmentName(e),identifier:e.identifier,date:due(e),state:status(e,today)})).sort((a,b)=>a.date.localeCompare(b.date)||a.identifier.localeCompare(b.identifier,'fr'))}
 
 // Tableau de bord opérationnel : contrôle réalisé et conformité restent distincts.
 export function homeSummary(equipment,today){
@@ -119,13 +120,13 @@ export function calculatedDeadline(e){
  return c&&[3,6,9,12].includes(e.months)&&p?.validated&&p.months===e.months&&p.reason?.trim()&&p.by?.trim()?addMonths(c.date,e.months):null;
 }
 export function obligationEntries(e){
- const entries=new Map((e.obligations||[]).map(o=>[o.id,{...o,equipmentId:e.id,identifier:o.identifier||e.identifier,name:o.name||e.designation}]));
- for(const c of e.controls){if(!c.plannedDate)continue;const id=`${e.id}|${c.plannedDate}`;let entry=entries.get(id)||{id,equipmentId:e.id,identifier:e.identifier,name:e.designation,date:c.plannedDate,origin:'Association historique enregistrée',createdAt:c.date};
+ const entries=new Map((e.obligations||[]).map(o=>[o.id,{...o,equipmentId:e.id,identifier:o.identifier||e.identifier,name:o.name||equipmentName(e)}]));
+ for(const c of e.controls){if(!c.plannedDate)continue;const id=`${e.id}|${c.plannedDate}`;let entry=entries.get(id)||{id,equipmentId:e.id,identifier:e.identifier,name:equipmentName(e),date:c.plannedDate,origin:'Association historique enregistrée',createdAt:c.date};
  if(isInspection(c)&&(!entry.controlDate||c.date<entry.controlDate)){entry={...entry,done:true,controlId:c.id,controlDate:c.date};}
  if(c.result==='Introuvable'&&!entry.done)entry={...entry,excludedAt:c.date,excludedReason:'Introuvable — enregistrement historique',originalControlId:c.id};
  entries.set(id,entry);
  }
- const date=calculatedDeadline(e);if(date){const id=`${e.id}|${date}`;if(!entries.has(id))entries.set(id,{id,equipmentId:e.id,identifier:e.identifier,name:e.designation,date,origin:'Échéance validée',createdAt:e.dateValidation?.at?.slice(0,10)||e.periodicityValidation?.at?.slice(0,10)||null});}
+ const date=calculatedDeadline(e);if(date){const id=`${e.id}|${date}`;if(!entries.has(id))entries.set(id,{id,equipmentId:e.id,identifier:e.identifier,name:equipmentName(e),date,origin:'Échéance validée',createdAt:e.dateValidation?.at?.slice(0,10)||e.periodicityValidation?.at?.slice(0,10)||null});}
  return [...entries.values()];
 }
 export function lossArchived(e){return e.archived&&[...(e.archiveHistory||[])].reverse().find(a=>a.type==='archive')?.reason==='Équipement perdu';}

@@ -1,3 +1,7 @@
+# Noms standardisés — version à vérifier
+
+Types, variantes et reprise des anciens noms par groupes : voir [le guide](docs/NOMS-STANDARDISES.md). Le site utilisé reste sur la version publiée précédente jusqu’à validation de cette nouvelle modification.
+
 # Mise en service autorisée
 
 Voir [le guide d’activation](docs/MISE-EN-SERVICE.md) : protection SQL Supabase nécessaire pour activer l’enregistrement, puis import de l’export Excel MemoryFlow. Aucune donnée réelle n’a été utilisée dans les tests ou ajoutée au dépôt.
