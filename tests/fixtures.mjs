@@ -1,0 +1,2 @@
+// Règles déclarées fictives, limitées aux tests. Aucun équipement réel n'est validé.
+export function approved(e){return {...e,periodicityValidation:{validated:true,months:e.months,reason:'Règle fictive pour le test',by:'Testeur fictif',at:'2026-01-01T00:00:00Z'},...(e.firstControlDate?{dateValidation:{validated:true,source:'Document fictif',reason:'Première échéance justifiée dans le test',by:'Testeur fictif'}}:{}),controls:(e.controls||[]).map((c,i)=>({id:c.id||'test-'+i,intervenant:'Testeur fictif',result:'Bon état',...c}))};}

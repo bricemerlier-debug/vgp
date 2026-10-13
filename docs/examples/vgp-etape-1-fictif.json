@@ -1,0 +1,248 @@
+{
+  "anticipation": 30,
+  "owners": [
+    "Référent fictif"
+  ],
+  "ownerContacts": [
+    {
+      "owner": "Référent fictif",
+      "email": "referent@example.test"
+    }
+  ],
+  "nextVgpId": 5,
+  "equipment": [
+    {
+      "id": "fictif-1",
+      "siteId": 1,
+      "identifier": "FICTIF-1",
+      "serialNumber": "SERIE-FICTIVE-1",
+      "designation": "Anneau contrôlé à temps",
+      "family": "Anneaux de retournement — exemple",
+      "category": "",
+      "assignment": "",
+      "location": "Emplacement fictif",
+      "sector": "B2",
+      "zone": "DMCR",
+      "team": "A",
+      "owner": "Référent fictif",
+      "comments": "DONNÉES FICTIVES : ne pas importer en production.",
+      "months": 3,
+      "periodicityValidation": {
+        "validated": true,
+        "months": 3,
+        "reason": "Règle FICTIVE de démonstration, sans portée réglementaire",
+        "by": "Responsable fictif",
+        "at": "2026-01-01T00:00:00Z"
+      },
+      "controls": [
+        {
+          "id": "controle-1",
+          "reportId": "FICTIF-controle-1",
+          "date": "2026-10-01",
+          "plannedDate": "2026-10-05",
+          "intervenant": "Vérificateur fictif",
+          "result": "Bon état",
+          "observations": "Exemple fictif uniquement",
+          "attachment": null,
+          "created": 1
+        }
+      ],
+      "archived": false,
+      "archiveHistory": [],
+      "pendingArchive": null,
+      "obligations": [
+        {
+          "id": "fictif-1|2026-10-05",
+          "equipmentId": "fictif-1",
+          "identifier": "FICTIF-1",
+          "name": "Anneau contrôlé à temps",
+          "date": "2026-10-05",
+          "origin": "Association historique enregistrée",
+          "createdAt": "2026-10-01",
+          "done": true,
+          "controlId": "controle-1",
+          "controlDate": "2026-10-01"
+        },
+        {
+          "id": "fictif-1|2027-01-01",
+          "equipmentId": "fictif-1",
+          "identifier": "FICTIF-1",
+          "name": "Anneau contrôlé à temps",
+          "date": "2027-01-01",
+          "origin": "Échéance validée",
+          "createdAt": "2026-01-01"
+        }
+      ]
+    },
+    {
+      "id": "fictif-2",
+      "siteId": 2,
+      "identifier": "FICTIF-2",
+      "serialNumber": "SERIE-FICTIVE-2",
+      "designation": "Anneau contrôlé en retard",
+      "family": "Anneaux de retournement — exemple",
+      "category": "",
+      "assignment": "",
+      "location": "Emplacement fictif",
+      "sector": "B2",
+      "zone": "DMCR",
+      "team": "A",
+      "owner": "Référent fictif",
+      "comments": "DONNÉES FICTIVES : ne pas importer en production.",
+      "months": 3,
+      "periodicityValidation": {
+        "validated": true,
+        "months": 3,
+        "reason": "Règle FICTIVE de démonstration, sans portée réglementaire",
+        "by": "Responsable fictif",
+        "at": "2026-01-01T00:00:00Z"
+      },
+      "controls": [
+        {
+          "id": "controle-2",
+          "reportId": "FICTIF-controle-2",
+          "date": "2026-10-12",
+          "plannedDate": "2026-10-10",
+          "intervenant": "Vérificateur fictif",
+          "result": "Mauvais état — réparable",
+          "observations": "Exemple fictif uniquement",
+          "attachment": null,
+          "created": 1
+        }
+      ],
+      "archived": false,
+      "archiveHistory": [],
+      "pendingArchive": null,
+      "obligations": [
+        {
+          "id": "fictif-2|2026-10-10",
+          "equipmentId": "fictif-2",
+          "identifier": "FICTIF-2",
+          "name": "Anneau contrôlé en retard",
+          "date": "2026-10-10",
+          "origin": "Association historique enregistrée",
+          "createdAt": "2026-10-12",
+          "done": true,
+          "controlId": "controle-2",
+          "controlDate": "2026-10-12"
+        },
+        {
+          "id": "fictif-2|2027-01-12",
+          "equipmentId": "fictif-2",
+          "identifier": "FICTIF-2",
+          "name": "Anneau contrôlé en retard",
+          "date": "2027-01-12",
+          "origin": "Échéance validée",
+          "createdAt": "2026-01-01"
+        }
+      ]
+    },
+    {
+      "id": "fictif-3",
+      "siteId": 3,
+      "identifier": "FICTIF-3",
+      "serialNumber": "SERIE-FICTIVE-3",
+      "designation": "Anneau avec échéance dépassée",
+      "family": "Anneaux de retournement — exemple",
+      "category": "",
+      "assignment": "",
+      "location": "Emplacement fictif",
+      "sector": "B2",
+      "zone": "DMCR",
+      "team": "A",
+      "owner": "Référent fictif",
+      "comments": "DONNÉES FICTIVES : ne pas importer en production.",
+      "months": 6,
+      "periodicityValidation": {
+        "validated": true,
+        "months": 6,
+        "reason": "Règle FICTIVE de démonstration, sans portée réglementaire",
+        "by": "Responsable fictif",
+        "at": "2026-01-01T00:00:00Z"
+      },
+      "controls": [
+        {
+          "id": "controle-3",
+          "reportId": "FICTIF-controle-3",
+          "date": "2026-01-08",
+          "plannedDate": "2026-01-10",
+          "intervenant": "Vérificateur fictif",
+          "result": "Bon état",
+          "observations": "Exemple fictif uniquement",
+          "attachment": null,
+          "created": 1
+        }
+      ],
+      "archived": false,
+      "archiveHistory": [],
+      "pendingArchive": null,
+      "manualNextControlDate": "2026-10-08",
+      "manualControlId": "controle-3",
+      "dateValidation": {
+        "validated": true,
+        "source": "Justificatif FICTIF",
+        "reason": "Date fictive approuvée pour démonstration",
+        "by": "Responsable fictif",
+        "at": "2026-01-08T00:00:00Z"
+      },
+      "obligations": [
+        {
+          "id": "fictif-3|2026-01-10",
+          "equipmentId": "fictif-3",
+          "identifier": "FICTIF-3",
+          "name": "Anneau avec échéance dépassée",
+          "date": "2026-01-10",
+          "origin": "Association historique enregistrée",
+          "createdAt": "2026-01-08",
+          "done": true,
+          "controlId": "controle-3",
+          "controlDate": "2026-01-08"
+        },
+        {
+          "id": "fictif-3|2026-10-08",
+          "equipmentId": "fictif-3",
+          "identifier": "FICTIF-3",
+          "name": "Anneau avec échéance dépassée",
+          "date": "2026-10-08",
+          "origin": "Échéance validée",
+          "createdAt": "2026-01-08"
+        }
+      ]
+    },
+    {
+      "id": "fictif-4",
+      "siteId": 4,
+      "identifier": "FICTIF-4",
+      "serialNumber": "SERIE-FICTIVE-4",
+      "designation": "Fiche sans échéance validée",
+      "family": "Anneaux de retournement — exemple",
+      "category": "",
+      "assignment": "",
+      "location": "Emplacement fictif",
+      "sector": "B2",
+      "zone": "DMCR",
+      "team": "A",
+      "owner": "Référent fictif",
+      "comments": "DONNÉES FICTIVES : ne pas importer en production.",
+      "months": 3,
+      "periodicityValidation": {
+        "validated": false,
+        "months": 3,
+        "by": "Exemple",
+        "reason": "À valider"
+      },
+      "controls": [],
+      "archived": false,
+      "archiveHistory": [],
+      "pendingArchive": null,
+      "createdDate": "2026-10-01",
+      "firstControlDate": "2027-10-01",
+      "scheduledControl": {
+        "id": "ancienne-planification-fictive",
+        "date": "2027-10-01"
+      },
+      "obligations": []
+    }
+  ],
+  "trackingVersion": 2
+}

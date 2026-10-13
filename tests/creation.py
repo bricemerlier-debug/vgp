@@ -19,13 +19,13 @@ with sync_playwright() as p:
   expect(page.locator('tbody tr')).to_have_count(3)
   record=next(e for e in json.loads(page.evaluate("localStorage.getItem('vgp-prototype-v1')"))['equipment'] if e['identifier']=='NEW-001')
   assert record['controls']==[]
-  assert record['scheduledControl']['date']==record['firstControlDate']
-  assert record['firstControlDate']==page.evaluate("(()=>{const d=new Date();return `${d.getFullYear()+1}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`})()")
+  assert record['scheduledControl'] is None and record['firstControlDate'] is None
+
   row=page.locator('tbody tr').filter(has_text='NEW-001')
-  assert 'Planifié' in row.inner_text() and 'Aucun contrôle' in row.inner_text()
+  assert 'Situation à vérifier' in row.inner_text() and 'Aucun contrôle' in row.inner_text()
   row.get_by_role('button',name='Ouvrir',exact=True).click()
   assert page.get_by_role('button',name='Télécharger le PDF').count()==0
-  assert 'Contrôle à réaliser' in page.locator('#detailContent').inner_text()
+  assert 'aucune première échéance justifiée' in page.locator('#detailContent').inner_text()
   page.get_by_role('button',name='Modifier la fiche').click()
   form.locator('[name=location]').fill('Usine')
   form.get_by_role('button',name='Enregistrer l’équipement').click()
@@ -36,8 +36,8 @@ with sync_playwright() as p:
   page.locator('[data-view=kpi]').click()
   expect(page.locator('#kpi-performed')).to_have_text('1')
   expect(page.locator('#kpi-todo')).to_have_text('1')
-  expect(page.locator('#kpi-percent')).to_have_text('33 %')
+  expect(page.locator('#kpi-percent')).to_have_text('0 %')
   assert not errors,errors
   page.close()
  b.close()
- print('PASS: ajout sans contrôle, navigateur sans randomUUID, visibilité immédiate malgré filtres, échéance automatique, absence de contrôle fictif, modification et persistance, KPI ; sources et HTML autonome')
+ print('PASS: ajout sans contrôle, navigateur sans randomUUID, visibilité immédiate malgré filtres, absence d’échéance artificielle, absence de contrôle fictif, modification et persistance, KPI ; sources et HTML autonome')

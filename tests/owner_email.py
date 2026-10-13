@@ -6,7 +6,7 @@ with sync_playwright() as p:
  page.route('**/cloud-config.js',lambda r:r.fulfill(body="window.VGP_CLOUD={enabled:false};",content_type='text/javascript'));page.goto('http://127.0.0.1:8000'+'#material')
  # Prepare ordinary existing data; no external email operation occurs.
  page.get_by_role('button',name='+ Ajouter un équipement').click();f=page.locator('#equipmentForm');f.locator('[name=identifier]').fill('MAIL-1');f.locator('[name=designation]').fill('Anneau avec rappels');f.get_by_role('button',name='Enregistrer l’équipement').click()
- data=json.loads(page.evaluate("localStorage.getItem('vgp-prototype-v1')"));data['owners']=['Alice'];data['equipment'][-1]['owner']='Alice';page.evaluate('(d)=>localStorage.setItem("vgp-prototype-v1",JSON.stringify(d))',data);page.reload()
+ data=json.loads(page.evaluate("localStorage.getItem('vgp-prototype-v1')"));data['owners']=['Alice'];data['equipment'][-1]['owner']='Alice';data['equipment'][-1]['firstControlDate']='2027-10-13';data['equipment'][-1]['dateValidation']={'validated':True,'source':'Document fictif','reason':'Échéance fictive explicite','by':'Responsable fictif'};page.evaluate('(d)=>localStorage.setItem("vgp-prototype-v1",JSON.stringify(d))',data);page.reload()
  def open_owner():
   page.get_by_role('button',name='Ouvrir le menu',exact=True).click();page.get_by_role('button',name='Propriétaires',exact=True).click();page.get_by_role('heading',name='Alice',exact=True).click()
  open_owner();page.locator('#ownerContactForm [name=email]').fill('alice@example.com');page.get_by_role('button',name='Enregistrer l’adresse').click()

@@ -1,6 +1,10 @@
+# Version de vérification — étape 1
+
+Voir le [guide de recette](docs/ETAPE-1.md) : KPI, introuvables et échéances. Cette branche prépare une validation ; elle ne publie pas le site de production. Les décisions métier proposées restent à confirmer.
+
 ## Accueil de pilotage VGP
 
-Le logo Goodyear et le menu **Accueil** ouvrent le tableau de bord : avancement des contrôles prévus dans le mois, retards, échéances des 7 prochains jours, dates à définir, agenda hebdomadaire et équipements prioritaires avec accès direct au contrôle. Les résultats nécessitant une action (réparable, à jeter, introuvable) restent distincts de l’avancement. Les archives sont exclues des indicateurs actifs ; un équipement neuf ne reçoit aucun contrôle réalisé fictif. Les écrans utilisent désormais le libellé **ID**.
+Le logo Goodyear et le menu **Accueil** ouvrent le tableau de bord : avancement des contrôles prévus dans le mois, retards, échéances des 7 prochains jours, dates à définir, agenda hebdomadaire et équipements prioritaires avec accès direct au contrôle. Les résultats nécessitant une action (réparable, à jeter) et les exclusions pour perte restent distincts de l’avancement. Les archives sont exclues des indicateurs actifs ; un équipement neuf ne reçoit aucun contrôle réalisé fictif. Les écrans utilisent désormais le libellé **ID**.
 
 En mode Supabase, les données sont vérifiées automatiquement toutes les 20 secondes, après chaque enregistrement depuis cet appareil et au retour sur la page. L’heure de dernière réception et les erreurs réseau sont visibles. L’actualisation attend la fin des dialogues et des saisies non enregistrées. Les liens `#home`, `#material`, `#kpi` permettent de retrouver l’écran après rechargement.
 
@@ -10,7 +14,7 @@ Le build `python tools/build.py` produit un HTML autonome **local** pour préser
 
 Le site porte le nom « Vérification générale périodique Goodyear Amiens », avec une présentation bleu et jaune. Le logo officiel importé dans **⚙ > Rapports** apparaît aussi au centre de l’en-tête. En son absence, le nom GOODYEAR est affiché en texte ; aucune image de logo officiel n’est inventée. Les sauvegardes et la clé locale restent inchangées.
 
-## Connexion Supabase (préparée, désactivée par défaut)
+## Connexion Supabase
 
 Le [guide Supabase](docs/SUPABASE.md) décrit le stockage actuel, les scripts SQL, Auth/RLS, la migration sans suppression du local, l’import Excel et les futurs rappels J-30/J-14/J-7/J0. La connexion utilise les valeurs publiques de `cloud-config.js` ; sa configuration existante est conservée. Les rappels VGP restent désactivés.
 
@@ -26,13 +30,11 @@ Les données et pièces jointes sont réellement conservées dans le stockage lo
 
 PDF/images limités à 1 Mo par pièce ; stockage total limité par le navigateur (souvent environ 5 Mo). Une erreur de stockage est signalée, sans annoncer un enregistrement réussi. Le prototype est destiné aux essais, pas à l’ensemble du parc réel.
 
-Les notifications sont des alertes visuelles, sans e-mail, SMS ni tâche en arrière-plan. Les contrôles de niveaux 1 à 3, les comptes utilisateurs, le partage entre appareils et les sauvegardes automatiques ne sont pas implémentés. Aucun service externe ne reçoit les données.
+Les notifications sont des alertes visuelles, sans e-mail, SMS ni tâche en arrière-plan. Dans ce fichier autonome local, les comptes et le partage centralisé sont désactivés. Le site connecté utilise Supabase Auth ; les niveaux 1 à 3 et les sauvegardes automatiques restent à définir.
 
 ## Échéances
 
-Les délais sont des paramètres choisis par l’utilisateur, sans valeur réglementaire automatique. Calcul depuis le dernier contrôle par date, au même jour du mois ; si ce jour n’existe pas, utilisation du dernier jour. Le jour de l’échéance est « À venir », le lendemain « En retard ». Sans contrôle, l’échéance est « À définir » : cela ne signifie pas que le contrôle peut attendre. Une saisie historique plus ancienne ne repousse pas l’échéance. Modifier la périodicité recalcule l’échéance. L’anticipation est configurable de 0 à 365 jours.
-
-Le résultat reste distinct de l’échéance. Un résultat « Introuvable » ou « À jeter » reste affiché ; le prototype ne décide pas d’une remise en service ou d’une conformité. Le compte rendu reprend les données déclarées ; localisation et affectation sont celles de la fiche actuelle.
+Une échéance nécessite un contrôle exploitable et une périodicité validée, ou une première date explicitement justifiée. Sans cela : **Situation à vérifier**. Aucune validité depuis la création informatique. Le résultat du contrôle reste distinct. Les modifications sont tracées, et le cycle déjà validé est conservé lors d'un changement de périodicité. Voir les règles et limites dans [ETAPE-1.md](docs/ETAPE-1.md).
 
 ## Développement dans le cloud
 
@@ -56,15 +58,11 @@ Le bouton à trois barres en haut à gauche ouvre le menu « Matériel » / « P
 
 ## KPI visuels VGP
 
-Le pourcentage principal est le nombre d’équipements actifs ayant au moins un contrôle enregistré divisé par le nombre total d’équipements actifs. Chaque équipement compte une fois, même avec plusieurs contrôles. Les archives sont exclues du dénominateur. Sans équipement actif, le pourcentage est indéfini (—). Contrairement à l’ancien indicateur, ce pourcentage ne dépend pas de l’échéance : un équipement contrôlé mais en retard reste dans la part contrôlée.
-
-L’anneau montre les parts contrôlée et jamais contrôlée. Les cartes donnent le parc actif, les équipements jamais contrôlés, les contrôles à faire et les contrôles enregistrés dans tout l’historique. Les actions réalisées reprennent le nombre de contrôles enregistrés.
-
-Le graphique des échéances répartit les actifs en catégories sans doublon : jamais contrôlés, contrôlés en retard, contrôlés à venir dans le délai d’anticipation configurable, contrôlés à échéance plus lointaine. Un équipement jamais contrôlé avec une première échéance dépassée reste dans la catégorie jamais contrôlé de ce graphique. Le graphique des résultats utilise seulement le dernier résultat de chaque équipement contrôlé actif ; il ne certifie pas la conformité. Le suivi par secteur présente contrôlés / total actif et permet d’ouvrir la liste correspondante, y compris pour les secteurs non renseignés. Les graphiques se mettent à jour après chaque enregistrement et restent distincts des pages Contenant.
-
-Tests : `node --test tests/dashboard.test.mjs tests/domain.test.mjs tests/kpi.test.mjs`, puis `python tests/kpi.py` avec un serveur sur le port 8000. Les tests couvrent résultats, échéances, archives, doublons historiques, parc vide et affichage mobile.
+Le principal indicateur est désormais **VGP à jour** : échéances validées non dépassées / tout le parc actif suivi, situations inconnues comprises. Le résultat et les anomalies restent séparés. Les contrôles introuvables ne comptent pas comme réalisations. Les exclusions et archives sont visibles séparément. Tous les calculs sont détaillés dans [ETAPE-1.md](docs/ETAPE-1.md).
 
 ## Archivage, désarchivage et documents
+
+**Évolution étape 1 :** « Déclarer introuvable » archive directement avec événement de recherche, sans VGP. Le matériel retrouvé revient à vérifier sans nouvelle validité. Les parcours de documents signés décrits ci-dessous restent conservés pour la mise au rebut et les opérations existantes.
 
 Depuis une fiche, « Archiver » propose Équipement perdu ou Mis au rebut. Renseignez la date et le demandeur, préparez la demande, puis générez le document à signer. Imprimez-le ou enregistrez-le en PDF et faites-le signer. Joignez sa version signée (PDF/image, 1 Mo maximum), le nom de l’approbateur, la date d’approbation et confirmez la présence de la signature. La validation change alors le statut. Avant cette validation, l’équipement reste actif. La demande est sauvegardée et peut être reprise ou annulée ; annuler une demande ne change pas le statut. La génération seule ne vaut pas approbation.
 
@@ -99,13 +97,7 @@ Test automatisé : `python tests/live_reload.py`. Il démarre un serveur tempora
 
 ## Création sans contrôle antérieur
 
-Si aucun dernier contrôle n’est saisi, le nouvel équipement est enregistré avec une première échéance à la date locale d’ajout, statut À faire (puis En retard si cette date est dépassée). Il n’est ajouté aucun contrôle réalisé fictif, aucun résultat ni PDF de contrôle. Cette première échéance ne repousse pas le contrôle de 3/6/9/12 mois. Après un vrai contrôle, l’échéance se calcule à partir de sa date et de la périodicité choisie. Les équipements existants sans date restent inchangés.
-
-Après une création réussie, l’application revient à la liste complète en retirant les filtres et confirme l’enregistrement. Si le stockage échoue, l’erreur est affichée dans le formulaire qui reste ouvert. Un double clic pendant l’enregistrement ne crée pas deux fiches. La création des identifiants techniques est compatible avec les contextes où crypto.randomUUID n’est pas disponible, grâce à crypto.getRandomValues.
-
-Un premier contrôle non réalisé peut être à la fois sans historique et en retard ; ces catégories KPI se recoupent, mais un équipement compte une seule fois dans le nombre à faire. Le pourcentage continue d’exiger un véritable contrôle enregistré, pas une simple échéance.
-
-Vérification : `python tests/creation.py` avec le serveur du port 8000 actif.
+La fiche est créée sans VGP réalisée ni échéance artificielle. Elle affiche **Situation à vérifier** jusqu'à une échéance justifiée ou un contrôle et une règle de suivi validée. Après enregistrement, elle apparaît dans la liste, même si les filtres précédents la masquaient. Tests : `python tests/creation.py`.
 
 ## Filtres et zones
 
@@ -135,9 +127,7 @@ Matériel VGP propose Actifs et Archivés avec des compteurs séparés. Par déf
 
 ## Fiche VGP simplifiée
 
-Le formulaire utilise Nom au lieu de Désignation. Numéro interne et numéro de série sont placés côte à côte sur ordinateur. Catégorie et salarié/service d’affectation ne sont plus demandés ; les anciennes valeurs restent conservées dans les sauvegardes des fiches existantes.
-
-Sans dernier contrôle renseigné, la création ajoute automatiquement un contrôle à réaliser daté du jour, visible dans la fiche. Il ne possède aucun résultat et ne compte pas comme réalisé dans les KPI. L’enregistrement du premier vrai contrôle clôt cette attente et crée une ligne d’historique avec son PDF. Aucun contrôle réalisé n’est inventé.
+Le formulaire utilise Nom, numéros interne et de série, famille, localisation et associations. Les anciennes catégories et affectations sont conservées. Le dernier contrôle facultatif se déplie sur demande ; sans contrôle passé, aucune réalisation ni date périodique n'est inventée.
 
 ## Fiche propriétaire / employé et association
 
@@ -157,31 +147,19 @@ Tests : `node --test tests/reminders.test.mjs` et `python tests/owner_email.py` 
 
 ## Prochaine échéance automatique ou manuelle
 
-Pour les nouvelles fiches, sans contrôle antérieur, la première date prévue est désormais la date de création + la périodicité choisie (12 mois = l’année suivante), sans création de contrôle réalisé fictif. Avec un contrôle antérieur, l’échéance reste dernier contrôle + périodicité. Le bouton Date manuelle du prochain contrôle affiche une date facultative qui prime sur le calcul automatique ; effacer la date revient au calcul. Après un nouveau dernier contrôle, la date manuelle ne s’applique plus et l’échéance est recalculée. Les échéances déjà enregistrées sur les anciennes fiches ne sont pas déplacées automatiquement. Ces périodicités restent des paramètres internes à valider, pas des règles réglementaires inventées.
-
-La barre de recherche de Matériel VGP retrouve les équipements par ID VGP, numéro interne et nom, en ignorant la casse et les accents. Les résultats se mettent à jour pendant la saisie dans la vue Actifs ou Archivés sélectionnée, en combinaison avec les autres filtres.
-
-À la création VGP sans dernier contrôle : date manuelle vide = échéance périodique et fiche de contrôle À réaliser créée automatiquement ; date manuelle renseignée = échéance manuelle et aucun contrôle automatique. Dans les deux cas, aucun contrôle réalisé n’est inventé. Les contrôles passés réellement saisis restent dans l’historique. Les fiches déjà existantes sont conservées.
-
-Le statut À définir est cliquable depuis la liste du matériel, une fiche équipement ou la fiche propriétaire. Il ouvre une saisie de date du prochain contrôle, sauvegardée comme échéance manuelle, sans créer de résultat ni de contrôle réalisé.
+Le calcul automatique nécessite la validation de la périodicité et un contrôle exploitable. Une date manuelle exige origine, justification, auteur et confirmation. Les anciennes dates restent conservées comme informations à valider. La recherche Matériel retrouve ID, numéro interne et nom, sans sensibilité à la casse et aux accents.
 
 ## Statuts d’échéance harmonisés
 
-Planifié = plus d’un mois avant l’échéance ; À faire = depuis un mois calendaire avant l’échéance jusqu’au jour de l’échéance inclus ; En retard = lendemain et au-delà. Ce calcul ne dépend plus de la présence d’un contrôle passé : un équipement neuf à échéance dans un an est Planifié. Sans date, le statut reste À définir. Les dates et historiques déjà saisis sont conservés. L’ancienne anticipation configurable en jours n’est plus utilisée pour ces statuts, afin de respecter le seuil fixe d’un mois demandé. Les KPI À faire et la répartition des échéances utilisent le même calcul, et n’assimilent plus jamais contrôlé à dû immédiatement. Le pourcentage de contrôles enregistrés reste distinct.
+**Échéance à plus d'un mois** : limite validée lointaine. **À faire** : un mois calendaire avant la limite, jusqu'à son jour inclus. **En retard** : lendemain et au-delà. **Situation à vérifier** : date non exploitable/non validée ou équipement retrouvé à contrôler. Ces statuts ne certifient pas la conformité.
 
 ## Commentaires équipement
 
-La fiche comporte les onglets Fiche et Commentaires. À chaque création, le commentaire est initialisé à « Mise en service le JJ/MM/AAAA », avec la date locale du jour. Il peut être modifié, complété ou effacé puis enregistré. Une modification ultérieure de la fiche ne régénère pas et n’écrase pas ce commentaire. Les anciennes fiches reçoivent un commentaire vide, sans inventer une date de mise en service. Les commentaires sont conservés dans les sauvegardes et restent disponibles pour les archives.
+Les commentaires existants sont conservés et modifiables. Une nouvelle fiche reçoit « Fiche créée le JJ/MM/AAAA », sans inventer une date de mise en service. Le fil de commentaires datés et attribués reste prévu pour une étape suivante.
 
 ## KPI mensuels sur 12 mois
 
-Une courbe affiche les pourcentages par mois de l’année choisie (année courante par défaut). Le dénominateur est le nombre de contrôles prévus dans le mois, pour les équipements actuellement actifs ; le numérateur est le nombre de ces contrôles réalisés. Un contrôle réalisé après la date prévue reste rattaché au mois de son échéance d’origine. Ce graphique mesure l’avancement actuel, pas le taux de réalisation dans les délais ni la conformité. Les mois sans contrôle prévu affichent —, pas 0 ou 100 %.
-
-Le bouton de la part non réalisée ouvre les équipements correspondants avec leur date prévue, leur état et un accès à la fiche. Les dates futures ne sont pas qualifiées de retard. Par exemple, trois contrôles réalisés sur quatre prévus donnent 75 %, et le bouton 25 % montre le quatrième.
-
-Lors de l’enregistrement d’un nouveau dernier contrôle (date strictement plus récente que le dernier contrôle enregistré, ou premier contrôle), la date d’échéance actuelle est conservée dans `plannedDate` sur le contrôle avant de recalculer la prochaine. Les ajouts historiques antérieurs et les anciens contrôles sans planning connu ne reçoivent pas de date prévue inventée : ils sont exclus et leur nombre est signalé. Le total mensuel déduplique les contrôles pour un même équipement et une même date prévue. La courbe reflète le parc actuellement actif, pas une photographie du parc à chaque mois passé. Les équipements archivés sont exclus comme dans les autres KPI.
-
-Tests : `node --test tests/monthly.test.mjs` et `python tests/monthly.py` avec serveur sur le port 8000.
+La courbe présente les réalisations **dans les délais** par mois de l'échéance, avec réalisations tardives, retards non réalisés et exclusions distincts. Le registre conserve les échéances historiques après archivage et modification de périodicité. Une réalisation supplémentaire sur un matériel ne compense pas une échéance manquante sur un autre. Sans échéance : Non applicable. Les anciens contrôles sans échéance associée sont signalés et restent consultables. Voir [ETAPE-1.md](docs/ETAPE-1.md).
 
 ## Listes depuis les KPI et motifs d’archivage
 

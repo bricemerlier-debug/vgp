@@ -1,9 +1,10 @@
+from browser_support import approve_period,approve_manual
 from playwright.sync_api import sync_playwright,expect
 with sync_playwright() as p:
  b=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox']);page=b.new_page();errors=[]
  page.on('pageerror',lambda e:errors.append(str(e)))
  page.route('**/cloud-config.js',lambda r:r.fulfill(body="window.VGP_CLOUD={enabled:false};",content_type='text/javascript'));page.goto('http://127.0.0.1:8000/prototype-vgp.html'+'#material');today=page.evaluate("(()=>{let d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`})()")
- page.get_by_role('button',name='+ Ajouter un équipement').click();f=page.locator('#equipmentForm');f.locator('[name=identifier]').fill('SEMAINE-001');f.locator('[name=designation]').fill('Anneau semaine');page.get_by_role('button',name='Date manuelle du prochain contrôle').click();f.locator('[name=manualNextControlDate]').fill(today);f.get_by_role('button',name='Enregistrer l’équipement').click()
+ page.get_by_role('button',name='+ Ajouter un équipement').click();f=page.locator('#equipmentForm');f.locator('[name=identifier]').fill('SEMAINE-001');f.locator('[name=designation]').fill('Anneau semaine');page.get_by_role('button',name='Date manuelle du prochain contrôle').click();f.locator('[name=manualNextControlDate]').fill(today);approve_period(f);approve_manual(f);f.get_by_role('button',name='Enregistrer l’équipement').click()
  expect(page.locator('#weeklyCalendar .calendar-task')).to_have_count(1);assert 'Anneau semaine' in page.locator('#weeklyCalendar').inner_text()
  before=page.locator('#notificationCount').inner_text();page.get_by_role('button',name='Semaine suivante').click();expect(page.locator('#weeklyCalendar .calendar-task')).to_have_count(0);page.get_by_role('button',name='Cette semaine',exact=True).click();expect(page.locator('#weeklyCalendar .calendar-task')).to_have_count(1)
  page.locator('#notificationToggle').click();item=page.locator('#notificationList .notification-item').filter(has_text='SEMAINE-001');expect(item).to_be_visible();item.click();expect(page.locator('#notificationMenu')).not_to_be_visible();assert 'SEMAINE-001' in page.locator('#detailTitle').inner_text()

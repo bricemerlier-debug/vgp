@@ -6,22 +6,9 @@ export function addMonths(date, months) {
   return target.toISOString().slice(0,10);
 }
 export function latest(e) { return [...e.controls].sort((a,b)=>b.date.localeCompare(a.date)||b.created-a.created)[0]; }
-export function due(e) { const c=latest(e); if(e.manualNextControlDate&&(e.manualControlId??null)===(c?.id??null))return e.manualNextControlDate; return c ? addMonths(c.date,e.months):(e.firstControlDate??null); }
-export function status(e,today) {
-  if(e.archived)return 'Archivé';
-  const date=due(e);if(!date)return 'À définir';
-  if(date<today)return 'En retard';
-  return today>=addMonths(date,-1)?'À faire':'Planifié';
-}
-
-export function indicators(equipment, today) {
-  const performed=equipment.reduce((total,e)=>total+e.controls.length,0);
-  const active=equipment.filter(e=>!e.archived);
-  const covered=active.filter(e=>{const date=due(e);return !!latest(e)&&date!==null&&date>=today}).length;
-  const missing=active.filter(e=>!latest(e)).length;
-  const overdue=active.filter(e=>{const date=due(e);return date!==null&&date<today}).length;
-  return {total:active.length,performed,actions:performed,covered,missing,overdue,toDo:active.filter(e=>['À faire','En retard'].includes(status(e,today))).length,percent:active.length?Math.round(covered/active.length*100):null};
-}
+export function due(e){if(e.needsReverification)return null;const date=calculatedDeadline(e);if(!date)return null;const pending=obligationEntries(e).filter(o=>!o.done&&!o.excludedAt).map(o=>o.date).sort();return pending[0]||date;}
+export function status(e,today){if(e.archived)return 'Archivé';const date=due(e);if(!date)return 'Situation à vérifier';if(date<today)return 'En retard';return today>=addMonths(date,-1)?'À faire':'Échéance à plus d’un mois';}
+export function indicators(equipment,today){const k=dashboard(equipment,today);return {total:k.total,performed:k.performed,actions:k.performed,covered:k.upToDate,missing:k.missing,overdue:k.overdue,toDo:k.soon+k.overdue,percent:k.percent};}
 
 export function generatePdf(lines) {
   // PDF with embedded text using the standard Helvetica font and WinAnsi encoding.
@@ -37,18 +24,11 @@ export function generatePdf(lines) {
   let out='%PDF-1.4\n',offsets=[0];objects.forEach((object,i)=>{offsets.push(encode(out).length);out+=`${i+1} 0 obj\n${object}\nendobj\n`});const xref=encode(out).length;out+=`xref\n0 ${objects.length+1}\n0000000000 65535 f \n${offsets.slice(1).map(n=>String(n).padStart(10,'0')+' 00000 n \n').join('')}trailer\n<< /Size ${objects.length+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;return encode(out);
 }
 
-export function dashboard(equipment,today,anticipation) {
-  const active=equipment.filter(e=>!e.archived),controlled=active.filter(e=>latest(e));
-  const overdue=active.filter(e=>status(e,today)==='En retard').length;
-  const soon=active.filter(e=>status(e,today)==='À faire').length;
-  const planned=active.filter(e=>status(e,today)==='Planifié').length;
-  const undefinedCount=active.filter(e=>status(e,today)==='À définir').length;
-  const missing=active.length-controlled.length;
-  return {total:active.length,archived:equipment.length-active.length,controlled:controlled.length,missing,
-    percent:active.length?Math.round(controlled.length/active.length*100):null,overdue,soon,planned,undefinedCount,
-    performed:equipment.reduce((n,e)=>n+e.controls.length,0),
-    results:['Bon état','Mauvais état — réparable','Mauvais état — à jeter','Introuvable'].map(result=>({label:result,count:controlled.filter(e=>latest(e).result===result).length})),
-    sectors:['A1','A2','B1','B2','B3',''].map(sector=>{const items=active.filter(e=>(e.sector||'')===sector);return {sector,total:items.length,controlled:items.filter(e=>latest(e)).length}})};
+export function dashboard(equipment,today){
+ const active=equipment.filter(e=>!e.archived),controlled=active.filter(e=>latestInspection(e)),upToDate=active.filter(e=>due(e)&&due(e)>=today).length;
+ const overdue=active.filter(e=>status(e,today)==='En retard').length,soon=active.filter(e=>status(e,today)==='À faire').length,planned=active.filter(e=>status(e,today)==='Échéance à plus d’un mois').length,undefinedCount=active.filter(e=>!due(e)).length;
+ return {total:active.length,archived:equipment.length-active.length,lostArchived:equipment.filter(lossArchived).length,controlled:controlled.length,upToDate,missing:active.length-controlled.length,percent:active.length?Math.round(upToDate/active.length*100):null,overdue,soon,planned,undefinedCount,performed:equipment.reduce((n,e)=>n+e.controls.filter(isInspection).length,0),anomalies:controlled.filter(e=>latestInspection(e).result!=='Bon état').length,
+ results:['Bon état','Mauvais état — réparable','Mauvais état — à jeter'].map(result=>({label:result,count:controlled.filter(e=>latestInspection(e).result===result).length})),sectors:['A1','A2','B1','B2','B3',''].map(sector=>{const items=active.filter(e=>(e.sector||'')===sector);return {sector,total:items.length,controlled:items.filter(e=>due(e)&&due(e)>=today).length}})};
 }
 
 export function reminders(equipment) {
@@ -61,17 +41,14 @@ export function reminders(equipment) {
     {kind:'deadline',label:'Jour de l’échéance',date:deadline}].map(r=>({...r,deadline,equipmentId:equipment.id}));
 }
 
-export function monthlyProgress(equipment,year,today) {
-  const months=Array.from({length:12},(_,index)=>({month:index+1,total:0,done:0,remaining:0,overdue:0,percent:null,entries:[]}));
-  let unknownHistory=0;
-  for(const e of equipment.filter(e=>!e.archived)){
-    const entries=new Map();
-    for(const c of e.controls){if(!c.plannedDate){unknownHistory++;continue}entries.set(c.plannedDate,{equipmentId:e.id,identifier:e.identifier,name:e.designation,date:c.plannedDate,done:true,controlDate:c.date})}
-    const next=due(e);if(next&&!entries.has(next))entries.set(next,{equipmentId:e.id,identifier:e.identifier,name:e.designation,date:next,done:false});
-    for(const entry of entries.values()){if(Number(entry.date.slice(0,4))!==Number(year))continue;const month=months[Number(entry.date.slice(5,7))-1];month.entries.push({...entry,overdue:!entry.done&&entry.date<today})}
-  }
-  for(const m of months){m.total=m.entries.length;m.done=m.entries.filter(e=>e.done).length;m.remaining=m.total-m.done;m.overdue=m.entries.filter(e=>e.overdue).length;m.percent=m.total?Math.round(m.done/m.total*100):null}
-  return {months,unknownHistory};
+export function monthlyProgress(equipment,year,today){
+ const months=Array.from({length:12},(_,index)=>({month:index+1,total:0,done:0,onTime:0,late:0,excluded:0,remaining:0,overdue:0,percent:null,completionPercent:null,entries:[]}));let unknownHistory=0;
+ for(const e of equipment){unknownHistory+=e.controls.filter(c=>isInspection(c)&&!c.plannedDate).length;
+ for(const o of obligationEntries(e)){if(Number(o.date.slice(0,4))!==Number(year))continue;const m=months[Number(o.date.slice(5,7))-1];const done=!!o.done&&o.controlDate<=today,onTime=done&&o.controlDate<=o.date,late=done&&!onTime;const end=new Date(Date.UTC(year,m.month,0)).toISOString().slice(0,10);const currentExcluded=!!o.excludedAt&&o.excludedAt<=today&&!done,excluded=currentExcluded&&o.excludedAt<=o.date,overdue=!done&&o.date<today&&!excluded;
+ m.entries.push({...o,done,onTime,late,excluded,currentExcluded,archived:!!e.archived,overdue});}
+ }
+ for(const m of months){m.total=m.entries.length;m.done=m.entries.filter(o=>o.done).length;m.onTime=m.entries.filter(o=>o.onTime).length;m.late=m.entries.filter(o=>o.late).length;m.excluded=m.entries.filter(o=>o.excluded).length;m.remaining=m.entries.filter(o=>!o.done&&!o.currentExcluded&&!o.archived).length;m.overdue=m.entries.filter(o=>o.overdue).length;m.percent=m.total?Math.round(m.onTime/m.total*100):null;m.completionPercent=m.total?Math.round(m.done/m.total*100):null;}
+ return {months,unknownHistory};
 }
 
 export function fillEmailTemplate(template,values){return template.replace(/\{\{\s*([a-z_]+)\s*\}\}/g,(match,key)=>Object.hasOwn(values,key)?String(values[key]):match)}
@@ -113,7 +90,7 @@ export function buildReportPdf(report,logo){
 export function shiftDate(date,days){const d=new Date(date+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+days);return d.toISOString().slice(0,10)}
 export function weekStart(date){const d=new Date(date+'T00:00:00Z');return shiftDate(date,-((d.getUTCDay()+6)%7))}
 export function weeklySchedule(equipment,start){const days=Array.from({length:7},(_,i)=>({date:shiftDate(start,i),entries:[]}));const end=days[6].date;
- for(const e of equipment.filter(e=>!e.archived)){const entries=new Map();for(const c of e.controls)if(c.plannedDate&&c.plannedDate>=start&&c.plannedDate<=end)entries.set(c.plannedDate,{equipmentId:e.id,name:e.designation,identifier:e.identifier,done:true,date:c.plannedDate});const date=due(e);if(date&&date>=start&&date<=end&&!entries.has(date))entries.set(date,{equipmentId:e.id,name:e.designation,identifier:e.identifier,done:false,date});for(const entry of entries.values())days.find(d=>d.date===entry.date).entries.push(entry)}
+ for(const e of equipment.filter(e=>!e.archived)){const entries=new Map();for(const c of e.controls.filter(isInspection))if(c.plannedDate&&c.plannedDate>=start&&c.plannedDate<=end)entries.set(c.plannedDate,{equipmentId:e.id,name:e.designation,identifier:e.identifier,done:true,late:c.date>c.plannedDate,date:c.plannedDate});const date=due(e);if(date&&date>=start&&date<=end&&!entries.has(date))entries.set(date,{equipmentId:e.id,name:e.designation,identifier:e.identifier,done:false,date});for(const entry of entries.values())days.find(d=>d.date===entry.date).entries.push(entry)}
  return days;
 }
 export function equipmentAlerts(equipment,today){return equipment.filter(e=>!e.archived&&['À faire','En retard'].includes(status(e,today))).map(e=>({equipmentId:e.id,name:e.designation,identifier:e.identifier,date:due(e),state:status(e,today)})).sort((a,b)=>a.date.localeCompare(b.date)||a.identifier.localeCompare(b.identifier,'fr'))}
@@ -125,6 +102,60 @@ export function homeSummary(equipment,today){
  const overdue=active.filter(e=>status(e,today)==='En retard'),soon=active.filter(e=>status(e,today)==='À faire'),undefinedDates=active.filter(e=>!due(e));
  const week=active.filter(e=>due(e)&&due(e)>=today&&due(e)<=shiftDate(today,7));
  const priorities=[...overdue,...soon].sort((a,b)=>due(a).localeCompare(due(b))||a.identifier.localeCompare(b.identifier,'fr',{numeric:true}));
- const issues=active.filter(e=>latest(e)&&latest(e).result!=='Bon état');
+ const issues=active.filter(e=>latestInspection(e)&&latestInspection(e).result!=='Bon état');
  return {current,unknownHistory:progress.unknownHistory,activeCount:active.length,overdue,soon,week,undefinedDates,priorities,issues};
+}
+export function isInspection(c){return !!c&&['Bon état','Mauvais état — réparable','Mauvais état — à jeter'].includes(c.result)&&typeof c.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(c.date)&&typeof c.intervenant==='string'&&!!c.intervenant.trim();}
+export function latestInspection(e){return [...e.controls].filter(isInspection).sort((a,b)=>b.date.localeCompare(a.date)||b.created-a.created)[0];}
+export function calculatedDeadline(e){
+ if(e.needsReverification||latest(e)?.result==='Introuvable'&&!e.archived)return null;
+ const c=latestInspection(e),v=e.dateValidation;
+ if(v?.validated&&v.reason?.trim()&&v.source?.trim()&&v.by?.trim()){
+  if(e.manualNextControlDate&&(e.manualControlId??null)===(c?.id??null))return e.manualNextControlDate;
+  if(!c&&e.firstControlDate)return e.firstControlDate;
+ }
+ const p=e.periodicityValidation;
+ if(c&&p?.validated&&p.months===e.months&&e.cycleControlId===c.id&&e.cycleSource?.fromValidatedDeadline&&e.cycleDeadline)return e.cycleDeadline;
+ return c&&[3,6,9,12].includes(e.months)&&p?.validated&&p.months===e.months&&p.reason?.trim()&&p.by?.trim()?addMonths(c.date,e.months):null;
+}
+export function obligationEntries(e){
+ const entries=new Map((e.obligations||[]).map(o=>[o.id,{...o,equipmentId:e.id,identifier:o.identifier||e.identifier,name:o.name||e.designation}]));
+ for(const c of e.controls){if(!c.plannedDate)continue;const id=`${e.id}|${c.plannedDate}`;let entry=entries.get(id)||{id,equipmentId:e.id,identifier:e.identifier,name:e.designation,date:c.plannedDate,origin:'Association historique enregistrée',createdAt:c.date};
+ if(isInspection(c)&&(!entry.controlDate||c.date<entry.controlDate)){entry={...entry,done:true,controlId:c.id,controlDate:c.date};}
+ if(c.result==='Introuvable'&&!entry.done)entry={...entry,excludedAt:c.date,excludedReason:'Introuvable — enregistrement historique',originalControlId:c.id};
+ entries.set(id,entry);
+ }
+ const date=calculatedDeadline(e);if(date){const id=`${e.id}|${date}`;if(!entries.has(id))entries.set(id,{id,equipmentId:e.id,identifier:e.identifier,name:e.designation,date,origin:'Échéance validée',createdAt:e.dateValidation?.at?.slice(0,10)||e.periodicityValidation?.at?.slice(0,10)||null});}
+ return [...entries.values()];
+}
+export function lossArchived(e){return e.archived&&[...(e.archiveHistory||[])].reverse().find(a=>a.type==='archive')?.reason==='Équipement perdu';}
+export function freezeTracking(next,previous,today,actor){
+ next.trackingVersion=2;
+ for(const e of next.equipment){const old=previous?.equipment.find(x=>x.id===e.id),entries=new Map(obligationEntries(old||e).map(o=>[o.id,{...o}]));
+  const oldDate=old?calculatedDeadline(old):null;const sameControl=old&&latestInspection(old)?.id&&latestInspection(old)?.id===latestInspection(e)?.id;if(sameControl&&oldDate&&old.months!==e.months&&e.manualNextControlDate===old.manualNextControlDate){e.cycleDeadline=oldDate;e.cycleControlId=latestInspection(old).id;e.cycleSource={fromValidatedDeadline:true,recordedAt:today,by:actor,previousMonths:old.months};}const newDate=calculatedDeadline(e);
+  if(oldDate!==newDate&&oldDate&&oldDate>=today&&!e.controls.some(c=>isInspection(c)&&c.plannedDate===oldDate&&!old?.controls.some(previous=>previous.id===c.id))){const o=entries.get(`${e.id}|${oldDate}`);if(o&&!o.done&&!o.excludedAt)entries.set(o.id,{...o,excludedAt:today,excludedReason:'Modification d’échéance tracée',excludedBy:actor});}
+  for(const entry of obligationEntries(e)){const oldEntry=entries.get(entry.id);entries.set(entry.id,oldEntry?{...entry,...oldEntry,...(entry.done&&!oldEntry.done?{done:true,controlId:entry.controlId,controlDate:entry.controlDate}:{})}:entry);}
+  if(e.archived&&!old?.archived){const a=e.archiveHistory?.at(-1);for(const [id,o] of entries)if(!o.done&&!o.excludedAt)entries.set(id,{...o,excludedAt:a?.date||today,excludedReason:a?.reason||'Archivé',excludedBy:a?.requester||actor});}
+  e.obligations=[...entries.values()];e.periodicityValidation??={validated:false,months:e.months,reason:'Périodicité historique à valider',by:actor,account:actor,at:new Date().toISOString()};
+ }
+ return next;
+}
+export function declareLoss(e,{id,date,author,comment,account,attachment=null,originalControlId=null}){
+ if(!author?.trim()||!comment?.trim())throw Error('Renseignez l’auteur et le commentaire de recherche.');if(latestInspection(e)?.date>date)throw Error('La date de recherche précède un contrôle exploitable plus récent.');
+ const event={id,type:'archive',workflow:'loss-declaration',reason:'Équipement perdu',date,requester:author.trim(),observations:comment.trim(),account,attachment,originalControlId,created:Date.now(),generated:false,snapshot:Object.fromEntries(['identifier','serialNumber','designation','category','location','sector','zone','team','owner','assignment'].map(k=>[k,e[k]||''])),previousRequest:e.pendingArchive||null};
+ e.archiveHistory??=[];e.archiveHistory.push(event);e.archived=true;e.pendingArchive=null;return event;
+}
+export function reactivateFound(e,{id,date,author,comment,account}){
+ if(!author?.trim()||!comment?.trim())throw Error('Renseignez l’auteur et le motif de réactivation.');if(!e.archived||e.archiveHistory.at(-1)?.date>date)throw Error('Vérifiez la date de réactivation après l’archivage.');
+ e.archiveHistory.push({id,type:'restore',workflow:'restore-found',reason:'Matériel retrouvé — situation à vérifier',date,requester:author.trim(),observations:comment.trim(),account,created:Date.now(),generated:false});e.archived=false;e.needsReverification=true;e.lastFoundDate=date;e.pendingArchive=null;
+}
+export function migrationReview(data){
+ const equipment=data.equipment;return {lossControls:equipment.reduce((n,e)=>n+e.controls.filter(c=>c.result==='Introuvable').length,0),activeLost:equipment.filter(e=>!e.archived&&latest(e)?.result==='Introuvable').length,datesToValidate:equipment.filter(e=>!e.archived&&!calculatedDeadline(e)).length,unlinked:equipment.reduce((n,e)=>n+e.controls.filter(c=>isInspection(c)&&!c.plannedDate).length,0)};
+}
+export function migrateTracking(data,today,actor){
+ const next=typeof structuredClone==='function'?structuredClone(data):JSON.parse(JSON.stringify(data));
+ for(const e of next.equipment){e.lossEvents??=[];for(const c of e.controls.filter(c=>c.result==='Introuvable'))if(!e.lossEvents.some(x=>x.originalControlId===c.id))e.lossEvents.push({id:`legacy-loss:${e.id}:${c.id}`,date:c.date,author:c.intervenant||'Auteur historique non renseigné',comment:c.observations||'Commentaire de recherche absent dans l’ancien enregistrement',originalControlId:c.id,attachment:c.attachment||null});
+  const c=latest(e);if(!e.archived&&c?.result==='Introuvable')declareLoss(e,{id:`legacy-archive:${e.id}:${c.id}`,date:c.date,author:c.intervenant||'Auteur historique non renseigné',comment:c.observations||'Commentaire de recherche absent dans l’ancien enregistrement',account:actor,attachment:c.attachment,originalControlId:c.id});
+ }
+ return freezeTracking(next,data,today,actor);
 }

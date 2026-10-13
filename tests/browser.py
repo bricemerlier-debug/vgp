@@ -1,3 +1,4 @@
+from browser_support import approve_period
 from playwright.sync_api import sync_playwright,expect
 with sync_playwright() as p:
     browser=p.chromium.launch(headless=True, executable_path='/usr/bin/chromium',args=['--no-sandbox'])
@@ -7,6 +8,7 @@ with sync_playwright() as p:
     page.route('**/cloud-config.js',lambda r:r.fulfill(body="window.VGP_CLOUD={enabled:false};",content_type='text/javascript'));page.goto('http://127.0.0.1:8000'+'#material')
     page.get_by_role('button',name='+ Ajouter un équipement').click()
     form=page.locator('#equipmentForm')
+    approve_period(form)
     form.locator('#initial summary').click()
     for name,value in [('identifier','TEST-001'),('designation','Anneau test'),('date','2026-06-15'),('intervenant','Testeur')]:
         form.locator('[name='+name+']').fill(value)
@@ -23,7 +25,7 @@ with sync_playwright() as p:
     form=page.locator('#controlForm')
     form.locator('[name=date]').fill('2026-07-15')
     form.locator('[name=intervenant]').fill('Autre testeur')
-    form.locator('[name=result]').select_option(label='Introuvable')
+    form.locator('[name=result]').select_option(label='Mauvais état — à jeter')
     form.get_by_role('button',name='Enregistrer le contrôle',exact=True).click()
     assert page.locator('.history').count()==2
     with page.expect_popup() as popup:
@@ -31,7 +33,7 @@ with sync_playwright() as p:
     assert popup.value.url.startswith('blob:')
     page.reload()
     page.locator('#search').fill('TEST-001')
-    assert 'Introuvable' in page.locator('tbody').inner_text()
+    assert 'Mauvais état — à jeter' in page.locator('tbody').inner_text()
     page.get_by_role('button',name='Ouvrir',exact=True).click()
     page.get_by_role('button',name='Modifier la fiche').click()
     page.locator('#equipmentForm [name=location]').fill('Usine')

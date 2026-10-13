@@ -46,23 +46,9 @@ with sync_playwright() as p:
  page.get_by_role('button',name='Enregistrer l’équipement').click()
  assert page.get_by_role('button',name='Désarchiver',exact=True).count()==1
  page.get_by_role('button',name='Désarchiver',exact=True).click()
- form=page.locator('#requestArchive')
- form.locator('[name=reason]').fill('Équipement retrouvé')
- form.locator('[name=requester]').fill('Demandeur')
- form.get_by_role('button',name='Préparer le document').click()
- with page.expect_popup():page.get_by_role('button',name='Générer le document à signer').click()
- approve=page.locator('#approveArchive')
- approve.locator('[name=approver]').fill('Approbateur')
- approve.locator('[name=confirmed]').check()
- approve.locator('[name=signedAttachment]').set_input_files({'name':'retour-signe.pdf','mimeType':'application/pdf','buffer':b'%PDF-1.4 test'})
- approve.get_by_role('button',name='Valider le désarchivage').click()
- assert page.locator('#archiveDialog').is_visible()
- approve.locator('[name=date]').fill(page.locator('#requestArchive').input_value() if page.locator('#requestArchive').count() else page.evaluate("new Date().toISOString().slice(0,10)"))
- approve.locator('[name=intervenant]').fill('Contrôleur retour')
- approve.locator('[name=result]').select_option('Bon état')
- approve.get_by_role('button',name='Valider le désarchivage').click()
- expect(page.locator('#archiveDialog')).not_to_be_visible()
- assert page.locator('#detailContent').get_by_role('link',name='Document signé : retour-signe.pdf').count()==1
+ found=page.locator('#foundForm');found.locator('[name=author]').fill('Trouveur fictif');found.locator('[name=comment]').fill('Retrouvé pendant le test');found.get_by_role('button',name='Réactiver sans valider une nouvelle échéance').click();expect(page.locator('#foundDialog')).not_to_be_visible();expect(page.locator('#detailContent')).to_contain_text('Situation à vérifier')
+ page.get_by_role('button',name='+ Enregistrer un contrôle').click();control=page.locator('#controlForm');control.locator('[name=intervenant]').fill('Contrôleur retour');control.locator('[name=result]').select_option('Bon état');control.get_by_role('button',name='Enregistrer le contrôle',exact=True).click();expect(page.locator('#control')).not_to_be_visible()
+ assert page.locator('#detailContent').get_by_role('link',name='Document signé : signe.pdf').count()==1
  with page.expect_download() as pdf:
   page.get_by_role('button',name='Télécharger le PDF').first.click()
  pdf.value.save_as('/tmp/vgp-control-test.pdf')
@@ -95,4 +81,4 @@ with sync_playwright() as p:
  assert record['archiveHistory'][0]['snapshot']['location']=='Atelier A (fictif)'
  assert not errors,errors
  b.close()
- print('PASS: archivage perdu/rebut, demande persistante, signature obligatoire, document et historique, gris/KPI, désarchivage avec contrôle obligatoire, PDF, export/import')
+ print('PASS: archivage perdu/rebut, demande persistante, signature obligatoire, document et historique, gris/KPI, réactivation inconnue puis contrôle réel, PDF, export/import')
