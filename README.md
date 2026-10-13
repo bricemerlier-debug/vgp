@@ -1,6 +1,6 @@
-# Noms standardisés — version à vérifier
+# Noms standardisés
 
-Types, variantes et reprise des anciens noms par groupes : voir [le guide](docs/NOMS-STANDARDISES.md). Le site utilisé reste sur la version publiée précédente jusqu’à validation de cette nouvelle modification.
+Types, variantes et reprise des anciens noms par groupes : voir [le guide](docs/NOMS-STANDARDISES.md). Cette fonctionnalité est publiée sur le site : types et variantes dans les fiches, puis standardisation par groupes dans les paramètres.
 
 # Mise en service autorisée
 

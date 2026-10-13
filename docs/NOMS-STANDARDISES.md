@@ -1,6 +1,6 @@
 # Types, variantes et anciens noms
 
-Cette version de vérification conserve le champ **Nom actuel / nom libre**. Aucun nom importé n'est remplacé automatiquement.
+Le site conserve le champ **Nom actuel / nom libre**. Aucun nom importé n'est remplacé automatiquement.
 
 ## Dans une fiche
 
@@ -29,6 +29,6 @@ Les équipements, numéros, noms libres, contrôles, commentaires, justificatifs
 
 Les types et variantes sont ajoutés à la sauvegarde existante et au même stockage Supabase que le matériel, avec les droits et contrôles de révision existants. Aucun nouveau script SQL n'est nécessaire pour cette fonctionnalité. La protection SQL 003 déjà demandée reste nécessaire pour écrire en mode centralisé.
 
-Pour vérifier cette version sans toucher à Supabase : télécharger le ZIP de la branche de vérification, l'extraire, puis ouvrir **prototype-vgp.html** dans une fenêtre privée. Ne pas ouvrir `index.html` pour cet essai, car il utilise la connexion centralisée du site. Les exemples locaux sont fictifs. Les données privées disparaissent à la fermeture de la fenêtre ; exporter une sauvegarde pour conserver un essai.
+Pour un essai local sans toucher à Supabase : télécharger le ZIP du dépôt, l'extraire, puis ouvrir **prototype-vgp.html** dans une fenêtre privée. Ne pas ouvrir `index.html` pour cet essai, car il utilise la connexion centralisée du site. Les exemples locaux sont fictifs. Les données privées disparaissent à la fermeture de la fenêtre ; exporter une sauvegarde pour conserver un essai.
 
 Tests effectués avec des données fictives : création des types/variantes, refus des doublons et associations incohérentes, conservation du nom libre, classification par groupes avec aperçu et exclusion individuelle, recherche sur les deux noms, nouveaux instantanés de contrôle, sauvegarde/rechargement et affichage mobile. Les protections PostgreSQL ont également été testées après classification d'une fiche archivée, sans changement de ses échéances historiques.
