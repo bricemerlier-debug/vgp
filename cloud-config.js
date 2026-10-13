@@ -9,3 +9,6 @@ window.VGP_CLOUD = Object.freeze({
 if (window.VGP_CLOUD.enabled) {
   document.documentElement.classList.add('cloud-locked');
 }
+
+// Préserve la configuration actuelle ; édition après installation du script SQL 003.
+window.VGP_CLOUD=Object.freeze({...window.VGP_CLOUD,requireTrackingGuard:true});

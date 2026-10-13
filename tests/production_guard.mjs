@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {CloudStore} from '../cloud.mjs';
+const config={enabled:true,url:'https://test.supabase.co',publicKey:'sb_publishable_test',workspaceId:'10000000-0000-0000-0000-000000000001',requireTrackingGuard:true};
+let ready=false,writes=0,missing=true;
+const client=new CloudStore(config,{storage:{getItem:()=>null},persistentStorage:{getItem:()=>null},fetcher:async url=>({ok:!url.endsWith('tracking_ready')||!missing,status:404,json:async()=>url.endsWith('read_state')?{revision:1,payload:{equipment:[]}}:url.endsWith('tracking_ready')?ready:{revision:1+(++writes)}})});
+client.session={access_token:'fictif',expires_at:Date.now()/1000+3600};
+await client.read();assert.equal(client.trackingReady,false);await assert.rejects(()=>client.write({}),/Lecture seule/);assert.equal(writes,0);
+missing=false;await assert.rejects(()=>client.write({}),/Lecture seule/);assert.equal(writes,0);
+ready=true;await client.write({});assert.equal(writes,1);assert.equal(client.revision,2);
+ready=false;await assert.rejects(()=>client.write({}),/Lecture seule/);assert.equal(writes,1);
+console.log('Production : consultation conservée, aucune écriture avant protection SQL active, reprise après activation, contrôle avant chaque écriture.');

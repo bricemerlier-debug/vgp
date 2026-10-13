@@ -32,7 +32,7 @@ end if;
 end loop;
 for new_o in select value from jsonb_array_elements(coalesce(new_e->'obligations','[]')) loop
 perform (new_o->>'date')::date;
-if coalesce((new_o->>'done')::boolean,false) and not exists(select 1 from jsonb_array_elements(new_e->'controls') c where c.value->>'id'=new_o->>'controlId' and c.value->>'result' in ('Bon état','Mauvais état — réparable','Mauvais état — à jeter') and c.value->>'date'=new_o->>'controlDate') then raise exception 'Réalisation d’échéance sans contrôle exploitable';end if;
+if coalesce((new_o->>'done')::boolean,false) and not exists(select 1 from jsonb_array_elements(new_e->'controls') c where c.value->>'id'=new_o->>'controlId' and c.value->>'result' in ('Bon état','Mauvais état — réparable','Mauvais état — à jeter') and c.value->>'date'=new_o->>'controlDate' and c.value->>'plannedDate'=new_o->>'date' and btrim(coalesce(c.value->>'intervenant',''))<>'') then raise exception 'Réalisation d’échéance sans contrôle exploitable';end if;
 end loop;
 end loop;
 return new;
@@ -40,4 +40,17 @@ end$$;
 revoke all on function public.guard_tracking_state() from public,anon,authenticated;
 drop trigger if exists tracking_state_guard on public.workspace_state;
 create trigger tracking_state_guard before update of payload on public.workspace_state for each row execute function public.guard_tracking_state();
+-- Le navigateur peut consulter les données avant l'installation, mais n'écrit
+-- le format 2 qu'après confirmation de cette protection serveur.
+create or replace function public.tracking_ready(w uuid) returns boolean
+language sql stable security definer set search_path='' as $$
+select auth.uid() is not null and public.workspace_role(w) is not null
+and exists(select 1 from pg_catalog.pg_trigger t
+where t.tgrelid='public.workspace_state'::regclass
+and t.tgname='tracking_state_guard' and t.tgenabled in ('O','A')
+and t.tgfoid='public.guard_tracking_state()'::regprocedure);
+$$;
+revoke all on function public.tracking_ready(uuid) from public,anon;
+grant execute on function public.tracking_ready(uuid) to authenticated;
+notify pgrst, 'reload schema';
 commit;

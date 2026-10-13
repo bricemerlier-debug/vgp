@@ -1,3 +1,5 @@
+> Mise à jour : publication autorisée. Voir [MISE-EN-SERVICE.md](MISE-EN-SERVICE.md) pour activer la protection Supabase et utiliser l’import MemoryFlow corrigé. Le reste de ce document décrit la recette préalable.
+
 # Étape 1 — version à vérifier, sans publication en production
 
 Cette version corrige les KPI, les déclarations de matériel introuvable et les échéances. Elle conserve le projet actuel et sa connexion Supabase. Aucun équipement réel, compte réel ou projet Supabase n'a servi aux tests. Aucun mail n'est envoyé.

@@ -1,6 +1,8 @@
-# Version de vérification — étape 1
+# Mise en service autorisée
 
-Voir le [guide de recette](docs/ETAPE-1.md) : KPI, introuvables et échéances. Cette branche prépare une validation ; elle ne publie pas le site de production. Les décisions métier proposées restent à confirmer.
+Voir [le guide d’activation](docs/MISE-EN-SERVICE.md) : protection SQL Supabase nécessaire pour activer l’enregistrement, puis import de l’export Excel MemoryFlow. Aucune donnée réelle n’a été utilisée dans les tests ou ajoutée au dépôt.
+
+Le [guide étape 1](docs/ETAPE-1.md) détaille les calculs et les essais fictifs.
 
 ## Accueil de pilotage VGP
 
