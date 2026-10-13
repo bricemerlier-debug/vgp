@@ -1,4 +1,4 @@
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright,expect
 with sync_playwright() as p:
     browser=p.chromium.launch(headless=True, executable_path='/usr/bin/chromium',args=['--no-sandbox'])
     page=browser.new_page()
@@ -7,11 +7,13 @@ with sync_playwright() as p:
     page.goto('http://127.0.0.1:8000')
     page.get_by_role('button',name='+ Ajouter un équipement').click()
     form=page.locator('#equipmentForm')
+    form.locator('#initial summary').click()
     for name,value in [('identifier','TEST-001'),('designation','Anneau test'),('date','2026-06-15'),('intervenant','Testeur')]:
         form.locator('[name='+name+']').fill(value)
     form.locator('[name=result]').select_option(label='Mauvais état — réparable')
     form.locator('[name=attachment]').set_input_files({'name':'rapport.pdf','mimeType':'application/pdf','buffer':b'%PDF-1.4 test'})
     form.get_by_role('button',name='Enregistrer l’équipement').click()
+    expect(page.locator('#editor')).not_to_be_visible()
     page.locator('#search').fill('TEST-001')
     assert page.locator('tbody tr').count()==1
     page.get_by_role('button',name='Ouvrir',exact=True).click()
