@@ -1,0 +1,24 @@
+import json,base64,io,tempfile,subprocess
+from pathlib import Path
+from PIL import Image,ImageDraw
+from playwright.sync_api import sync_playwright,expect
+image=Image.new('RGBA',(240,70),(255,255,255,0));draw=ImageDraw.Draw(image);draw.line([(12,48),(70,12),(62,52),(128,18),(140,46),(222,22)],fill=(0,0,0,255),width=3);buffer=io.BytesIO();image.save(buffer,format='PNG');url='data:image/png;base64,'+base64.b64encode(buffer.getvalue()).decode()
+profile={'id':'verifier-fictif','name':'Contrôleur fictif','email':'signature@example.com','signature':{'name':'signature-fictive.png','type':'image/png','url':url}}
+source={'anticipation':30,'owners':[],'controllerProfiles':[profile],'equipment':[]}
+for i in [1,2]:
+ e={'id':'sign-fixture-'+str(i),'siteId':i,'identifier':'FICTIF-'+str(i),'designation':'Matériel fictif '+str(i),'serialNumber':'','sector':'B2','zone':'DMCR','team':'A','owner':'','location':'Atelier fictif','category':'','assignment':'','comments':'','months':12,'controls':[],'archived':False,'archiveHistory':[]}
+ if i==2:e['controls']=[{'id':'legacy','reportId':'1','date':'2026-10-01','intervenant':profile['name'],'verifierId':profile['id'],'result':'Bon état','observations':'Fixture','created':1}]
+ source['equipment'].append(e)
+with sync_playwright() as p:
+ b=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox']);page=b.new_page(viewport={'width':390,'height':844});errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.add_init_script('if(!localStorage.getItem("vgp-prototype-v1"))localStorage.setItem("vgp-prototype-v1",'+json.dumps(json.dumps(source))+');');page.goto('http://127.0.0.1:8000/prototype-vgp.html#material');page.locator('#list tbody tr').filter(has_text='FICTIF-2').get_by_role('button',name='Ouvrir',exact=True).click()
+ with page.expect_download() as legacy_download:page.locator('[data-control-pdf="legacy"]').click()
+ with tempfile.TemporaryDirectory() as folder:
+  path=Path(folder)/'legacy.pdf';legacy_download.value.save_as(path);assert b'/Signature Do' in path.read_bytes();assert 'fiche actuelle du contrôleur' in subprocess.check_output(['pdftotext',str(path),'-']).decode()
+ page.locator('#detail [data-close]').click();page.locator('#list tbody tr').filter(has_text='FICTIF-1').get_by_role('button',name='Ouvrir',exact=True).click();page.locator('#newControl').click();f=page.locator('#controlForm');f.locator('[name=intervenant]').evaluate("e=>{e.value='Contrôleur fictif';e.dispatchEvent(new Event('change',{bubbles:true}));}");f.locator('[name=time]').fill('11:15');f.locator('[name=result]').select_option('Bon état');f.get_by_role('button',name='Enregistrer le contrôle',exact=True).click();expect(page.locator('#control')).not_to_be_visible();data=json.loads(page.evaluate("localStorage.getItem('vgp-prototype-v1')"));c=data['equipment'][0]['controls'][0];assert c['time']=='11:15' and c['timeZone']=='Europe/Paris';assert c['reportSignature']['width']==240 and c['reportSignature']['data'].startswith('/9j/');assert c['recordedAt']
+ with page.expect_download() as dl:page.locator('[data-control-pdf="'+c['id']+'"]').click()
+ with tempfile.TemporaryDirectory() as folder:
+  pdf=Path(folder)/'new.pdf';dl.value.save_as(pdf);before=pdf.read_bytes();assert b'/Signature Do' in before;page.locator('#detail [data-close]').click();page.locator('#menuToggle').click();page.locator('#navigation [data-view=controllers]').click();page.locator('#controllersList button').first.click();expect(page.locator('#controllerControls')).to_contain_text('11:15');expect(page.locator('#controllerControls')).to_contain_text('Heure non renseignée');expect(page.locator('#controllerControls')).to_contain_text('Saisie le');page.locator('#controllerProfileForm [name=removeSignature]').check();page.locator('#controllerProfileForm').get_by_role('button',name='Enregistrer la fiche contrôleur').click();expect(page.locator('#controllerSaved')).to_contain_text('enregistrée');page.locator('#controllerControls [data-controller-equipment="sign-fixture-1"]').click()
+  with page.expect_download() as dl:page.locator('[data-control-pdf="'+c['id']+'"]').click()
+  pdf=Path(folder)/'after.pdf';dl.value.save_as(pdf);assert pdf.read_bytes()==before
+ assert json.loads(page.evaluate("localStorage.getItem('vgp-prototype-v1')"))['equipment'][1]['controls']==source['equipment'][1]['controls'];assert page.evaluate('document.documentElement.scrollWidth')==390;assert not errors,errors;b.close()
+print('PASS historique daté/heure réelle vs inconnue, signature PNG transparente intégrée au PDF et figée après retrait du profil, anciens contrôles intact et mobile.')
