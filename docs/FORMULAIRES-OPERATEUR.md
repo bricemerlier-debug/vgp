@@ -28,3 +28,15 @@ Les prévisualisations des rappels incluent les adresses des propriétaires asso
 Les blocs sont cliquables et filtrent les mêmes catégories que la liste : En retard (date limite dépassée), À contrôler bientôt (un mois calendaire avant l’échéance jusqu’à la date limite incluse), À jour (échéance au-delà d’un mois), Échéance à définir (aucune échéance exploitable), et Archivés. Les quatre catégories d’échéance sont disjointes et couvrent tout le parc actif. Le bloc Équipements actifs montre l’ensemble.
 
 Le compteur « Sans contrôle » est retiré de ce classement : un équipement peut avoir une date MemoryFlow et une échéance confirmée sans contrôle détaillé avec résultat et vérificateur. Il est donc classé selon son échéance, sans inventer de contrôle réalisé. Le résultat et l’historique des contrôles restent distincts, et le KPI des échéances non dépassées continue à inclure les échéances proches non échues.
+
+## Contrôleurs
+
+L’onglet VGP → Contrôleurs propose un annuaire avec recherche par nom ou e-mail, une fiche modifiable et la liste des contrôles associés. Les anciens noms de vérificateurs sont repris automatiquement dans des fiches, sans modifier les contrôles historiques. Le choix du contrôleur dans chaque formulaire de VGP est désormais une liste avec recherche provenant de cet annuaire. L’ajout rapide depuis le formulaire crée également une fiche, à compléter dans cet onglet.
+
+Chaque fiche possède un identifiant stable. Les nouveaux contrôles conservent `verifierId`, le nom déclaré et un snapshot du nom/e-mail ; renommer une fiche ne réécrit aucun contrôle ni PDF existant. Les alias historiques permettent de retrouver les anciens contrôles qui ne disposaient pas d’identifiant de contrôleur. Les noms déjà utilisés sont refusés et la sélection d’un contrôleur reste obligatoire pour enregistrer une VGP.
+
+Une signature peut être importée en PNG, JPEG ou WebP, jusqu’à 1 Mo. L’image est vérifiée, prévisualisée et conservée dans la fiche ; elle peut être remplacée ou retirée. Elle n’est pas apposée automatiquement sur un rapport et ne constitue pas une approbation de chaque contrôle. Le workflow d’approbation des rapports reste à définir avant une future utilisation de cette signature.
+
+Les fiches et images sont conservées dans `controllerProfiles`, dans le stockage local ou le snapshot Supabase existant, sous les règles d’accès de l’espace. Aucune nouvelle migration SQL n’est nécessaire. L’ancienne liste `verifiers` reste maintenue pour la compatibilité. Aucune donnée de démonstration n’est réinitialisée et aucun envoi de mail n’est activé.
+
+Le cercle KPI affiche son pourcentage en bleu sur fond blanc. La formule des échéances non dépassées / parc actif reste inchangée ; lorsqu’il n’y a aucun équipement actif, il indique « Non applicable ».
