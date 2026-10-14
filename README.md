@@ -1,3 +1,7 @@
+## Reprise des dernières dates MemoryFlow
+
+Le CSV des contrôles peut désormais être associé aux fiches existantes depuis ⚙ > Données, avec aperçu, confirmation des dates/périodicités, contrôle des identifiants et signalement des anomalies. Les dernières dates déclarées restent séparées des contrôles avec résultat/vérificateur. Voir [le guide](docs/REPRISE-DATES-MEMORYFLOW.md).
+
 ## Conversion et téléchargement Excel depuis votre PC
 
 Une [page de conversion](conversion-excel.html) prépare le classeur directement dans le navigateur sans envoyer de données à Supabase/GitHub. Voir les [consignes](docs/CONVERSION-EXCEL.md).
