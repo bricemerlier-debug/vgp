@@ -1,0 +1,18 @@
+# Bilans VGP hebdomadaires et mensuels
+
+Dans ⚙ → Mails, enregistrer l'adresse destinataire et choisir les bilans. L'aperçu utilise les données actuelles ; il n'envoie rien. Les préférences sont conservées dans la sauvegarde et Supabase. Horaire proposé : lundi et premier jour du mois à 7 h, Europe/Paris. Si les deux tombent le même jour, deux messages distincts sont prévus.
+
+Le bilan contient les échéances en retard, puis celles de la période jusqu'à sa fin, regroupées par secteur et triées par date. Équipe, zone, localisation et numéro interne facilitent la préparation. Les introuvables sont comptés séparément, les équipements mis au rebut sont exclus des tâches. Les dates inconnues restent visibles. Le taux des échéances non dépassées est distinct du taux des contrôles réalisés dans les délais : les dates historiques MemoryFlow sans résultat ni vérificateur ne deviennent pas des contrôles réalisés. Les exclusions historiques restent dans le dénominateur des cohortes.
+
+## Activation avec l'informatique
+
+GitHub Pages ne peut pas faire tourner une tâche en arrière-plan. Le serveur Supabase exécutera la fonction `supabase/functions/vgp-digests/index.ts`. Elle partage le calcul du site dans `digest.mjs` et `domain.mjs`.
+
+1. Exécuter `supabase/005_digest_deliveries.sql` dans Supabase après les migrations existantes. Le journal a RLS : visiteurs interdits, membres en lecture seulement, écritures serveur uniquement.
+2. Dans Microsoft Entra, créer une application serveur et configurer Microsoft Graph `Mail.Send` en permission d'application, avec consentement administrateur. Restreindre l'application à la boîte expéditrice choisie via Exchange Application RBAC ; faire valider cette restriction par l'informatique.
+3. Configurer uniquement dans les secrets des Edge Functions : `DIGEST_CRON_SECRET` (secret aléatoire long), `DIGEST_WORKSPACE_ID`, `MS_TENANT_ID`, `MS_CLIENT_ID`, `MS_CLIENT_SECRET`, `MS_SENDER`, `DIGEST_SEND_ENABLED=false`. Supabase fournit `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY` au serveur. Aucune de ces clés privées dans GitHub, cloud-config.js ou le navigateur.
+4. Depuis une machine de développement autorisée, avec le CLI Supabase (installation à expliquer avant usage sur PC d'entreprise), déployer : `supabase functions deploy vgp-digests --no-verify-jwt`. Le JWT Supabase est remplacé ici par la vérification obligatoire du secret de tâche ; ne jamais supprimer cette vérification.
+5. Configurer Supabase Cron/pg_net ou un ordonnanceur serveur pour un POST chaque heure à la fonction. Conserver URL et secret dans Vault/secrets de l'ordonnanceur. Authorization : Bearer suivi du secret de tâche. La fonction ne travaille qu'à 7 h en heure de Paris, ce qui suit automatiquement l'heure d'été/hiver. Pas de cron navigateur ; pas de secret dans le site.
+6. Tester à 7 h en simulation et comparer le contenu à l'aperçu. Vérifier adresse destinataire et boîte expéditrice. Puis passer `DIGEST_SEND_ENABLED=true` quand cette configuration est prête et autorisée. Aucun envoi n'est activé par la mise à jour du code seule.
+
+Une réservation unique `(espace, type, début de période)` évite les doubles envois concurrents. `accepted` signifie accepté par Graph (HTTP 202), pas livré à la boîte de réception. `processing` ou `uncertain` nécessite une vérification dans les éléments envoyés et les journaux Microsoft avant toute relance manuelle ; ne pas supprimer aveuglément la réservation. Une panne à 7 h peut entraîner un bilan manqué : superviser Cron et les journaux. Pas de rattrapage silencieux. Les anciennes notifications individuelles J-30/J-14/J-7/J0 restent inactives et distinctes de ces bilans.
