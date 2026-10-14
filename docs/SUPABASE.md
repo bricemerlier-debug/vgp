@@ -1,3 +1,5 @@
+> Installation actuelle : après 001 et 002 sur un projet neuf, exécuter 003 (protection historique) puis 004 (écritures optimisées). Sur un projet existant, ne pas rejouer 001/002. Voir [le correctif de délai](CORRECTIF-DELAI-SUPABASE.md).
+
 # Passer de votre prototype local à Supabase
 
 Les scripts et la connexion sont fournis. **Le mode utilisé dépend de votre configuration `cloud-config.js`** : `enabled:false` conserve le mode local ; `enabled:true` utilise le projet Supabase que vous avez configuré. Ne remplacez pas une configuration déjà connectée lorsque vous mettez à jour le site. Aucun mail VGP n'est envoyé. Ne transmettez jamais un mot de passe, une clé `service_role`, une clé `sb_secret_…` ou une sauvegarde contenant vos données dans une conversation ou un dépôt public.

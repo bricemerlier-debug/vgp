@@ -1,3 +1,7 @@
+## Correction des imports interrompus par Supabase
+
+Le correctif SQL 004 optimise les grands enregistrements sans supprimer les données ni désactiver les protections. Il doit être appliqué dans SQL Editor du projet existant : [étapes](docs/CORRECTIF-DELAI-SUPABASE.md). Le message de délai est désormais expliqué en français dans le site.
+
 ## Reprise des dernières dates MemoryFlow
 
 Le CSV des contrôles peut désormais être associé aux fiches existantes depuis ⚙ > Données, avec aperçu, confirmation des dates/périodicités, contrôle des identifiants et signalement des anomalies. Les dernières dates déclarées restent séparées des contrôles avec résultat/vérificateur. Voir [le guide](docs/REPRISE-DATES-MEMORYFLOW.md).

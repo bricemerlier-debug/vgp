@@ -1,3 +1,5 @@
+> Si l’enregistrement affiche « statement timeout », appliquer [le correctif 004](CORRECTIF-DELAI-SUPABASE.md) dans Supabase, puis relancer la reprise.
+
 # Activation sur le site réel
 
 Le propriétaire de l'application a autorisé la publication de l'étape 1. Le site conserve sa configuration Supabase et ses données. Le fichier Excel transmis n'est pas ajouté au dépôt et n'est pas importé automatiquement dans la base de production.

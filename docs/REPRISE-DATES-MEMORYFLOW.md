@@ -1,3 +1,5 @@
+> Si l’enregistrement affiche « statement timeout », appliquer [le correctif 004](CORRECTIF-DELAI-SUPABASE.md) dans Supabase, puis relancer la reprise.
+
 # Associer les dernières dates MemoryFlow aux équipements existants
 
 Dans le site : **⚙ > Données > Associer les dernières dates MemoryFlow aux fiches existantes**. Sélectionner directement `export-complet (4).csv` ; il n'est pas nécessaire de convertir ce fichier en Excel. Les exports équivalents `.xlsx` sont également acceptés.

@@ -22,6 +22,7 @@ export class CloudStore{
   try{response=await this.fetcher(this.config.url+path,{method,headers:{apikey:this.config.publicKey,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},...(body===undefined?{}:{body:JSON.stringify(body)}),cache:'no-store',signal:controller.signal});result=await response.json().catch(()=>({}));}
   catch{throw Error('Enregistrement non confirmé : vérifiez le réseau, puis actualisez avant de réessayer.');}
   finally{clearTimeout(timeout);}
+  if(!response.ok&&/statement timeout/i.test(result.message||''))throw Error('Enregistrement annulé par Supabase : délai serveur dépassé. Exécutez supabase/004_fast_writes.sql dans SQL Editor, puis actualisez et relancez l’association. Cette opération a été annulée par le serveur.');
   if(!response.ok)throw Error(response.status===401?'Session expirée : reconnectez-vous.':result.message||result.msg||result.error_description||'Opération Supabase refusée.');return result;
  }
 
