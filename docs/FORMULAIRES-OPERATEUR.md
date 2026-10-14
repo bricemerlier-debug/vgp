@@ -40,3 +40,5 @@ Une signature peut être importée en PNG, JPEG ou WebP, jusqu’à 1 Mo. L’im
 Les fiches et images sont conservées dans `controllerProfiles`, dans le stockage local ou le snapshot Supabase existant, sous les règles d’accès de l’espace. Aucune nouvelle migration SQL n’est nécessaire. L’ancienne liste `verifiers` reste maintenue pour la compatibilité. Aucune donnée de démonstration n’est réinitialisée et aucun envoi de mail n’est activé.
 
 Le cercle KPI affiche son pourcentage en bleu sur fond blanc. La formule des échéances non dépassées / parc actif reste inchangée ; lorsqu’il n’y a aucun équipement actif, il indique « Non applicable ».
+
+Dans « Propriétaires de l’équipement », le bouton « Créer un propriétaire » permet de saisir son nom et un e-mail facultatif, puis de créer sa fiche et de l’associer en un seul enregistrement. Les propriétaires déjà associés sont conservés. Les doublons de noms sont refusés ; équipe, service et secteur peuvent être complétés ensuite dans la fiche propriétaire.

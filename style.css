@@ -82,3 +82,5 @@ main{max-width:1240px;padding-top:40px}.intro{margin-bottom:32px}h1{color:var(--
 .donut{color:#003b71}.donut strong{color:#003b71;display:block}.signature-preview{display:block;max-width:100%;width:280px;max-height:140px;object-fit:contain;object-position:left center;background:#fff;border:1px solid #dce5ef;border-radius:6px;margin:12px 0}#controllerProfile{margin-top:24px}#controllerProfileForm{margin-top:20px}#controllerControls{margin-top:24px}#controllerControls .history small{display:block;margin:8px 0}
 
 .calendar-task .calendar-assignment{font-size:10px;line-height:1.5;color:#355b80;margin:6px 0}
+
+.owner-create-actions{margin:18px 0 10px}.inline-owner-create{background:#f3f7fc;border:1px solid #d5e1ef;border-radius:8px;padding:16px;margin:12px 0}.inline-owner-create h3{margin-top:0}.inline-owner-create .actions{margin-top:16px}
