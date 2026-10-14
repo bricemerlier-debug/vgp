@@ -72,16 +72,16 @@ export function buildReportPdf(report,logo){
   const text=(value,x,lineY,size=10,bold=false,color='0.12 0.22 0.32')=>commands.push(`BT /${bold?'F2':'F1'} ${size} Tf ${color} rg ${x} ${lineY} Td ${literal(value)} Tj ET`);
   const rect=(x,top,w,h,color)=>commands.push(`${color} rg ${x} ${top-h} ${w} ${h} re f`);
   function header(){rect(0,842,595,8,'0.97 0.79 0.1');if(imageId){const w=Math.min(280,logo.width/Math.max(logo.width/280,logo.height/70)),h=w*logo.height/logo.width;commands.push(`q ${w} 0 0 ${h} 42 ${760-h/2} cm /Logo Do Q`)}else{text('GOODYEAR',42,765,31,true,'0.05 0.19 0.43');text('Logo officiel à importer',44,747,8,false,'0.4 0.45 0.5')}
-    text('RAPPORT DE VÉRIFICATION',42,705,21,true);text('ÉQUIPEMENT VGP',42,683,10,true,'0.35 0.45 0.52');text(report.reportId,42,663,8.5);y=637}
+    text(report.result==='Introuvable'?'DÉCLARATION D’INTROUVABLE':'RAPPORT DE VÉRIFICATION',42,705,21,true);text('ÉQUIPEMENT VGP',42,683,10,true,'0.35 0.45 0.52');text(report.reportId,42,663,8.5);y=637}
   function finish(){commands.push('0.78 0.83 0.86 RG 42 46 m 553 46 l S');text(report.reportId,42,32,7);text(`Page ${pages.length+1}`,510,32,8);pages.push(commands.join('\n'));commands=[];header()}
   function ensure(h){if(y-h<70)finish()}
   function section(title){ensure(42);rect(42,y,511,24,'0.06 0.2 0.4');text(title,52,y-16,11,true,'1 1 1');y-=34}
   function wrap(value,size=10,max=91){const lines=[];for(const row of String(value).split('\n')){let current='';for(const word of row.split(/\s+/)){for(let i=0;i<word.length;i+=max){const part=word.slice(i,i+max);if(current.length+part.length+1>max){lines.push(current);current=''}current+=(current?' ':'')+part}}lines.push(current)}for(const line of lines){ensure(size+6);text(line,52,y,size);y-=size+5}y-=7}
   header();section('01  IDENTIFICATION DE L’ÉQUIPEMENT');wrap(report.equipment.designation,14,65);
   for(const [label,value] of report.fields){ensure(20);text(label,52,y,9,true);const values=String(value||'Non renseigné').match(/.{1,60}/g)||['Non renseigné'];for(const line of values){ensure(18);text(line,210,y,10);y-=16}y-=4}
-  section('02  VÉRIFICATION');wrap(`Date du contrôle : ${report.date}`);wrap(`Vérificateur : ${report.verifier}`);wrap(`Résultat : ${report.result}`,12,75);
+  section(report.result==='Introuvable'?'02  DÉCLARATION':'02  VÉRIFICATION');wrap(`${report.result==='Introuvable'?'Date de déclaration':'Date du contrôle'} : ${report.date}`);wrap(`Vérificateur : ${report.verifier}`);wrap(`Résultat : ${report.result}`,12,75);
   section('03  OBSERVATIONS');wrap(report.observations||'Aucune observation renseignée.');
-  section('04  CONCLUSION DU VÉRIFICATEUR');wrap(report.conclusion);ensure(90);text('Signature du vérificateur :',52,y,10,true);commands.push(`0.55 0.64 0.69 RG 52 ${y-32} m 340 ${y-32} l S`);text(`Date de vérification : ${report.date}`,52,y-50,8);text(`Code de vérification : ${report.reportId}`,52,y-64,7.5);text(report.snapshotNote,52,y-78,7);text('Document établi à partir des informations déclarées. Signature du vérificateur requise pour approbation.',52,y-90,7);
+  section('04  CONCLUSION DU VÉRIFICATEUR');wrap(report.conclusion);ensure(90);text('Signature du vérificateur :',52,y,10,true);commands.push(`0.55 0.64 0.69 RG 52 ${y-32} m 340 ${y-32} l S`);text(`${report.result==='Introuvable'?'Date de déclaration':'Date de vérification'} : ${report.date}`,52,y-50,8);text(`Code de vérification : ${report.reportId}`,52,y-64,7.5);text(report.snapshotNote,52,y-78,7);text('Document établi à partir des informations déclarées. Signature du vérificateur requise pour approbation.',52,y-90,7);
   finish();
   const kids=[];for(const stream of pages){const pageId=objects.length+1,streamId=pageId+1;kids.push(`${pageId} 0 R`);objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> ${imageId?`/XObject << /Logo ${imageId} 0 R >>`:''} >> /Contents ${streamId} 0 R >>`);objects.push(`<< /Length ${encode(stream).length} >>\nstream\n${stream}\nendstream`)}
   objects[1]=`<< /Type /Pages /Kids [${kids.join(' ')}] /Count ${pages.length} >>`;
@@ -143,9 +143,9 @@ export function freezeTracking(next,previous,today,actor){
  }
  return next;
 }
-export function declareLoss(e,{id,date,author,comment,account,attachment=null,originalControlId=null}){
+export function declareLoss(e,{id,date,author,comment,account,attachment=null,originalControlId=null,reportId=null,equipmentSnapshot=null,verifierId=null}){
  if(!author?.trim()||!comment?.trim())throw Error('Renseignez l’auteur et le commentaire de recherche.');if(latestInspection(e)?.date>date)throw Error('La date de recherche précède un contrôle exploitable plus récent.');
- const event={id,type:'archive',workflow:'loss-declaration',reason:'Équipement perdu',date,requester:author.trim(),observations:comment.trim(),account,attachment,originalControlId,created:Date.now(),generated:false,snapshot:Object.fromEntries(['identifier','serialNumber','designation','category','location','sector','zone','team','owner','assignment'].map(k=>[k,e[k]||''])),previousRequest:e.pendingArchive||null};
+ const event={id,...(reportId?{reportId}:{}),...(equipmentSnapshot?{equipmentSnapshot}:{}),...(verifierId?{verifierId}:{}),type:'archive',workflow:'loss-declaration',reason:'Équipement perdu',date,requester:author.trim(),observations:comment.trim(),account,attachment,originalControlId,created:Date.now(),generated:false,snapshot:Object.fromEntries(['identifier','serialNumber','designation','category','location','sector','zone','team','owner','assignment'].map(k=>[k,e[k]||''])),previousRequest:e.pendingArchive||null};
  e.archiveHistory??=[];e.archiveHistory.push(event);e.archived=true;e.pendingArchive=null;return event;
 }
 export function reactivateFound(e,{id,date,author,comment,account}){
