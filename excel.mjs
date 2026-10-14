@@ -19,9 +19,10 @@ export function analyzeRows(rows,data,today){
  if(row.lastDate>today)throw Error('Le dernier contrôle ne peut pas être futur.');
  if(row.lastDate&&(!row.verifier||!['Bon état','Mauvais état — réparable','Mauvais état — à jeter','Introuvable'].includes(row.result)))throw Error('Un dernier contrôle exige un vérificateur et un résultat reconnu.');
  if(!row.lastDate&&(row.verifier||row.result))throw Error('Renseignez aussi la date du dernier contrôle.');
- if(row.sector&&!['A1','A2','B1','B2','B3'].includes(row.sector))throw Error('Secteur inconnu.');
+ if(heading(row.sector)==='pasdesecteur')row.sector='Pas de secteur';if(heading(row.team)==='pasdequipe')row.team='Pas d’équipe';
+ if(row.sector&&!['A1','A2','B1','B2','B3','Pas de secteur'].includes(row.sector))throw Error('Secteur inconnu.');
  if(row.zone&&(!['DMCR','Yuzer'].includes(row.zone)||row.sector!=='B2'))throw Error('DMCR et Yuzer sont des zones du secteur B2.');
- if(row.team&&!['A','B','C','D','E','Jour'].includes(row.team))throw Error('Équipe inconnue.');
+ if(row.team&&!['A','B','C','D','E','Jour','Pas d’équipe'].includes(row.team))throw Error('Équipe inconnue.');
  if(row.email&&(!row.owner||!/^\S+@\S+\.\S+$/.test(row.email)))throw Error('Adresse e-mail ou propriétaire invalide.');
  if(row.email&&emails.has(norm(row.owner))&&emails.get(norm(row.owner))!==norm(row.email))throw Error('Adresse différente du propriétaire existant : modifiez sa fiche séparément.');
  if(identifiers.has(norm(row.identifier))||(row.serialNumber&&serials.has(norm(row.serialNumber)))){item.status='duplicate';item.message='Doublon : numéro interne ou série déjà présent (archives comprises).';}
