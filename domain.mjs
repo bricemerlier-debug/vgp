@@ -1,3 +1,5 @@
+import {goodyearReportLogo} from './assets/report-logo.mjs';
+import {pdfFonts} from './assets/report-fonts.mjs';
 export function equipmentName(e){return e.standardName||e.designation;}
 export function addMonths(date, months) {
   const [y,m,d]=date.split('-').map(Number);
@@ -63,27 +65,31 @@ export function reportConclusion(result,verifier,date){
 }
 
 export function buildReportPdf(report,logo){
+  logo??=goodyearReportLogo;
   const special={'€':128,'’':146,'‘':145,'“':147,'”':148,'–':150,'—':151,'œ':156,'Œ':140,'…':133};
   const encode=s=>Uint8Array.from([...s].map(c=>special[c]??(c.charCodeAt(0)<=255?c.charCodeAt(0):63)));
   const literal=s=>'('+[...String(s)].map(c=>'\\'+(special[c]??(c.charCodeAt(0)<=255?c.charCodeAt(0):63)).toString(8).padStart(3,'0')).join('')+')';
-  const objects=['<< /Type /Catalog /Pages 2 0 R >>','','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>'];
+  const objects=['<< /Type /Catalog /Pages 2 0 R >>','','','','','','',''];
+  pdfFonts.forEach((font,index)=>{const fontId=3+index,descriptorId=5+index,streamId=7+index,bytes=atob(font.data),hex=[...bytes].map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join('')+'>';objects[fontId-1]=`<< /Type /Font /Subtype /TrueType /BaseFont /${font.name} /FirstChar 32 /LastChar 255 /Widths [${font.widths.join(' ')}] /Encoding /WinAnsiEncoding /FontDescriptor ${descriptorId} 0 R >>`;objects[descriptorId-1]=`<< /Type /FontDescriptor /FontName /${font.name} /Flags 32 /FontBBox [${font.bbox.join(' ')}] /ItalicAngle 0 /Ascent ${font.ascent} /Descent ${font.descent} /CapHeight ${font.capHeight} /StemV ${index?120:80} /FontFile2 ${streamId} 0 R >>`;objects[streamId-1]=`<< /Length ${hex.length} /Length1 ${bytes.length} /Filter /ASCIIHexDecode >>\nstream\n${hex}\nendstream`;});
   let imageId=null;if(logo){const bytes=atob(logo.data),hex=[...bytes].map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join('')+'>';imageId=objects.length+1;objects.push(`<< /Type /XObject /Subtype /Image /Width ${logo.width} /Height ${logo.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter [/ASCIIHexDecode /DCTDecode] /Length ${hex.length} >>\nstream\n${hex}\nendstream`)}
-  const pages=[];let commands=[],y=660;
+  const pages=[];let commands=[],y=658;
   const text=(value,x,lineY,size=10,bold=false,color='0.12 0.22 0.32')=>commands.push(`BT /${bold?'F2':'F1'} ${size} Tf ${color} rg ${x} ${lineY} Td ${literal(value)} Tj ET`);
   const rect=(x,top,w,h,color)=>commands.push(`${color} rg ${x} ${top-h} ${w} ${h} re f`);
-  function header(){rect(0,842,595,8,'0.97 0.79 0.1');if(imageId){const w=Math.min(280,logo.width/Math.max(logo.width/280,logo.height/70)),h=w*logo.height/logo.width;commands.push(`q ${w} 0 0 ${h} 42 ${760-h/2} cm /Logo Do Q`)}else{text('GOODYEAR',42,765,31,true,'0.05 0.19 0.43');text('Logo officiel à importer',44,747,8,false,'0.4 0.45 0.5')}
-    text(report.result==='Introuvable'?'DÉCLARATION D’INTROUVABLE':'RAPPORT DE VÉRIFICATION',42,705,21,true);text('ÉQUIPEMENT VGP',42,683,10,true,'0.35 0.45 0.52');text(report.reportId,42,663,8.5);y=637}
-  function finish(){commands.push('0.78 0.83 0.86 RG 42 46 m 553 46 l S');text(report.reportId,42,32,7);text(`Page ${pages.length+1}`,510,32,8);pages.push(commands.join('\n'));commands=[];header()}
-  function ensure(h){if(y-h<70)finish()}
-  function section(title){ensure(42);rect(42,y,511,24,'0.06 0.2 0.4');text(title,52,y-16,11,true,'1 1 1');y-=34}
-  function wrap(value,size=10,max=91){const lines=[];for(const row of String(value).split('\n')){let current='';for(const word of row.split(/\s+/)){for(let i=0;i<word.length;i+=max){const part=word.slice(i,i+max);if(current.length+part.length+1>max){lines.push(current);current=''}current+=(current?' ':'')+part}}lines.push(current)}for(const line of lines){ensure(size+6);text(line,52,y,size);y-=size+5}y-=7}
-  header();section('01  IDENTIFICATION DE L’ÉQUIPEMENT');wrap(report.equipment.designation,14,65);
-  for(const [label,value] of report.fields){ensure(20);text(label,52,y,9,true);const values=String(value||'Non renseigné').match(/.{1,60}/g)||['Non renseigné'];for(const line of values){ensure(18);text(line,210,y,10);y-=16}y-=4}
-  section(report.result==='Introuvable'?'02  DÉCLARATION':'02  VÉRIFICATION');wrap(`${report.result==='Introuvable'?'Date de déclaration':'Date du contrôle'} : ${report.date}`);wrap(`Vérificateur : ${report.verifier}`);wrap(`Résultat : ${report.result}`,12,75);
-  section('03  OBSERVATIONS');wrap(report.observations||'Aucune observation renseignée.');
-  section('04  CONCLUSION DU VÉRIFICATEUR');wrap(report.conclusion);ensure(90);text('Signature du vérificateur :',52,y,10,true);commands.push(`0.55 0.64 0.69 RG 52 ${y-32} m 340 ${y-32} l S`);text(`${report.result==='Introuvable'?'Date de déclaration':'Date de vérification'} : ${report.date}`,52,y-50,8);text(`Code de vérification : ${report.reportId}`,52,y-64,7.5);text(report.snapshotNote,52,y-78,7);text('Document établi à partir des informations déclarées. Signature du vérificateur requise pour approbation.',52,y-90,7);
+  const width=(value,size,bold=false)=>[...String(value)].reduce((n,c)=>{const code=special[c]??(c.charCodeAt(0)<=255?c.charCodeAt(0):63);return n+(pdfFonts[bold?1:0].widths[code-32]??0)*size/1000},0);
+  const lines=(value,size,maxWidth,bold=false)=>{const out=[];for(const row of String(value).split('\n')){let line='';for(const word of row.split(/\s+/)){if(!word)continue;if(width((line?line+' ':'')+word,size,bold)<=maxWidth){line+=(line?' ':'')+word;continue;}if(line){out.push(line);line='';}for(const c of word){if(width(line+c,size,bold)>maxWidth){out.push(line);line='';}line+=c;}}out.push(line);}return out;};
+  function header(){rect(0,842,595,6,'1 0.82 0');if(imageId){const w=Math.min(220,logo.width*70/logo.height),h=w*logo.height/logo.width;commands.push(`q ${w} 0 0 ${h} 42 ${797-h} cm /Logo Do Q`);}else{text('GOODYEAR',42,775,27,true,'0 0.24 0.44');}
+    text('AMIENS · SUIVI DES ÉQUIPEMENTS',42,740,9,false,'0.35 0.45 0.52');rect(363,799,190,64,'0 0.23 0.44');text('RAPPORT VGP',376,780,10,true,'1 1 1');const label='N° '+report.reportId;lines(label,14,164,true).slice(0,2).forEach((line,i)=>text(line,376,759-i*16,14,true,'1 1 1'));text(report.result==='Introuvable'?'DÉCLARATION D’INTROUVABLE':'RAPPORT DE VÉRIFICATION',42,703,20,true,'0 0.23 0.44');text(`${report.result==='Introuvable'?'Déclaration':'Contrôle'} du ${report.date}`,42,683,10);y=656;}
+  function finish(){commands.push('0.78 0.83 0.86 RG 42 40 m 553 40 l S');pages.push(commands.join('\n'));commands=[];}
+  function ensure(h){if(y-h<62){finish();header();}}
+  function section(number,title){ensure(44);rect(42,y,511,25,'0.93 0.95 0.98');rect(42,y,29,25,'0 0.23 0.44');text(number,49,y-17,10,true,'1 1 1');text(title,82,y-17,10,true,'0 0.23 0.44');y-=42;}
+  function wrap(value,size=10,maxWidth=491,bold=false){for(const line of lines(value,size,maxWidth,bold)){ensure(size+5);text(line,52,y,size,bold);y-=size+5;}y-=7;}
+  header();section('01','IDENTIFICATION DE L’ÉQUIPEMENT');wrap(report.equipment.designation,14,491,true);if(report.snapshotNote?.includes('antérieur'))wrap(report.snapshotNote,9);
+  for(const [label,value] of report.fields){const values=lines(String(value??'').trim()||'Non renseigné',10,325);for(let i=0;i<values.length;i++){ensure(20);if(i===0)text(label,52,y,10,true);text(values[i],217,y,10);y-=15;}y-=5;}
+  section('02',report.result==='Introuvable'?'DÉCLARATION DU MATÉRIEL INTROUVABLE':'RÉSULTAT DE LA VÉRIFICATION');wrap(`Vérificateur : ${report.verifier}`,10);wrap(`Résultat : ${report.result}`,11,491,true);
+  section('03','OBSERVATIONS');wrap(report.observations||'Aucune observation renseignée.',10);
+  section('04','CONCLUSION ET SIGNATURE');wrap(report.conclusion,10);ensure(76);text('Signature du vérificateur',52,y,10,true);commands.push(`0.55 0.64 0.69 RG 52 ${y-50} m 350 ${y-50} l S`);y-=70;
   finish();
-  const kids=[];for(const stream of pages){const pageId=objects.length+1,streamId=pageId+1;kids.push(`${pageId} 0 R`);objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> ${imageId?`/XObject << /Logo ${imageId} 0 R >>`:''} >> /Contents ${streamId} 0 R >>`);objects.push(`<< /Length ${encode(stream).length} >>\nstream\n${stream}\nendstream`)}
+  const kids=[];for(const [pageIndex,body] of pages.entries()){const stream=body+`\nBT /F1 8 Tf 0.35 0.45 0.52 rg 503 26 Td ${literal('Page '+(pageIndex+1)+' / '+pages.length)} Tj ET`;const pageId=objects.length+1,streamId=pageId+1;kids.push(`${pageId} 0 R`);objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> ${imageId?`/XObject << /Logo ${imageId} 0 R >>`:''} >> /Contents ${streamId} 0 R >>`);objects.push(`<< /Length ${encode(stream).length} >>\nstream\n${stream}\nendstream`)}
   objects[1]=`<< /Type /Pages /Kids [${kids.join(' ')}] /Count ${pages.length} >>`;
   let out='%PDF-1.4\n',offsets=[0];objects.forEach((object,i)=>{offsets.push(encode(out).length);out+=`${i+1} 0 obj\n${object}\nendobj\n`});const xref=encode(out).length;out+=`xref\n0 ${objects.length+1}\n0000000000 65535 f \n${offsets.slice(1).map(n=>String(n).padStart(10,'0')+' 00000 n \n').join('')}trailer\n<< /Size ${objects.length+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;return encode(out);
 }

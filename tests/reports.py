@@ -9,7 +9,8 @@ with sync_playwright() as p:
  page.on('dialog',lambda d:d.accept('Vérificateur de test'));c.get_by_role('button',name='+ Ajouter un contrôleur').click();assert c.locator('[name=intervenant]').input_value()=='Vérificateur de test';c.locator('[name=observations]').fill('Examen réalisé. Aucun défaut signalé.');c.get_by_role('button',name='Enregistrer le contrôle',exact=True).click();expect(page.locator('#control')).not_to_be_visible()
  data=json.loads(page.evaluate("localStorage.getItem('vgp-prototype-v1')"));e=data['equipment'][-1];record=e['controls'][0];assert record['reportId'] and record['equipmentSnapshot']['zone']=='DMCR';assert 'Vérificateur de test' in data['verifiers']
  with page.expect_download() as download:page.get_by_role('button',name='Télécharger le PDF').click()
- download.value.save_as('/tmp/report-styled.pdf');subprocess.run(['pdftotext','/tmp/report-styled.pdf','/tmp/report-styled.txt'],check=True);text=open('/tmp/report-styled.txt').read()
+ assert download.value.suggested_filename=='rapport_vgp_'+record['reportId']+'.pdf';download.value.save_as('/tmp/report-styled.pdf');subprocess.run(['pdftotext','/tmp/report-styled.pdf','/tmp/report-styled.txt'],check=True);text=open('/tmp/report-styled.txt').read()
+ assert 'Code de vérification' not in text and 'Date de vérification' not in text;assert 'RAPPORT VGP' in text;
  for expected in ['RAPPORT DE VÉRIFICATION','Anneau de retournement M30','SERIE-ABCD','B2 / DMCR','Vérificateur de test',record['reportId'],'bon état','Signature']:assert expected in text,expected
  page.get_by_role('button',name='Modifier la fiche').click();f.locator('[name=typeId]').select_option('__free__');f.locator('[name=designation]').fill('Nom changé après contrôle');choose_missing_assignment(f);f.get_by_role('button',name='Enregistrer l’équipement').click()
  with page.expect_download() as download:page.get_by_role('button',name='Télécharger le PDF').click()
