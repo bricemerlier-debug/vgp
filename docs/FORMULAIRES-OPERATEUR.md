@@ -8,3 +8,7 @@
 - Les nouveaux rapports suivent la séquence 1, 2, 3 dans l’espace de données, après le plus grand numéro numérique enregistré. Les anciennes références et les rapports existants restent inchangés. Le contrôle de révision Supabase rejette une écriture concurrente obsolète : actualiser les données avant de réessayer. Une création annulée ne réserve pas un numéro.
 
 Validation : tests navigateur sur données fictives (création, périodicité, variante, recherche, affectation, rapports successifs et persistance), régression propriétaires/nomenclature/rapports et génération PDF. Aucune donnée de production utilisée ou modifiée par les tests.
+
+## Fiche propriétaire
+
+La fiche conserve l’adresse e-mail et propose équipe (A, B, C, D, E, Jour), service (IT, HSE, Métrologie, RH), secteur (A1, A2, B1, B2, B3), et sous-secteur / zone (DMCR, Yuzer sous B2). Les champs sont facultatifs. Changer de secteur efface le sous-secteur incompatible lors de l’enregistrement. La recherche des propriétaires accepte aussi leur affectation. Ces informations sont enregistrées dans le profil existant `ownerContacts`, dans le même stockage local ou Supabase que les coordonnées ; aucune migration SQL supplémentaire nécessaire. Les affectations des équipements restent indépendantes de la fiche propriétaire. Les anciens profils sans ces champs restent compatibles.

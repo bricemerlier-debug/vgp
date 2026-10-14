@@ -66,3 +66,5 @@ main{max-width:1240px;padding-top:40px}.intro{margin-bottom:32px}h1{color:var(--
 .naming-groups{max-height:300px;overflow:auto;border:1px solid #d1dceb;border-radius:8px;padding:12px;margin-bottom:16px}.naming-group{display:flex;align-items:center;gap:12px;padding:10px;border-bottom:1px solid #e5eaf2}.naming-group input{width:auto;flex-shrink:0}.naming-group small{display:block}.naming-preview{max-height:320px;overflow:auto;margin:16px 0}#equipmentType+button,#equipmentVariant+button{margin-top:8px}
 
 .select-search{margin-bottom:6px;font-size:0.85rem;padding:8px 10px;width:100%;min-width:0}input[readonly]{background:#eef2f7;color:#315479}#ownerTools{margin-bottom:20px}#createAssociatedEquipment{margin-bottom:16px}
+
+.owner-profile-form{display:block}.owner-profile-form .fields{width:100%}.owner-profile-form h3{margin-top:0}.owner-profile-form .foot{margin:12px 0}.owner-profile-form [role=status]{color:#0055a4}

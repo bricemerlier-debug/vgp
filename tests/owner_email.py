@@ -9,8 +9,8 @@ with sync_playwright() as p:
  data=json.loads(page.evaluate("localStorage.getItem('vgp-prototype-v1')"));data['owners']=['Alice'];data['equipment'][-1]['owner']='Alice';data['equipment'][-1]['firstControlDate']='2027-10-13';data['equipment'][-1]['dateValidation']={'validated':True,'source':'Document fictif','reason':'Échéance fictive explicite','by':'Responsable fictif'};page.evaluate('(d)=>localStorage.setItem("vgp-prototype-v1",JSON.stringify(d))',data);page.reload()
  def open_owner():
   page.get_by_role('button',name='Ouvrir le menu',exact=True).click();page.get_by_role('button',name='Propriétaires',exact=True).click();page.get_by_role('heading',name='Alice',exact=True).click()
- open_owner();page.locator('#ownerContactForm [name=email]').fill('alice@example.com');page.get_by_role('button',name='Enregistrer l’adresse').click()
- expect(page.locator('#message')).to_contain_text('Adresse e-mail enregistrée')
+ open_owner();page.locator('#ownerContactForm [name=email]').fill('alice@example.com');page.get_by_role('button',name='Enregistrer la fiche propriétaire').click()
+ expect(page.locator('#message')).to_contain_text('Fiche propriétaire enregistrée')
  expect(page.locator('.owner-reminders tbody tr')).to_have_count(4)
  page.locator('[data-reminder-kind=deadline]').click();expect(page.locator('#emailPreviewMeta')).to_contain_text('alice@example.com')
  assert 'ne doit plus être utilisé' in page.locator('#emailPreviewBody').input_value()
