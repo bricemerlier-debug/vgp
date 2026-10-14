@@ -103,3 +103,11 @@ main{max-width:1240px;padding-top:40px}.intro{margin-bottom:32px}h1{color:var(--
 .digest-preview{white-space:pre-wrap;overflow-wrap:anywhere;background:#f2f6fc;padding:18px;border-left:4px solid #0057a8;font:14px/1.6 system-ui;max-height:550px;overflow:auto}
 
 .home-priority-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0 10px}.home-priority-filters label{min-width:0}.home-priority-filters button{justify-self:start}@media(max-width:480px){.home-priority-filters{grid-template-columns:minmax(0,1fr)}}
+
+.monthly-status-legend{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+#monthlyRemainingList .monthly-done-row{background:#eaf5ef;color:#205d48}#monthlyRemainingList .monthly-done-row small{color:#42715e}#monthlyRemainingList .monthly-done-row td:first-child{border-left:4px solid #21815f}
+#monthlyRemainingList .monthly-done-late-row{background:#fff5df;color:#79520b}#monthlyRemainingList .monthly-done-late-row small{color:#806022}#monthlyRemainingList .monthly-done-late-row td:first-child{border-left:4px solid #d89b13}
+#monthlyRemainingList .monthly-overdue-row{background:#fff0ef;color:#812d28}#monthlyRemainingList .monthly-overdue-row small{color:#94504b}#monthlyRemainingList .monthly-overdue-row td:first-child{border-left:4px solid #d94339}
+#monthlyRemainingList .monthly-pending-row{background:#edf3fc;color:#244e80}#monthlyRemainingList .monthly-pending-row small{color:#537399}#monthlyRemainingList .monthly-pending-row td:first-child{border-left:4px solid #5686bd}
+#monthlyRemainingList .monthly-excluded-row{background:#eef0f1;color:#525b64}#monthlyRemainingList .monthly-excluded-row small{color:#687078}#monthlyRemainingList .monthly-excluded-row td:first-child{border-left:4px solid #7b8790}
+#monthlyRemainingList .badge.monthly-done{background:#cce9da;color:#175139}#monthlyRemainingList .badge.monthly-done-late{background:#ffe3a2;color:#704800}#monthlyRemainingList .badge.monthly-overdue{background:#fbd2ce;color:#8a211a}#monthlyRemainingList .badge.monthly-pending{background:#dce9fa;color:#244e80}#monthlyRemainingList .badge.monthly-excluded{background:#dfe3e6;color:#525b64}
