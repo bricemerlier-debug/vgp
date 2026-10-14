@@ -42,3 +42,11 @@ Les fiches et images sont conservées dans `controllerProfiles`, dans le stockag
 Le cercle KPI affiche son pourcentage en bleu sur fond blanc. La formule des échéances non dépassées / parc actif reste inchangée ; lorsqu’il n’y a aucun équipement actif, il indique « Non applicable ».
 
 Dans « Propriétaires de l’équipement », le bouton « Créer un propriétaire » permet de saisir son nom et un e-mail facultatif, puis de créer sa fiche et de l’associer en un seul enregistrement. Les propriétaires déjà associés sont conservés. Les doublons de noms sont refusés ; équipe, service et secteur peuvent être complétés ensuite dans la fiche propriétaire.
+
+## Introuvables visibles dans Matériel
+
+L’onglet Matériel contient les équipements en suivi et les introuvables, affichés en violet et recherchables par leurs identifiants ou leur nom. Un compteur et un filtre Introuvables ouvrent leur liste. L’onglet Archivés contient uniquement les équipements mis au rebut. Ce classement s’applique également aux déclarations d’introuvables déjà enregistrées, sans import ni réinitialisation. Les propriétaires voient aussi ces matériels dans leur fiche.
+
+La fiche d’un introuvable propose « Déclarer retrouvé ». Cette déclaration conserve l’historique puis exige un nouveau contrôle avant de reprendre une échéance valide. Tant qu’il est introuvable, le suivi est suspendu : aucune VGP, validité ou notification automatique n’est créée. Les règles de calcul des KPI opérationnels et l’historique des échéances/exclusions restent conservés. Le classement des listes distingue les introuvables suspendus des matériels mis au rebut ; les libellés KPI ont été adaptés en conséquence.
+
+Pour assurer la compatibilité avec les sauvegardes et la protection SQL existantes, les champs historiques de suspension et les événements `archiveHistory` sont conservés ; l’interface classe les pertes dans Matériel et les mises au rebut dans Archivés. Aucune migration SQL supplémentaire ni modification automatique de données n’est nécessaire. Les anciennes demandes/documents de perte restent consultables. Une nouvelle demande d’archivage propose uniquement « Mis au rebut » ; une perte se déclare par « Déclarer introuvable ».

@@ -9,7 +9,7 @@ for i,(name,date) in enumerate([('EN-RETARD','2026-10-13'),('DATE-LIMITE','2026-
  source['equipment'].append(e)
 with sync_playwright() as p:
  b=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox']);page=b.new_page(viewport={'width':390,'height':844});errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.clock.install(time=datetime(2026,10,14,10,0,tzinfo=timezone.utc));page.add_init_script('localStorage.setItem("vgp-prototype-v1",'+json.dumps(json.dumps(source))+');');page.goto('http://127.0.0.1:8000/prototype-vgp.html#material')
- for value,n,names in [('',6,None),('En retard',1,['EN-RETARD']),('À faire',2,['DATE-LIMITE','UN-MOIS']),('Échéance à plus d’un mois',2,['PLUS-UN-MOIS','DEUX-MOIS']),('Situation à vérifier',1,['A-DEFINIR']),('Archivé',1,['ARCHIVE'])]:
+ for value,n,names in [('',7,None),('En retard',1,['EN-RETARD']),('À faire',2,['DATE-LIMITE','UN-MOIS']),('Échéance à plus d’un mois',2,['PLUS-UN-MOIS','DEUX-MOIS']),('Situation à vérifier',1,['A-DEFINIR']),('Introuvable',1,['ARCHIVE']),('Archivé',0,[])]:
   card=page.locator('#stats [data-status-filter="'+value+'"]');expect(card.locator('strong')).to_have_text(str(n));card.click();expect(page.locator('#list tbody tr')).to_have_count(n)
   if names:assert sorted(page.locator('#list tbody tr').all_text_contents()) and all(name in page.locator('#list').inner_text() for name in names)
   expect(card).to_have_attribute('aria-pressed','true')
