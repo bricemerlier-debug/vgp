@@ -101,3 +101,5 @@ main{max-width:1240px;padding-top:40px}.intro{margin-bottom:32px}h1{color:var(--
 .deadline-late-row td:first-child{border-left:4px solid #d94339}.deadline-soon-row td:first-child{border-left:4px solid #d89b13}.deadline-current-row td:first-child{border-left:4px solid #21815f}.deadline-unknown-row td:first-child{border-left:4px solid #5686bd}
 
 .digest-preview{white-space:pre-wrap;overflow-wrap:anywhere;background:#f2f6fc;padding:18px;border-left:4px solid #0057a8;font:14px/1.6 system-ui;max-height:550px;overflow:auto}
+
+.home-priority-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0 10px}.home-priority-filters label{min-width:0}.home-priority-filters button{justify-self:start}@media(max-width:480px){.home-priority-filters{grid-template-columns:minmax(0,1fr)}}
