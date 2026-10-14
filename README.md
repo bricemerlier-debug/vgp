@@ -1,3 +1,7 @@
+## Conversion et téléchargement Excel depuis votre PC
+
+Une [page de conversion](conversion-excel.html) prépare le classeur directement dans le navigateur sans envoyer de données à Supabase/GitHub. Voir les [consignes](docs/CONVERSION-EXCEL.md).
+
 # Noms standardisés
 
 Types, variantes et reprise des anciens noms par groupes : voir [le guide](docs/NOMS-STANDARDISES.md). Cette fonctionnalité est publiée sur le site : types et variantes dans les fiches, puis standardisation par groupes dans les paramètres.
