@@ -3,7 +3,7 @@ export function installSearchableSelects(){
  const widgets=new WeakMap();let opened=null,sequence=0;
  const key=v=>String(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fr');
  function enhance(select){
-  if(widgets.has(select))return;
+  if(select.hasAttribute('data-native-select')||widgets.has(select))return;
   const label=select.closest('label')?.childNodes[0]?.textContent?.trim()||select.getAttribute('aria-label')||'Choix';
   const wrapper=document.createElement('div');wrapper.className='searchable-select';
   const trigger=document.createElement('button');trigger.type='button';trigger.className='select-trigger';trigger.setAttribute('role','combobox');trigger.setAttribute('aria-label',label);trigger.setAttribute('aria-haspopup','listbox');trigger.setAttribute('aria-expanded','false');
