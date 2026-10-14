@@ -22,3 +22,9 @@ La fiche équipement affiche les propriétaires en haut à gauche. Chaque nom ou
 Le champ historique `owner` est conservé, complété par `additionalOwners` ; ces données sont stockées dans la sauvegarde JSON existante et dans le snapshot Supabase, sans nouvelle migration SQL. Retirer le premier propriétaire conserve les autres associations. Les contrôles et leurs documents historiques restent inchangés ; les nouveaux rapports reprennent tous les noms associés au moment du contrôle. Aucun rôle « chef d’équipe » ou « responsable secteur » n’est imposé.
 
 Les prévisualisations des rappels incluent les adresses des propriétaires associés, avec détection des adresses identiques et indication des adresses manquantes. Il n’y a toujours aucun envoi automatique. Avant activation, les rôles, la visibilité des adresses, le mode d’envoi (individuel ou copie) et les règles de destinataires devront être définis. L’application n’associe jamais un responsable à partir du seul secteur ou de l’équipe.
+
+## Classement des échéances dans Matériel
+
+Les blocs sont cliquables et filtrent les mêmes catégories que la liste : En retard (date limite dépassée), À contrôler bientôt (un mois calendaire avant l’échéance jusqu’à la date limite incluse), À jour (échéance au-delà d’un mois), Échéance à définir (aucune échéance exploitable), et Archivés. Les quatre catégories d’échéance sont disjointes et couvrent tout le parc actif. Le bloc Équipements actifs montre l’ensemble.
+
+Le compteur « Sans contrôle » est retiré de ce classement : un équipement peut avoir une date MemoryFlow et une échéance confirmée sans contrôle détaillé avec résultat et vérificateur. Il est donc classé selon son échéance, sans inventer de contrôle réalisé. Le résultat et l’historique des contrôles restent distincts, et le KPI des échéances non dépassées continue à inclure les échéances proches non échues.

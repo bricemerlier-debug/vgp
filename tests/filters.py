@@ -8,7 +8,7 @@ with sync_playwright() as p:
  page.get_by_role('button',name='+ Ajouter un équipement').click()
  form=page.locator('#equipmentForm')
  form.locator('[name=identifier]').fill('ZONE-01')
- form.locator('[name=designation]').fill('Anneau DMCR')
+ form.locator('[name=typeId]').select_option('__free__');form.locator('[name=designation]').fill('Anneau DMCR')
  expect(form.locator('[name=zone]')).to_be_disabled()
  form.locator('[name=sector]').select_option('B2')
  form.locator('[name=zone]').select_option('DMCR')
@@ -30,7 +30,7 @@ with sync_playwright() as p:
  expect(page.locator('tbody tr')).to_have_count(1)
  assert 'DEMO-AR-001' in page.locator('tbody').inner_text()
  assert page.locator('#sectorFilter').input_value()==''
- page.locator('#stats [data-status-filter="without-control"]').click()
+ page.locator('#stats [data-status-filter="Situation à vérifier"]').click()
  expect(page.locator('tbody tr')).to_have_count(3)
  page.locator('#stats [data-status-filter="À faire"]').click()
  expect(page.get_by_text('Aucun équipement correspondant.',exact=True)).to_be_visible()
