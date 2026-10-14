@@ -9,3 +9,14 @@ test('première échéance explicitement justifiée jusqu’à un mois calendair
  assert.equal(status(e,'2026-10-12'),'Échéance à plus d’un mois');assert.equal(status(e,'2027-09-11'),'Échéance à plus d’un mois');assert.equal(status(e,'2027-09-12'),'À faire');assert.equal(status(e,'2027-10-12'),'À faire');assert.equal(status(e,'2027-10-13'),'En retard');
  assert.equal(status(approved({controls:[],firstControlDate:'2027-03-31'}),'2027-02-27'),'Échéance à plus d’un mois');assert.equal(status(approved({controls:[],firstControlDate:'2027-03-31'}),'2027-02-28'),'À faire');
 });
+
+test('contrôle réel sur fiche importée : prochaine échéance automatique sans validation historique',()=>{
+ const e={id:'import-fictif',months:12,periodicityValidation:{validated:false,months:12},controls:[{id:'inspection',date:'2026-10-14',intervenant:'Contrôleur fictif',result:'Bon état'}]};
+ assert.equal(due(e),'2027-10-14');
+ assert.equal(status(e,'2026-10-14'),'Échéance à plus d’un mois');
+ for(const months of [3,6,9,12])assert.equal(due({...e,months}),addMonths('2026-10-14',months));
+ assert.equal(due({...e,controls:[]}),null);
+ assert.equal(due({...e,controls:[{...e.controls[0],result:'Introuvable'}]}),null);
+ assert.equal(due({...e,needsReverification:true}),null);
+ const source=structuredClone(e);due(e);assert.deepEqual(e,source);
+});

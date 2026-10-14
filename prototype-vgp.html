@@ -233,7 +233,9 @@ function calculatedDeadline(e){
  }
  const p=e.periodicityValidation;
  if(c&&p?.validated&&p.months===e.months&&e.cycleControlId===c.id&&e.cycleSource?.fromValidatedDeadline&&e.cycleDeadline)return e.cycleDeadline;
- return c&&[3,6,9,12].includes(e.months)&&p?.validated&&p.months===e.months&&p.reason?.trim()&&p.by?.trim()?addMonths(c.date,e.months):null;
+ // Un contrôle réellement effectué relance le suivi selon la périodicité saisie,
+ // y compris pour les fiches importées sans ancienne validation administrative.
+ return c&&[3,6,9,12].includes(e.months)?addMonths(c.date,e.months):null;
 }
 function obligationEntries(e){
  const entries=new Map((e.obligations||[]).map(o=>[o.id,{...o,equipmentId:e.id,identifier:o.identifier||e.identifier,name:o.name||equipmentName(e)}]));
