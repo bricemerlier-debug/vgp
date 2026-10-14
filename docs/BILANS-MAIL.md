@@ -2,7 +2,7 @@
 
 Dans ⚙ → Mails, enregistrer l'adresse destinataire et choisir les bilans. L'aperçu utilise les données actuelles ; il n'envoie rien. Les préférences sont conservées dans la sauvegarde et Supabase. Horaire proposé : lundi et premier jour du mois à 7 h, Europe/Paris. Si les deux tombent le même jour, deux messages distincts sont prévus.
 
-Le bilan contient les échéances en retard, puis celles de la période jusqu'à sa fin, regroupées par secteur et triées par date. Équipe, zone, localisation et numéro interne facilitent la préparation. Les introuvables sont comptés séparément, les équipements mis au rebut sont exclus des tâches. Les dates inconnues restent visibles. Le taux des échéances non dépassées est distinct du taux des contrôles réalisés dans les délais : les dates historiques MemoryFlow sans résultat ni vérificateur ne deviennent pas des contrôles réalisés. Les exclusions historiques restent dans le dénominateur des cohortes.
+Le bilan contient les échéances en retard, puis celles de la période jusqu'à sa fin, regroupées par secteur et triées par date. Équipe, zone, localisation et numéro interne facilitent la préparation. Les introuvables sont comptés séparément, les équipements mis au rebut sont exclus des tâches. Les dates inconnues restent visibles. Le taux des échéances non dépassées est distinct du taux des contrôles réalisés : les dates historiques MemoryFlow sans résultat ni vérificateur ne deviennent pas des contrôles réalisés. Un contrôle réalisé après son échéance compte comme fait dans son mois prévu. Les exclusions historiques restent dans le dénominateur des cohortes.
 
 ## Activation avec l'informatique
 
