@@ -92,3 +92,10 @@ main{max-width:1240px;padding-top:40px}.intro{margin-bottom:32px}h1{color:var(--
 #lifecycleDialog{width:min(1100px,94vw)}.lifecycle-table{overflow:auto;max-height:50vh;margin:16px 0}.lifecycle-table td{vertical-align:top}.lifecycle-table select{width:180px}.lifecycle-table td:nth-child(2){max-width:400px;overflow-wrap:anywhere}
 
 #equipmentForm .field-label{min-height:20px}#equipmentForm input[name=location]{min-height:44px}
+
+/* Couleurs d’échéance : les libellés restent visibles indépendamment de la couleur. */
+.deadline-late-row{background:#fff0ef;color:#812d28}.deadline-late-row small{color:#94504b}
+.deadline-soon-row{background:#fff5df;color:#79520b}.deadline-soon-row small{color:#806022}
+.deadline-current-row{background:#eaf5ef;color:#205d48}.deadline-current-row small{color:#42715e}
+.deadline-unknown-row{background:#edf3fc;color:#244e80}.deadline-unknown-row small{color:#537399}
+.deadline-late-row td:first-child{border-left:4px solid #d94339}.deadline-soon-row td:first-child{border-left:4px solid #d89b13}.deadline-current-row td:first-child{border-left:4px solid #21815f}.deadline-unknown-row td:first-child{border-left:4px solid #5686bd}
