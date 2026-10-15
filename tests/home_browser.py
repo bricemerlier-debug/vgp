@@ -13,6 +13,7 @@ def api(route):
  headers={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'apikey,authorization,content-type','Access-Control-Allow-Methods':'POST'}
  if route.request.method=='OPTIONS':route.fulfill(status=204,headers=headers);return
  if '/token?' in route.request.url:result={'access_token':'test','refresh_token':'test','expires_in':3600}
+ elif route.request.url.endswith('read_shift_calendar'):result={'revision':0,'rows':[],'imports':[]}
  elif route.request.url.endswith('read_state'):
   reads+=1
   if fail:route.fulfill(status=503,json={'message':'Serveur indisponible'},headers=headers);return

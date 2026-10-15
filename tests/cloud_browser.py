@@ -12,6 +12,7 @@ def api(route):
   route.fulfill(status=204,headers={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'apikey,authorization,content-type','Access-Control-Allow-Methods':'POST'});return
  body=route.request.post_data_json
  if '/token?' in route.request.url:result={'access_token':'test','refresh_token':'test','expires_in':3600}
+ elif route.request.url.endswith('read_shift_calendar'):result={'revision':0,'rows':[],'imports':[]}
  elif route.request.url.endswith('read_state'): result=state
  elif route.request.url.endswith('write_state'):
   if fail:route.fulfill(status=503,headers={'Access-Control-Allow-Origin':'*'},json={'message':'Indisponible : aucun enregistrement'});return

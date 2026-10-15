@@ -8,6 +8,7 @@ def api(route):
  if route.request.method=='OPTIONS':route.fulfill(status=204,headers=headers);return
  if '/token?' in route.request.url:
   logins+=1;result={'access_token':'fake','refresh_token':'refresh','expires_in':3600,'user':{'id':'20000000-0000-0000-0000-000000000001','email':'fictif@example.test'}}
+ elif route.request.url.endswith('read_shift_calendar'):result={'revision':0,'rows':[],'imports':[]}
  elif route.request.url.endswith('read_state'):result={'revision':0,'payload':{'anticipation':30,'equipment':[],'owners':[]}}
  elif '/logout?' in route.request.url:result={}
  else:raise AssertionError(route.request.url)
@@ -17,7 +18,7 @@ def prepare(context):
  context.route('**/cloud-config.js',lambda r:r.fulfill(body=config,content_type='text/javascript'));context.route('https://test.supabase.co/**',api)
 
 def login(page,remember):
- page.goto('http://127.0.0.1:8000/');expect(page.locator('#authGate')).to_be_visible();page.locator('[name=email]').fill('fictif@example.test');page.locator('#loginForm [name=password]').fill('mot-de-passe-fictif');page.locator('#rememberLogin').set_checked(remember);page.locator('#loginForm button').first.click();expect(page.locator('#homeView')).to_be_visible()
+ page.goto('http://127.0.0.1:8000/');expect(page.locator('#authGate')).to_be_visible();page.locator('#loginForm [name=email]').fill('fictif@example.test');page.locator('#loginForm [name=password]').fill('mot-de-passe-fictif');page.locator('#rememberLogin').set_checked(remember);page.locator('#loginForm button').first.click();expect(page.locator('#homeView')).to_be_visible()
 
 with sync_playwright() as p:
  b=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox']);c=b.new_context();prepare(c);page=c.new_page();page.add_init_script("localStorage.setItem('vgp-prototype-v1','SOURCE_A_CONSERVER')");login(page,True);saved=c.storage_state();assert any('vgp-auth:' in v['name'] for o in saved['origins'] for v in o['localStorage']);assert 'mot-de-passe-fictif' not in str(saved);c.close()

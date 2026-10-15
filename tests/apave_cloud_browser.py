@@ -11,6 +11,7 @@ def api(route):
  url=route.request.url
  if route.request.method=='OPTIONS':route.fulfill(status=204,headers=headers);return
  if '/token?' in url:result={'access_token':'test','refresh_token':'test','expires_in':3600,'user':{'id':user,'email':'fictif@example.com'}}
+ elif url.endswith('read_shift_calendar'):result={'revision':0,'rows':[],'imports':[]}
  elif url.endswith('read_state'):result=state
  elif url.endswith('apave_automation_ready'):result=ready
  elif '/storage/v1/object/sign/' in url:

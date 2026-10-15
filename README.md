@@ -1,3 +1,7 @@
+## Planning des équipes 5×8
+
+Équipe en poste sur l’accueil, calendrier 7/30 jours, import du classeur officiel et stockage partagé séparé du parc VGP : [activation, format et tests](docs/PLANNING-5X8.md). Référence : « calendrier global », à partir du 01/10/2026 ; sous-équipes exclues.
+
 ## Import des rapports APAVE
 
 Analyse locale du PDF original, aperçu modifiable, stockage privé unique et liens vers les pages des équipements : [fonctionnement, activation et tests](docs/APAVE.md). Aucun import sans validation humaine.
