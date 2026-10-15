@@ -28,6 +28,25 @@ with sync_playwright() as p:
  second.once('dialog',lambda d:d.accept());second.locator('#shiftImportApply').click();expect(second.locator('#shiftImportError')).to_contain_text('REVISION_CONFLICT');assert len(writes)==1;second.locator('#shiftImportAnalyze').click();expect(second.locator('#shiftImportStatus')).to_contain_text('déjà présent');expect(second.locator('#shiftImportApply')).to_be_disabled()
  for page in pages:
   page.locator('#shiftImportClose').click();expect(page.locator('#shiftCurrentContent .shift-live-team')).to_have_text('Équipe B');expect(page.locator('#shiftCurrentContent')).to_contain_text('05:00–13:00');assert page.evaluate('document.documentElement.scrollWidth')==page.viewport_size['width']
+ # Shared header follows the same imported calendar on every page and timezone.
+ for page in pages:
+  expect(page.locator('#headerShiftContent')).to_contain_text('Équipe B')
+  expect(page.locator('#headerShiftPrevious')).to_be_disabled()
+  page.locator('#headerShiftNext').click();expect(page.locator('#headerShiftContent')).to_contain_text('Équipe C');expect(page.locator('#headerShiftContent')).to_contain_text('13:00–21:00')
+  page.locator('#headerShiftNext').click();expect(page.locator('#headerShiftContent')).to_contain_text('Équipe D');expect(page.locator('#headerShiftContent')).to_contain_text('21:00–05:00')
+  page.locator('#headerShiftNext').click();expect(page.locator('#headerShiftContent')).to_contain_text('Planning non renseigné');expect(page.locator('#headerShiftContent')).to_contain_text('16/10/2026')
+  page.locator('#headerShiftPrevious').click();expect(page.locator('#headerShiftContent')).to_contain_text('Équipe D')
+  page.locator('#headerShiftLive').click();expect(page.locator('#headerShiftContent')).to_contain_text('Équipe B');expect(page.locator('#headerShiftLive')).to_be_disabled()
+  page.locator('#headerShiftNext').click()
+  page.clock.set_system_time(datetime(2026,10,15,11,tzinfo=timezone.utc));page.clock.run_for(1100)
+  expect(page.locator('#headerShiftContent')).to_contain_text('Actuellement en poste');expect(page.locator('#headerShiftContent')).to_contain_text('Équipe C');expect(page.locator('#headerShiftPrevious')).to_be_disabled()
+  assert page.evaluate('document.documentElement.scrollWidth')==page.viewport_size['width']
+ first.set_viewport_size({'width':1900,'height':1000})
+ left=first.locator('.brand').bounding_box();widget=first.locator('.header-shift').bounding_box();logo=first.locator('.brand-identity').bounding_box()
+ assert left['x']+left['width']<widget['x'] and widget['x']+widget['width']<logo['x']
+ first.screenshot(path='/tmp/vgp-header-shift-desktop.png')
+ second.screenshot(path='/tmp/vgp-header-shift-mobile.png')
+ assert len(writes)==1
  assert core['revision']==7 and core['payload']['equipment']==[];assert not errors,errors;b.close()
 os.unlink(path)
 print('PASS planning cloud simulé : deux appareils/fuseaux cohérents, import sans classeur transmis, conflit concurrent bloqué, doublon après relecture et parc VGP intact.')

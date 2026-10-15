@@ -1,15 +1,28 @@
-import {SHIFT_TEAMS,SHIFT_CODES,SHIFT_MIN_DATE,shiftDayAdd,shiftParisParts,shiftCurrent,shiftCurrentSlot,shiftSlot,shiftSlotState,shiftRowsValid,parseShiftGlobal,shiftImportPreview,shiftUpcoming} from './shift-calendar.mjs';
+import {SHIFT_TEAMS,SHIFT_CODES,SHIFT_MIN_DATE,shiftDayAdd,shiftParisParts,shiftCurrent,shiftCurrentSlot,shiftNextSlot,shiftOccupant,shiftSlot,shiftSlotState,shiftRowsValid,parseShiftGlobal,shiftImportPreview,shiftUpcoming} from './shift-calendar.mjs';
 export function installShiftCalendar({cloud=null}={}){
  const qs=s=>document.querySelector(s),safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),key='vgp-shift-calendar-v1';
- let state={revision:0,rows:[],imports:[]},preview=null,grid=null,loading=false,busy=false,clockKey='',fileToken=0;
+ let state={revision:0,rows:[],imports:[]},preview=null,grid=null,loading=false,busy=false,clockKey='',fileToken=0,headerOffset=0,headerSlotKey='';
  const dateFmt=date=>new Date(date+'T12:00:00Z').toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric',timeZone:'UTC'});
  const hourFmt=value=>new Date(value).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Paris'});
  const label=code=>code?SHIFT_CODES[code]:'Non renseigné';
  const validState=value=>value&&Number.isSafeInteger(value.revision)&&value.revision>=0&&shiftRowsValid(value.rows)&&Array.isArray(value.imports)&&value.imports.every(i=>i&&Number.isSafeInteger(i.revision)&&typeof i.imported_at==='string'&&!isNaN(Date.parse(i.imported_at))&&Number.isSafeInteger(i.changed)&&i.source&&typeof i.source.fileName==='string'&&i.source.sheet==='calendrier global');
  const todayDate=()=>shiftParisParts().date;
  qs('#shiftCalendarDate').value=todayDate()<SHIFT_MIN_DATE?SHIFT_MIN_DATE:todayDate();
+ function renderHeader(current=shiftCurrent(state.rows)){
+  const slotKey=current.date+'|'+current.code;
+  if(headerSlotKey!==slotKey){headerOffset=0;headerSlotKey=slotKey;}
+  let slot=current;for(let n=0;n<headerOffset;n++)slot=shiftNextSlot(slot);
+  const row=shiftOccupant(state.rows,slot),status=shiftSlotState(state.rows,slot);
+  qs('#headerShiftContent').innerHTML=`<span class="header-shift-caption">${headerOffset?'Prochaine relève · +'+headerOffset+' poste'+(headerOffset>1?'s':''):'Actuellement en poste'}</span><strong>${row?'Équipe '+safe(row.team):status==='off'?'Aucune équipe prévue':'Planning non renseigné'}</strong><span class="header-shift-hours">${safe(SHIFT_CODES[slot.code])} · ${hourFmt(slot.start)}–${hourFmt(slot.end)} · ${safe(dateFmt(slot.date))}</span>`;
+  qs('#headerShiftPrevious').disabled=headerOffset===0;
+  qs('#headerShiftNext').disabled=headerOffset===21;
+  qs('#headerShiftLive').disabled=headerOffset===0;
+ }
+ qs('#headerShiftPrevious').onclick=()=>{if(headerOffset>0)headerOffset--;renderHeader();};
+ qs('#headerShiftNext').onclick=()=>{if(headerOffset<21)headerOffset++;renderHeader();};
+ qs('#headerShiftLive').onclick=()=>{headerOffset=0;renderHeader();};
  function renderCurrent(){
-  const current=shiftCurrent(state.rows),p=shiftParisParts(),stamp=state.revision+'|'+p.date+'|'+p.hour+'|'+p.minute;if(stamp===clockKey)return;clockKey=stamp;
+  const current=shiftCurrent(state.rows),p=shiftParisParts(),stamp=state.revision+'|'+p.date+'|'+p.hour+'|'+p.minute;if(stamp===clockKey)return;clockKey=stamp;renderHeader(current);
   const row=current.assignment,next=current.next.assignment;
   qs('#shiftCurrentContent').innerHTML=`<div><b class="shift-live-team">${row?'Équipe '+safe(row.team):current.state==='off'?'Aucune équipe prévue':'Planning non renseigné'}</b><p>${safe(SHIFT_CODES[current.code])} · ${hourFmt(current.start)}–${hourFmt(current.end)}${current.code==='N'?' · nuit du '+dateFmt(current.date):''}</p><p><b>Prochaine relève :</b> ${hourFmt(current.end)} · ${next?'Équipe '+safe(next.team)+' — '+safe(SHIFT_CODES[current.next.code]):current.next.state==='off'?'Aucune équipe prévue au poste suivant':'Planning non renseigné pour le poste suivant'}</p></div><button type="button" class="secondary" id="shiftCurrentOpen">Consulter le planning 5×8</button>`;
   qs('#shiftCurrentOpen').onclick=()=>qs('[data-view="shiftCalendar"]').click();
