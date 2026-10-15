@@ -270,3 +270,7 @@ Après une standardisation automatique confirmée (y compris une règle réutili
 Les recherches de la page Matériel proposent des menus recherchables « Type d’équipement » et « Variante technique », alimentés par le catalogue existant. La variante dépend du type et est remise à zéro lorsqu’on change de type. Ces filtres se combinent avec les échéances, les recherches textuelles et les affectations ; ils restent sélectionnés lors du passage entre Tout, Matériel, Archivés et les cartes de statut. La réinitialisation les efface. Les listes de contrôles réalisés et les détails mensuels disposent des mêmes filtres. Le rapprochement utilise les identifiants de classification enregistrés, sans déduire un type à partir d’un ancien nom. Ces actions de consultation n’écrivent aucune donnée.
 
 Test : `python tests/material_naming_filters_browser.py` (menus recherchables, M16/M30, statuts, archives, noms libres, listes réalisées/mensuelles, retour à la fiche, mobile et absence d’écriture).
+
+## Fenêtre d’import simplifiée
+
+Paramètres → Import de rapports met uniquement APAVE au premier plan. Les imports Excel, les reprises de dates/statuts MemoryFlow et les migrations restent accessibles sous **Outils archivés**, replié à chaque ouverture. Aucun outil ni aucune donnée historique n'est supprimé. Le bouton APAVE du matériel reste disponible. Vérification : `python tests/import_tools_archive_browser.py`, plus les parcours APAVE et les anciens imports dépliés.
