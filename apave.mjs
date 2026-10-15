@@ -61,7 +61,7 @@ export function parseApavePages(pages){
  return {reportNumber,pageCount:pages.length,parserVersion:'leara-text-1',records};
 }
 export function matchApaveRecords(records,equipment){
- const index=new Map();for(const e of equipment)for(const value of [e.identifier,e.serialNumber]){const k=apaveKey(value);if(k){if(!index.has(k))index.set(k,new Set());index.get(k).add(e.id);}}
+ const index=new Map();for(const e of equipment)for(const value of [e.identifier,e.serialNumber,e.equipmentMark]){const k=apaveKey(value);if(k){if(!index.has(k))index.set(k,new Set());index.get(k).add(e.id);}}
  const matches=records.map(record=>{const candidates=[...new Set(record.identifiers.flatMap(i=>[...(index.get(apaveKey(i.value))||[])]))];return {...record,candidates,equipmentId:candidates.length===1?candidates[0]:'',matchIssue:candidates.length>1?'Plusieurs fiches possibles':candidates.length===0?'Aucune correspondance exacte':''};});
  const counts=new Map();for(const r of matches)if(r.equipmentId)counts.set(r.equipmentId,(counts.get(r.equipmentId)||0)+1);
  return matches.map(r=>counts.get(r.equipmentId)>1?{...r,equipmentId:'',matchIssue:'Identifiant répété dans le rapport : choisir la fiche manuellement'}:r);

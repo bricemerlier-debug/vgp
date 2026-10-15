@@ -11,7 +11,8 @@ test('couverture par équipement, archives exclues, résultats et échéances di
  const k=dashboard(e,'2026-10-12',30);
  assert.equal(k.total,4);assert.equal(k.controlled,3);assert.equal(k.percent,50);assert.equal(k.missing,1);assert.equal(k.archived,1);assert.equal(k.performed,4);
  assert.deepEqual([k.missing,k.overdue,k.soon,k.planned],[1,1,1,1]);
- assert.deepEqual(k.results.map(r=>r.count),[2,1,0]);
+ assert.deepEqual(k.results.map(r=>r.count),[2,1,0,0]);
+ assert.equal(k.results[3].label,'Réalisé — observations à traiter');
  assert.deepEqual(k.sectors.find(s=>s.sector==='B2'),{sector:'B2',total:2,controlled:1});
  assert.deepEqual(k.sectors.find(s=>s.sector===''),{sector:'',total:1,controlled:0});
 });
