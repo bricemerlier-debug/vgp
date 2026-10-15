@@ -113,3 +113,12 @@ main{max-width:1240px;padding-top:40px}.intro{margin-bottom:32px}h1{color:var(--
 #monthlyRemainingList .badge.monthly-done{background:#cce9da;color:#175139}#monthlyRemainingList .badge.monthly-done-late{background:#ffe3a2;color:#704800}#monthlyRemainingList .badge.monthly-overdue{background:#fbd2ce;color:#8a211a}#monthlyRemainingList .badge.monthly-pending{background:#dce9fa;color:#244e80}#monthlyRemainingList .badge.monthly-excluded{background:#dfe3e6;color:#525b64}
 
 #monthlyRemainingList .monthly-pending-row{background:#fff0ef;color:#812d28}#monthlyRemainingList .monthly-pending-row small{color:#94504b}#monthlyRemainingList .monthly-pending-row td:first-child{border-left-color:#d94339}#monthlyRemainingList .badge.monthly-pending{background:#fbd2ce;color:#8a211a}
+
+/* Agenda : mêmes couleurs et libellés sur l’accueil et le matériel. */
+.calendar-task{border-width:1px;border-left-width:5px;font-size:12px;line-height:1.45}.calendar-task span{font-size:11px;font-weight:700;padding-top:4px}.calendar-task small,.calendar-task .calendar-assignment{font-size:11px;color:inherit}
+.calendar-task.calendar-done,.calendar-key.calendar-done{background:#d5eddf;border-color:#19734c;color:#155139}.calendar-task.calendar-done span{color:#155139}
+.calendar-task.calendar-pending,.calendar-key.calendar-pending{background:#ffedba;border-color:#b77800;color:#704900}.calendar-task.calendar-pending span{color:#704900}
+.calendar-task.calendar-late,.calendar-key.calendar-late{background:#fbd8d3;border-color:#c3382d;color:#85241d}.calendar-task.calendar-late span{color:#85241d}
+.calendar-task.calendar-lost,.calendar-key.calendar-lost{background:#e7d8f7;border-color:#7950a5;color:#4f2a77}.calendar-task.calendar-lost span{color:#4f2a77}
+.calendar-task.calendar-scrapped,.calendar-key.calendar-scrapped{background:#4f575d;border-color:#30393f;color:#fff}.calendar-task.calendar-scrapped span{color:#fff}
+.calendar-status-legend{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 0}.calendar-key{display:inline-block;padding:6px 9px;border:1px solid;border-left-width:5px;border-radius:5px;font-size:12px;font-weight:600}.calendar-task:hover{filter:brightness(.96)}.calendar-task:focus-visible{outline:3px solid #0057a8;outline-offset:3px}

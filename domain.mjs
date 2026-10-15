@@ -97,10 +97,20 @@ export function buildReportPdf(report,logo){
 
 export function shiftDate(date,days){const d=new Date(date+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+days);return d.toISOString().slice(0,10)}
 export function weekStart(date){const d=new Date(date+'T00:00:00Z');return shiftDate(date,-((d.getUTCDay()+6)%7))}
-export function weeklySchedule(equipment,start){const days=Array.from({length:7},(_,i)=>({date:shiftDate(start,i),entries:[]}));const end=days[6].date;
- for(const e of equipment.filter(e=>!e.archived)){const entries=new Map();for(const c of e.controls.filter(isInspection))if(c.plannedDate&&c.plannedDate>=start&&c.plannedDate<=end)entries.set(c.plannedDate,{equipmentId:e.id,name:equipmentName(e),identifier:e.identifier,done:true,late:c.date>c.plannedDate,date:c.plannedDate});const date=due(e);if(date&&date>=start&&date<=end&&!entries.has(date))entries.set(date,{equipmentId:e.id,name:equipmentName(e),identifier:e.identifier,done:false,date});for(const entry of entries.values())days.find(d=>d.date===entry.date).entries.push(entry)}
- return days;
+export function weeklySchedule(equipment,start){
+ const days=Array.from({length:7},(_,i)=>({date:shiftDate(start,i),entries:[]})),end=days[6].date;
+ for(const e of equipment){const archive=[...(e.archiveHistory||[])].reverse().find(a=>a.type==='archive'),disposal=archive?.reason==='Mis au rebut'?e.controls.find(c=>c.id===archive.controlId&&isInspection(c)):null;
+ for(const o of obligationEntries(e)){if(o.date<start||o.date>end)continue;const c=e.controls.find(c=>c.id===o.controlId&&isInspection(c)),done=!!o.done&&!!c;
+ if(o.excludedAt&&!['Équipement perdu','Mis au rebut'].includes(o.excludedReason)&&!done)continue;
+ if(!done&&e.archived&&!archive)continue;
+ if(!done&&disposal&&o.date===addMonths(disposal.date,e.months)&&o.date!==disposal.plannedDate)continue;
+ const reason=!done?(['Équipement perdu','Mis au rebut'].includes(o.excludedReason)?o.excludedReason:e.archived?archive?.reason:null):c.result==='Mauvais état — à jeter'?'Mis au rebut':null;
+ const state=reason==='Équipement perdu'?'lost':reason==='Mis au rebut'?'scrapped':done?'done':'pending';
+ days.find(d=>d.date===o.date).entries.push({equipmentId:e.id,name:equipmentName(e),identifier:e.identifier,date:o.date,done,late:done&&c.date>o.date,state});
+ }}
+ for(const day of days)day.entries.sort((a,b)=>a.name.localeCompare(b.name,'fr')||a.identifier.localeCompare(b.identifier,'fr',{numeric:true}));return days;
 }
+
 export function equipmentAlerts(equipment,today){return equipment.filter(e=>!e.archived&&['À faire','En retard'].includes(status(e,today))).map(e=>({equipmentId:e.id,name:equipmentName(e),identifier:e.identifier,date:due(e),state:status(e,today)})).sort((a,b)=>a.date.localeCompare(b.date)||a.identifier.localeCompare(b.identifier,'fr'))}
 
 // Tableau de bord opérationnel : contrôle réalisé et conformité restent distincts.
