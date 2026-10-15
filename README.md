@@ -274,3 +274,7 @@ Test : `python tests/material_naming_filters_browser.py` (menus recherchables, M
 ## Fenêtre d’import simplifiée
 
 Paramètres → Import de rapports met uniquement APAVE au premier plan. Les imports Excel, les reprises de dates/statuts MemoryFlow et les migrations restent accessibles sous **Outils archivés**, replié à chaque ouverture. Aucun outil ni aucune donnée historique n'est supprimé. Le bouton APAVE du matériel reste disponible. Vérification : `python tests/import_tools_archive_browser.py`, plus les parcours APAVE et les anciens imports dépliés.
+
+Les informations de dernière date déclarée dans MemoryFlow sont présentées comme une entrée distincte dans l’onglet Commentaires, avec l’auteur, la date de reprise, les dates déclarées et les détails source. Elles ne sont plus affichées dans l’onglet Contrôles. Cette présentation s’applique aussi aux fiches existantes, sans réécriture des données ni duplication dans le commentaire personnel. Le bandeau utilise par défaut le même logo Goodyear intégré que les rapports ; un logo personnalisé reste prioritaire.
+
+Les paramètres de formulaire de connexion éventuellement présents dans l’adresse sont retirés au démarrage. Les formulaires de connexion/réinitialisation bloquent la soumission native tant que leurs gestionnaires JavaScript ne sont pas installés, afin de ne pas envoyer les champs dans une URL. Vérification : `python tests/memoryflow_comment_brand_browser.py` et `python tests/auth_browser.py`.
