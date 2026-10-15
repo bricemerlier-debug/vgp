@@ -1,3 +1,4 @@
+import {installApaveActionImport} from './apave-actions-import.mjs';
 import {installNamingReview} from './nomenclature-ui.mjs';
 import {installEquipmentMaintenance} from './maintenance-ui.mjs';
 import {installShiftCalendar} from './shift-calendar-ui.mjs';
@@ -231,6 +232,8 @@ $('#equipmentForm').onsubmit=async ev=>{ev.preventDefault();const button=ev.targ
 let equipmentReturnView='material',equipmentReturnOwner=null,equipmentReturnScroll=0,equipmentTab='overview';
 window.addEventListener('beforeunload',event=>{if(currentView==='equipment'&&hasUnsavedForm()){event.preventDefault();event.returnValue='';}});
 const maintenanceUI=installEquipmentMaintenance({cloud,accountName,today,cleanForm:form=>dirtyForms.delete(form)});
+const apaveActionImporter=installApaveActionImport({cloud,getEquipment:()=>data.equipment,today,onImported:()=>{if(selected&&!hasUnsavedForm()){maintenanceUI.release();if($('#maintenanceTab')?.getAttribute('aria-selected')==='true')maintenanceUI.open(selected);}}});
+document.addEventListener('click',event=>{if(event.target.closest('[data-import-apave-actions]'))apaveActionImporter.open();});
 function equipmentDraftGuard(){
  if(maintenanceUI.busy){alert('L’enregistrement de l’intervention est en cours. Patientez.');return false;}
  const dirty=[...dirtyForms].filter(f=>f.isConnected&&$('#detail').contains(f));
