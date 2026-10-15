@@ -17,10 +17,10 @@ def api(route):
  elif url.endswith('read_maintenance_action_imports'):result=imports
  elif url.endswith('read_maintenance_actions'):result=actions
  elif url.endswith('read_equipment_maintenance'):result=[]
- elif url.endswith('import_apave_maintenance_actions'):
+ elif url.endswith('import_apave_maintenance_actions_v2'):
   body=route.request.post_data_json;assert body['w']==w;items=body['items'];assert len(items)==1;a=items[0];assert a['source_observation']==a['plan']=='Réparer sans déformer le texte.\nEssai final.';assert a['level']==2 and a['action_date']=='2026-07-09' and a['equipment_id']=='e1';assert len(a['source_key'])==64;attempts+=1
   if not imports:
-   imports.append({'source_key':a['source_key'],'action_id':a['id']});actions.append({**a,'action_number':56,'revision':1,'due_date':'2027-01-09','created_at':'2026-10-15T10:00:00Z'})
+   imports.append({'source_key':a['source_key'],'action_id':a['id']});actions.append({**a,'action_number':56,'revision':1,'due_date':'2026-12-31','created_at':'2026-10-15T10:00:00Z'})
    route.fulfill(status=503,json={'message':'Réponse interrompue après enregistrement'},headers=headers);return
   result={'added':0,'skipped':1}
  else:raise AssertionError('Unexpected API request: '+url)

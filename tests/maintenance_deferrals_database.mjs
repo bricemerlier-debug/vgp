@@ -1,0 +1,30 @@
+import {PGlite} from '@electric-sql/pglite';import {readFileSync} from 'node:fs';import assert from 'node:assert/strict';
+const db=new PGlite();await db.exec(`create role anon;create role authenticated;create schema auth;create table auth.users(id uuid primary key);create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;grant usage on schema public,auth to authenticated,anon;grant execute on function auth.uid() to authenticated;create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);create table storage.objects(bucket_id text,name text,metadata jsonb);alter table storage.objects enable row level security;grant usage on schema storage to authenticated,anon;grant select,insert,update,delete on storage.objects to authenticated,anon;`);
+for(const name of ['001_schema','003_tracking_guard','004_fast_writes','009_equipment_maintenance','010_maintenance_actions','011_maintenance_action_levels','012_apave_maintenance_import','013_maintenance_kpi_deferrals','013_maintenance_kpi_deferrals'])await db.exec(readFileSync('supabase/'+name+'.sql','utf8'));
+const w='10000000-0000-0000-0000-000000000001',user='20000000-0000-0000-0000-000000000001',reader='20000000-0000-0000-0000-000000000002',outsider='20000000-0000-0000-0000-000000000003',id='30000000-0000-0000-0000-000000000001';
+for(const u of [user,reader,outsider])await db.query('insert into auth.users values($1)',[u]);await db.query('insert into public.workspaces values($1,$2)',[w,'Fictif']);for(const [u,role] of [[user,'editor'],[reader,'reader']])await db.query('insert into public.workspace_members values($1,$2,$3)',[w,u,role]);await db.query('insert into public.workspace_state(workspace_id) values($1)',[w]);
+await db.query("select set_config('request.jwt.claim.sub',$1,false)",[user]);await db.exec('set role authenticated');
+const document={owners:[],equipment:[{id:'e1',siteId:1,identifier:'FICTIF',designation:'Fictif',months:12,controls:[],archiveHistory:[],archived:false}]};await db.query('select public.write_state($1,0,$2::jsonb,null)',[w,JSON.stringify(document)]);
+
+
+const original=(await db.query('select payload,revision from public.workspace_state')).rows[0];
+const item={id:'40000000-0000-0000-0000-000000000001',equipment_id:'e1',title:'Budget réparation',plan:'Remplacer la pièce',source:'Manuel',reference:'',responsible:'Atelier',status:'todo',level:2,action_date:'2026-10-01'};
+const save=(a=item,r=0)=>db.query('select public.save_maintenance_action_v3($1,$2::jsonb,$3) as result',[w,JSON.stringify(a),r]);
+let a=(await save()).rows[0].result;assert.equal(a.due_date,'2026-12-31');assert.equal(a.initial_due_date,'2026-12-31');
+const request='60000000-0000-0000-0000-000000000001';
+const postpone=(revision=1,date='2027-03-31',reason='Budget non disponible',rid=request)=>db.query('select public.postpone_maintenance_action($1,$2,$3,$4,$5::date,$6,$7) as result',[w,item.id,revision,rid,date,reason,'Compte fictif']);
+await assert.rejects(()=>postpone(1,'2027-03-31',' '),/obligatoires/);
+await assert.rejects(()=>postpone(1,'2026-12-30'),/postérieure/);
+a=(await postpone()).rows[0].result;assert.equal(a.due_date,'2027-03-31');assert.equal(a.initial_due_date,'2026-12-31');assert.equal(a.status,'todo');assert.equal(a.deferrals.length,1);assert.equal(a.deferrals[0].actor,user);
+assert.deepEqual((await postpone()).rows[0].result,a);await assert.rejects(()=>postpone(1,'2027-03-31','Autre motif'),/autre contenu/);
+await assert.rejects(()=>postpone(1,'2027-06-30','Pièce en attente','60000000-0000-0000-0000-000000000002'),/entre-temps/);
+await assert.rejects(()=>save({...item,action_date:'2026-09-01'},2),/conservés/);
+a=(await save({...item,title:'Titre modifié',due_date:'2099-01-01',deferrals:[]},2)).rows[0].result;assert.equal(a.due_date,'2027-03-31');assert.equal(a.initial_due_date,'2026-12-31');assert.equal(a.deferrals.length,1);
+a=(await postpone(3,'2027-06-30','Pièce en attente','60000000-0000-0000-0000-000000000002')).rows[0].result;assert.equal(a.deferrals.length,2);assert.equal(a.initial_due_date,'2026-12-31');
+const repair={id:'50000000-0000-0000-0000-000000000001',equipment_id:'e1',date:'2026-10-02',kind:'Réparation',comment:'Réparé',author:'Atelier',photo_path:null};await db.query('select public.complete_maintenance_action($1,$2,4,$3::jsonb)',[w,a.id,JSON.stringify(repair)]);
+await assert.rejects(()=>postpone(5,'2028-01-31','Autre raison','60000000-0000-0000-0000-000000000003'),/réalisée/);
+await db.query('select public.add_equipment_maintenance($1,$2::jsonb)',[w,JSON.stringify({...repair,id:'50000000-0000-0000-0000-000000000002',kind:'Entretien'})]);
+let dashboard=(await db.query('select public.read_maintenance_dashboard($1) as result',[w])).rows[0].result;assert.equal(dashboard.actions.length,1);assert.equal(dashboard.entries.length,2);assert.equal(dashboard.actions[0].deferrals.length,2);assert.equal(dashboard.actions[0].status,'done');assert.equal(dashboard.entries[0].photo_path,undefined);
+await db.query("select set_config('request.jwt.claim.sub',$1,false)",[reader]);assert.equal((await db.query('select public.read_maintenance_dashboard($1) as result',[w])).rows[0].result.entries.length,2);await assert.rejects(()=>postpone(),/refusée/);
+await db.query("select set_config('request.jwt.claim.sub',$1,false)",[outsider]);await assert.rejects(()=>db.query('select public.read_maintenance_dashboard($1)',[w]),/refusée/);
+await db.exec('reset role');assert.deepEqual((await db.query('select payload,revision from public.workspace_state')).rows[0],original);assert.equal((await db.query('select count(*)::int n from public.controls')).rows[0].n,0);await db.close();console.log('PASS reports et KPI SQL : plafond annuel, dates initiales immuables, justifications obligatoires, historique, CAS, anti-doublon, report préservé lors des modifications, RLS et VGP inchangée.');

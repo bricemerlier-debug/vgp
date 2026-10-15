@@ -152,3 +152,14 @@ main{max-width:1240px;padding-top:40px}.intro{margin-bottom:32px}h1{color:var(--
 #maintenanceActionsArea{margin:24px 0}
 #maintenanceActionsArea hr{margin:28px 0;border:0;border-top:1px solid #d9e3ef}
 #actionList{margin-top:18px}
+.action-kpi-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-bottom:24px}
+.action-kpi-card strong{font-size:30px;color:#00356b}
+.action-kpi-progress{width:100%;height:20px;accent-color:#21835a}
+.action-activity-total strong{font-size:36px;color:#00356b}
+.action-activity-months{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px;margin-top:24px;text-align:center}
+.action-activity-months>div{display:flex;flex-direction:column;gap:8px;font-size:12px}
+.action-month-track{height:100px;background:#edf2f8;display:flex;align-items:flex-end;border-radius:5px;overflow:hidden}
+.action-month-track span{display:block;background:#0057a8;width:100%;min-height:1px}
+.action-deferrals{padding:14px;border:1px solid #d7e2ee;margin:14px 0;border-radius:8px}
+.action-deferrals article{border-top:1px solid #d7e2ee;padding:10px 0}
+@media(max-width:700px){.action-activity-months{gap:6px;grid-template-columns:repeat(6,minmax(0,1fr))}.action-kpi-grid{grid-template-columns:1fr}}
