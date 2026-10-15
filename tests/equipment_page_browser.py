@@ -1,0 +1,29 @@
+from playwright.sync_api import sync_playwright,expect
+from datetime import datetime,timezone
+import json,io,re
+from PIL import Image
+source={'anticipation':30,'owners':['Brice'],'equipment':[{'id':'eq-1','siteId':1,'identifier':'FF-TEST','designation':'Anneau de retournement','serialNumber':'SN-1','sector':'B2','zone':'DMCR','team':'A','owner':'Brice','location':'Armoire atelier mécanique','category':'','assignment':'','months':12,'firstControlDate':'2026-11-01','controls':[],'archived':False,'archiveHistory':[]}]}
+image=Image.new('RGB',(180,120),'blue');buffer=io.BytesIO();image.save(buffer,format='PNG');photo=buffer.getvalue()
+with sync_playwright() as p:
+ browser=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox']);c=browser.new_context(viewport={'width':1440,'height':1000});c.route('**/cloud-config.js',lambda r:r.fulfill(body='window.VGP_CLOUD={enabled:false};',content_type='text/javascript'));c.add_init_script("if(!localStorage.getItem('vgp-prototype-v1'))localStorage.setItem('vgp-prototype-v1',"+json.dumps(json.dumps(source))+")")
+ page=c.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.clock.install(time=datetime(2026,10,15,10,tzinfo=timezone.utc));page.goto('http://127.0.0.1:8000/#material')
+ # Detect the actual legacy key without changing production data.
+ if page.locator('[data-open="eq-1"]').count()==0:
+  print(page.evaluate('Object.keys(localStorage)'));raise AssertionError('Fixture storage key mismatch')
+ page.locator('#search').fill('FF-TEST');page.locator('[data-open="eq-1"]').click();expect(page.locator('#detail')).to_be_visible();assert page.locator('dialog#detail').count()==0;expect(page.locator('#materialView')).not_to_be_visible();assert page.url.endswith('#equipment/eq-1');expect(page.locator('.equipment-summary')).to_contain_text('Armoire atelier mécanique');assert page.locator('#detail').bounding_box()['width']>1000
+ before=page.evaluate("localStorage.getItem('vgp-prototype-v1')")
+ page.locator('#maintenanceTab').click();expect(page.locator('#equipmentMaintenance')).to_be_visible();expect(page.locator('#maintenanceStatus')).to_contain_text('Aucune intervention');page.locator('#maintenanceAdd').click();page.locator('#maintenanceForm [name=author]').fill('Christophe');page.locator('#maintenanceForm [name=comment]').fill('Remplacement de la goupille.\nEssai après réparation. <script>test</script>');page.locator('#maintenancePhoto').set_input_files({'name':'photo.png','mimeType':'image/png','buffer':photo});expect(page.locator('#maintenancePhotoPreview')).to_be_visible()
+ page.locator('#overviewTab').click();page.clock.run_for(21000);page.locator('#maintenanceTab').click();expect(page.locator('#maintenanceForm [name=comment]')).to_have_value(re.compile('Remplacement'));expect(page.locator('#maintenancePhotoPreview')).to_be_visible()
+ # Moving away must protect the unsaved intervention.
+ page.once('dialog',lambda d:d.dismiss());page.locator('#backEquipment').click();expect(page.locator('#detail')).to_be_visible();expect(page.locator('#maintenanceForm [name=comment]')).to_have_value(re.compile('Remplacement'))
+ page.locator('#maintenanceSave').click();expect(page.locator('#maintenanceStatus')).to_contain_text('Intervention enregistrée');expect(page.locator('.maintenance-entry')).to_contain_text('Christophe');expect(page.locator('.maintenance-entry')).to_contain_text('<script>test</script>');assert page.locator('.maintenance-entry script').count()==0;assert before==page.evaluate("localStorage.getItem('vgp-prototype-v1')")
+ page.locator('[data-maintenance-photo]').click();expect(page.locator('.maintenance-entry img')).to_be_visible();assert page.locator('.maintenance-entry img').evaluate('(img)=>img.naturalWidth')==180
+ page.locator('#backEquipment').click();expect(page.locator('#search')).to_have_value('FF-TEST');page.locator('[data-open="eq-1"]').click()
+ page.reload();expect(page.locator('#detailTitle')).to_contain_text('FF-TEST');page.locator('#maintenanceTab').click();expect(page.locator('.maintenance-entry')).to_contain_text('Remplacement');expect(page.locator('#maintenanceForm')).not_to_be_visible()
+ # Tabs support keyboard navigation and equipment actions remain available.
+ page.locator('#maintenanceTab').focus();page.keyboard.press('ArrowRight');expect(page.locator('#equipmentComments')).to_be_visible();page.locator('#commentsForm textarea').fill('Commentaire fiche');page.locator('#commentsForm button').click();expect(page.locator('#commentsSaved')).to_contain_text('enregistré');page.locator('#edit').click();expect(page.locator('#editor')).to_be_visible();page.locator('[data-close=editor]').click();expect(page.locator('#detail')).to_be_visible()
+ page.locator('#overviewTab').click();page.locator('#newControl').click();expect(page.locator('#control')).to_be_visible();page.locator('[data-close=control]').click();page.screenshot(path='/tmp/equipment-page-desktop.png',full_page=True)
+ page.locator('#backEquipment').click();expect(page.locator('#materialView')).to_be_visible();expect(page.locator('#search')).to_have_value('');page.locator('[data-open="eq-1"]').click();page.go_back();expect(page.locator('#materialView')).to_be_visible();page.go_forward();expect(page.locator('#detail')).to_be_visible()
+ page.set_viewport_size({'width':390,'height':844});page.locator('#maintenanceTab').click();expect(page.locator('.maintenance-entry')).to_be_visible();assert page.evaluate('document.documentElement.scrollWidth')==390;page.screenshot(path='/tmp/equipment-page-mobile.png',full_page=True)
+ assert not errors,errors;browser.close()
+print('PASS page équipement : vraie page, lien direct, retour/filtres, onglets clavier, brouillons, maintenance/photo persistantes, commentaires, actions, mobile, aucun contrôle ou échéance modifié.')

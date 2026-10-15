@@ -232,3 +232,17 @@ La cloche près de la roue dentée affiche les échéances À faire (un mois ava
 Aucun mail n’est actuellement envoyé et aucune notification de mail fictif n’est affichée. La cloche le précise. Les confirmations d’envoi ne pourront être ajoutées qu’après connexion réelle de la messagerie Microsoft 365 et du traitement serveur. Les données restent locales au navigateur comme auparavant.
 
 Tests : `node --test tests/weekly.test.mjs` et `python tests/weekly.py` avec serveur sur le port 8000.
+
+## Fiche équipement et carnet de maintenance
+
+La fiche matériel est une page avec un lien direct `#equipment/IDENTIFIANT`, une synthèse et quatre rubriques : contrôles, carnet de maintenance, commentaires et traçabilité. Le retour conserve les filtres de la liste pendant la session. Les brouillons du carnet restent présents lors d'un changement d'onglet ; une confirmation protège les modifications lorsqu'on quitte la fiche.
+
+Pour le carnet partagé, exécuter **`supabase/009_equipment_maintenance.sql`** après les migrations existantes. Le script est idempotent et additif. Il crée la table `equipment_maintenance`, deux RPC et le bucket privé `equipment-maintenance`. Il ne modifie ni le document principal `workspace_state`, ni les contrôles, ni les échéances, ni les KPI. Tant qu'il n'est pas installé, les autres rubriques restent utilisables et le carnet signale son indisponibilité.
+
+Une intervention comprend une date, une nature (réparation, entretien ou observation), un intervenant, un commentaire et une photo facultative. L'heure d'enregistrement et l'utilisateur sont conservés côté serveur. Les membres lecteurs peuvent consulter ; seuls les administrateurs et éditeurs peuvent ajouter une intervention. Aucune modification ou suppression directe n'est autorisée. Les répétitions d'une même requête ne créent pas de doublon.
+
+Les photos JPEG/PNG/WebP de 12 Mo maximum sont préparées localement en JPEG (1600 pixels maximum, 2 Mo maximum), puis envoyées comme fichier binaire. Seul le chemin de stockage est enregistré en base. Un lien de consultation est signé pour 120 secondes lors du clic. Les restrictions Storage interdisent les accès hors espace, les modifications et les suppressions, même si une autre politique permissive existe. Aucun service tiers n'intervient. Un téléversement interrompu avant l'enregistrement peut laisser une photo non liée ; elle demeure inaccessible en lecture et peut être nettoyée par l'administrateur après vérification.
+
+En mode local, le carnet et les photos sont conservés dans IndexedDB sur cet appareil, séparément des équipements. Ils ne sont pas inclus dans l'export JSON du parc. Le mode cloud utilise uniquement les tables et le stockage partagés.
+
+Vérifications : `python tests/equipment_page_browser.py`, `python tests/maintenance_cloud_browser.py`, `node tests/maintenance_database.mjs` (serveur local sur le port 8000 pour les tests navigateur ; données fictives, aucun appel à la production).

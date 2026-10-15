@@ -69,5 +69,22 @@ export class CloudStore{
   if(url.origin!==new URL(this.config.url).origin||url.pathname!=='/storage/v1/object/sign/apave-reports/'+path)throw Error('Adresse de rapport refusée.');
   url.hash='page='+page;return url.href;
  }
+ async maintenanceUpload(blob,id){
+  if(!/^[a-f0-9-]{36}$/.test(id)||blob.type!=='image/jpeg'||blob.size>2*1024*1024)throw Error('Photo invalide.');
+  const hash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer()))].map(n=>n.toString(16).padStart(2,'0')).join('');
+  const path=this.config.workspaceId+'/'+id+'_'+hash+'.jpg',controller=new AbortController(),timer=setTimeout(()=>controller.abort(),60000);
+  try{const response=await this.fetcher(this.config.url+'/storage/v1/object/equipment-maintenance/'+path,{method:'POST',headers:{apikey:this.config.publicKey,Authorization:'Bearer '+await this.token(),'Content-Type':'image/jpeg','x-upsert':'false'},body:blob,signal:controller.signal});
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok&&response.status!==409&&String(result.statusCode)!=='409'&&result.error!=='Duplicate')throw Error(result.message||'Stockage privé des photos indisponible.');
+  return path;
+  }finally{clearTimeout(timer);}
+ }
+ async maintenancePhotoUrl(path){
+  if(typeof path!=='string'||!path.startsWith(this.config.workspaceId+'/')||!(/^[a-f0-9-]{36}\/[a-f0-9-]{36}_[a-f0-9]{64}\.jpg$/).test(path))throw Error('Référence photo invalide.');
+  const result=await this.request('/storage/v1/object/sign/equipment-maintenance/'+path,{expiresIn:120},await this.token()),raw=result.signedURL||result.signedUrl;
+  if(typeof raw!=='string')throw Error('Lien photo indisponible.');
+  const url=new URL(raw.startsWith('/object/')?'/storage/v1'+raw:raw,this.config.url);
+  if(url.origin!==new URL(this.config.url).origin||url.pathname!=='/storage/v1/object/sign/equipment-maintenance/'+path)throw Error('Adresse photo refusée.');return url.href;
+ }
  async logout(){try{await this.request('/auth/v1/logout?scope=local',{},await this.token())}finally{this.session=null;this.remember=false;for(const place of [this.storage,this.persistentStorage]){try{place?.removeItem(this.key)}catch{}}}}
 }
