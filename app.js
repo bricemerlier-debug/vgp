@@ -235,7 +235,7 @@ window.addEventListener('beforeunload',event=>{if(currentView==='equipment'&&has
 const maintenanceUI=installEquipmentMaintenance({cloud,accountName,today,cleanForm:form=>dirtyForms.delete(form)});
 const maintenanceKpiUI=installMaintenanceKpi({cloud,getEquipment:()=>data.equipment,onEquipment:async(id,options={})=>{showDetail(id);$('#maintenanceTab')?.click();if(options.actionId)await maintenanceUI.focusAction(options.actionId,{complete:options.complete});}});
 const apaveActionImporter=installApaveActionImport({cloud,getEquipment:()=>data.equipment,today,onImported:()=>{if(selected&&!hasUnsavedForm()){maintenanceUI.release();if($('#maintenanceTab')?.getAttribute('aria-selected')==='true')maintenanceUI.open(selected);}}});
-document.addEventListener('click',event=>{if(event.target.closest('[data-import-apave-actions]'))apaveActionImporter.open();});
+document.addEventListener('click',event=>{if(event.target.closest('[data-import-apave-actions]')){if($('#dataDialog').open)$('#dataDialog').close();apaveActionImporter.open();}});
 function equipmentDraftGuard(){
  if(maintenanceUI.busy){alert('L’enregistrement de l’intervention est en cours. Patientez.');return false;}
  const dirty=[...dirtyForms].filter(f=>f.isConnected&&$('#detail').contains(f));
