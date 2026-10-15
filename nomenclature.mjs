@@ -1,3 +1,4 @@
+const namingCommentDateFormat=new Intl.DateTimeFormat('fr-FR',{timeZone:'Europe/Paris'});
 const namingKey=value=>String(value??'').trim().replace(/\s+/g,' ').toLocaleLowerCase('fr');
 export function initialEquipmentTypes(){return [{id:'anneau-retournement',name:'Anneau de retournement',months:12,variants:[{id:'anneau-m16',name:'M16'},{id:'anneau-m30',name:'M30'}]},{id:'manille',name:'Manille',months:12,variants:[]}];}
 export function standardizedLabel(types,typeId,variantId=''){const type=types.find(t=>t.id===typeId);if(!type)return '';const variant=type.variants.find(v=>v.id===variantId);if(variantId&&!variant)throw Error('La variante ne correspond pas au type choisi.');return type.name+(variant?' · '+variant.name:'');}
@@ -6,14 +7,23 @@ export function addEquipmentVariant(types,typeId,id,name){const issue=technicalV
 export function applyEquipmentNaming(e,types,typeId,variantId,author,date,options={}){
  if(variantId&&!typeId)throw Error('Choisissez un type pour cette variante.');const label=standardizedLabel(types,typeId,variantId);if(typeId&&!label)throw Error('Type inconnu.');if(variantId){const issue=technicalVariantIssue(types.find(t=>t.id===typeId)?.variants.find(v=>v.id===variantId)?.name||'',options.context||{equipment:[e]});if(issue)throw Error(issue);}
  const mark=options.equipmentMark??e.equipmentMark??'',review=options.ownerReviewRequired??e.ownerReviewRequired??false;
- if((e.typeId||'')===(typeId||'')&&(e.variantId||'')===(variantId||'')&&(e.standardName||'')===label&&(!label||e.designation===label)&&(e.equipmentMark||'')===mark&&!!e.ownerReviewRequired===review)return e;
+ let formerNameComment=null;
+ if(options.commentFormerName&&label){
+  const name=historicalEquipmentName(e),comments=e.comments||'';
+  const alreadyPresent=(e.namingHistory||[]).some(h=>h.formerNameComment?.name===name&&comments.includes(h.formerNameComment.text));
+  const day=namingCommentDateFormat.format(new Date(options.at||date+'T12:00:00Z'));
+  const text=`Ancien nom avant standardisation automatique du ${day} : ${name}`;
+  if(name&&!alreadyPresent&&!comments.includes(text))formerNameComment={name,text};
+ }
+ if((e.typeId||'')===(typeId||'')&&(e.variantId||'')===(variantId||'')&&(e.standardName||'')===label&&(!label||e.designation===label)&&(e.equipmentMark||'')===mark&&!!e.ownerReviewRequired===review&&!formerNameComment)return e;
  const originalName=e.designation;
  const previous={typeId:e.typeId||'',variantId:e.variantId||'',standardName:e.standardName||'',equipmentMark:e.equipmentMark||'',ownerReviewRequired:!!e.ownerReviewRequired};
  e.originalDesignation??=historicalEquipmentName(e);e.typeId=typeId||'';e.variantId=variantId||'';e.standardName=label;
  if(mark||Object.hasOwn(e,'equipmentMark')||Object.hasOwn(options,'equipmentMark'))e.equipmentMark=mark;
  if(review||Object.hasOwn(e,'ownerReviewRequired')||Object.hasOwn(options,'ownerReviewRequired'))e.ownerReviewRequired=review;
  if(label)e.designation=label;
- e.namingHistory=[...(e.namingHistory||[]),{date,at:options.at||new Date().toISOString(),by:author,previous,next:{typeId:e.typeId,variantId:e.variantId,standardName:label,equipmentMark:mark,ownerReviewRequired:review},originalName,equipmentMark:mark,source:options.source||'Classification manuelle',...(options.ruleId?{ruleId:options.ruleId}:{})}];return e;
+ if(formerNameComment)e.comments=(e.comments||'')+((e.comments||'')?'\n\n':'')+formerNameComment.text;
+ e.namingHistory=[...(e.namingHistory||[]),{date,at:options.at||new Date().toISOString(),by:author,previous,next:{typeId:e.typeId,variantId:e.variantId,standardName:label,equipmentMark:mark,ownerReviewRequired:review},originalName,equipmentMark:mark,source:options.source||'Classification manuelle',...(formerNameComment?{formerNameComment}:{}),...(options.ruleId?{ruleId:options.ruleId}:{})}];return e;
 }
 export function namingGroups(equipment,{search='',includeNamed=false}={}){const groups=new Map(),query=namingSearchKey(search);for(const e of equipment){if(!includeNamed&&e.typeId)continue;const key=namingKey(e.designation);if(query&&!namingSearchKey(equipmentNamingSearch(e)).includes(query))continue;if(!groups.has(key))groups.set(key,{key,name:e.designation,equipment:[]});groups.get(key).equipment.push(e);}return [...groups.values()].sort((a,b)=>a.name.localeCompare(b.name,'fr'));}
 export function nomenclatureValid(data){if(!namingExtensionValid(data))return false;const types=data.equipmentTypes;if(types===undefined)return !data.equipment.some(e=>e?.typeId||e?.variantId||e?.standardName);if(!Array.isArray(types)||types.some(t=>!t||(t.months!==undefined&&![3,6,9,12].includes(t.months))||typeof t.id!=='string'||!t.id||typeof t.name!=='string'||!t.name.trim()||t.name.length>120||!Array.isArray(t.variants)||t.variants.some(v=>!v||typeof v.id!=='string'||!v.id||typeof v.name!=='string'||!v.name.trim()||v.name.length>80)||new Set(t.variants.map(v=>v.id)).size!==t.variants.length||new Set(t.variants.map(v=>namingKey(v.name))).size!==t.variants.length)||new Set(types.map(t=>t.id)).size!==types.length||new Set(types.map(t=>namingKey(t.name))).size!==types.length)return false;return data.equipment.every(e=>{if(e.originalDesignation!==undefined&&typeof e.originalDesignation!=='string')return false;if(e.namingHistory!==undefined&&(!Array.isArray(e.namingHistory)||e.namingHistory.some(h=>!h||typeof h.date!=='string'||typeof h.by!=='string'||typeof h.originalName!=='string'||!h.previous||!h.next||['typeId','variantId','standardName'].some(k=>typeof h.previous[k]!=='string'||typeof h.next[k]!=='string'))))return false;if(!e.typeId)return !e.variantId&&!e.standardName;const t=types.find(t=>t.id===e.typeId);return !!t&&(!e.variantId||t.variants.some(v=>v.id===e.variantId))&&e.standardName===standardizedLabel(types,e.typeId,e.variantId);});}
@@ -85,7 +95,7 @@ export function applyNamingReview(state,choices,{confirmed=false,by,at,rememberR
   const type=next.equipmentTypes.find(t=>t.id===choice.typeId);if(!type)throw Error('Choisissez un type pour chaque fiche.');const variant=type.variants.find(v=>v.id===choice.variantId);if(choice.variantId&&!variant)throw Error('La variante ne correspond pas au type choisi.');
   const issue=technicalVariantIssue(variant?.name||'',next);if(issue)throw Error(issue);
   const mark=String(choice.equipmentMark??'').trim();if(mark.length>120||/[\r\n]/.test(mark))throw Error('Repère équipement invalide (120 caractères maximum).');
-  applyEquipmentNaming(e,next.equipmentTypes,type.id,choice.variantId||'',by,at.slice(0,10),{at,equipmentMark:mark,ownerReviewRequired:!!choice.ownerReviewRequired,source:'Prévisualisation validée',ruleId:choice.ruleId||null,context:next});
+  applyEquipmentNaming(e,next.equipmentTypes,type.id,choice.variantId||'',by,at.slice(0,10),{at,equipmentMark:mark,ownerReviewRequired:!!choice.ownerReviewRequired,commentFormerName:true,source:'Prévisualisation validée',ruleId:choice.ruleId||null,context:next});
   if(rememberRules){const key=namingSearchKey(choice.originalName),target=type.id+'|'+(choice.variantId||'');if(ruleTargets.has(key)&&ruleTargets.get(key)!==target)throw Error('Le même ancien nom possède deux cibles différentes : désactivez la mémorisation ou corrigez les choix.');ruleTargets.set(key,target);saveNamingRule(next,{id:newId(),sourceName:choice.originalName,typeId:type.id,variantId:choice.variantId||''},by,at);}
  }
  if(!nomenclatureValid(next))throw Error('Nomenclature invalide : aucune modification appliquée.');return next;
@@ -100,5 +110,5 @@ function namingExtensionValid(data){
 export function applyImportedNamingRule(e,state,{confirmed=false,by,at}={}){
  if(!confirmed)throw Error('Confirmez les règles de nomenclature dans l’aperçu de l’import.');
  const proposal=suggestEquipmentNaming(e,state);if(proposal.confidence!=='rule'||proposal.issues.length||!proposal.ruleId)return false;
- applyEquipmentNaming(e,state.equipmentTypes,proposal.typeId,proposal.variantId,by,at.slice(0,10),{at,equipmentMark:proposal.equipmentMark,ownerReviewRequired:proposal.ownerReviewRequired,source:'Règle validée réutilisée après aperçu Excel',ruleId:proposal.ruleId,context:state});return true;
+ applyEquipmentNaming(e,state.equipmentTypes,proposal.typeId,proposal.variantId,by,at.slice(0,10),{at,equipmentMark:proposal.equipmentMark,ownerReviewRequired:proposal.ownerReviewRequired,commentFormerName:true,source:'Règle validée réutilisée après aperçu Excel',ruleId:proposal.ruleId,context:state});return true;
 }
