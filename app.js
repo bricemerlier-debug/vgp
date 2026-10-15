@@ -233,7 +233,7 @@ $('#equipmentForm').onsubmit=async ev=>{ev.preventDefault();const button=ev.targ
 let equipmentReturnView='material',equipmentReturnOwner=null,equipmentReturnScroll=0,equipmentTab='overview';
 window.addEventListener('beforeunload',event=>{if(currentView==='equipment'&&hasUnsavedForm()){event.preventDefault();event.returnValue='';}});
 const maintenanceUI=installEquipmentMaintenance({cloud,accountName,today,cleanForm:form=>dirtyForms.delete(form)});
-const maintenanceKpiUI=installMaintenanceKpi({cloud,getEquipment:()=>data.equipment,onEquipment:id=>{showDetail(id);$('#maintenanceTab')?.click();}});
+const maintenanceKpiUI=installMaintenanceKpi({cloud,getEquipment:()=>data.equipment,onEquipment:async(id,options={})=>{showDetail(id);$('#maintenanceTab')?.click();if(options.actionId)await maintenanceUI.focusAction(options.actionId,{complete:options.complete});}});
 const apaveActionImporter=installApaveActionImport({cloud,getEquipment:()=>data.equipment,today,onImported:()=>{if(selected&&!hasUnsavedForm()){maintenanceUI.release();if($('#maintenanceTab')?.getAttribute('aria-selected')==='true')maintenanceUI.open(selected);}}});
 document.addEventListener('click',event=>{if(event.target.closest('[data-import-apave-actions]'))apaveActionImporter.open();});
 function equipmentDraftGuard(){

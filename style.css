@@ -163,3 +163,19 @@ main{max-width:1240px;padding-top:40px}.intro{margin-bottom:32px}h1{color:var(--
 .action-deferrals{padding:14px;border:1px solid #d7e2ee;margin:14px 0;border-radius:8px}
 .action-deferrals article{border-top:1px solid #d7e2ee;padding:10px 0}
 @media(max-width:700px){.action-activity-months{gap:6px;grid-template-columns:repeat(6,minmax(0,1fr))}.action-kpi-grid{grid-template-columns:1fr}}
+/* Les mêmes états servent à la liste, aux compteurs et à l’agenda des plans. */
+.plans-late{--plan-ink:#9d1919;--plan-line:#cf3030;--plan-bg:#fff0f0}
+.plans-todo,.plans-open{--plan-ink:#775000;--plan-line:#d68c00;--plan-bg:#fff7df}
+.plans-progress{--plan-ink:#004f8b;--plan-line:#087cc2;--plan-bg:#eaf5ff}
+.plans-deferred{--plan-ink:#633092;--plan-line:#8251b7;--plan-bg:#f3ebff}
+.plans-done{--plan-ink:#16633e;--plan-line:#21845a;--plan-bg:#e7f6ee}
+.plans-unknown{--plan-ink:#4c5b6c;--plan-line:#8795a6;--plan-bg:#f0f3f6}
+.plans-table{min-width:950px;width:100%}.plans-table td{vertical-align:top;white-space:normal}.plans-table td:first-child{min-width:260px;max-width:480px}.plans-table small{display:block;font-size:12px;margin-top:7px}.plans-table tr{background:var(--plan-bg,#fff);color:var(--plan-ink,#00356b)}.plans-table tr td:first-child{border-left:5px solid var(--plan-line,#bbc9d8)}
+.plans-badge{display:inline-block;background:var(--plan-bg,#eff4fa);color:var(--plan-ink,#00356b);border:1px solid var(--plan-line,#bbc9d8);border-radius:20px;padding:5px 9px;font-size:12px;font-weight:700;white-space:nowrap}
+.plans-legend{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}.plans-row-actions{display:flex;flex-direction:column;gap:8px;min-width:140px}.plans-row-actions button{white-space:normal}.plans-pagination{justify-content:center;margin-top:20px}
+.plans-counter{background:var(--plan-bg,#f2f7ff);color:var(--plan-ink,#00356b);border-top:4px solid var(--plan-line,#0057a8);text-align:left}.plans-counter span,.plans-counter strong{display:block}.plans-counter strong{font-size:30px;margin-top:14px}
+#plansWeek .calendar-task{background:var(--plan-bg,#fff);color:var(--plan-ink,#00356b);border:1px solid var(--plan-line,#bbc9d8);border-left-width:4px}#plansWeek .calendar-task small,#plansWeek .calendar-task span{color:inherit}#plansWeek .calendar-task strong{font-size:12px}#plansWeek .calendar-task:focus-visible,[data-equipment-action]:focus-visible,[data-maintenance-entry]:focus-visible{outline:3px solid #0057a8;outline-offset:3px}
+#maintenanceCompletedPanel .maintenance-entry{padding:22px;border:1px solid #b9dcc9;border-left:5px solid #21845a;border-radius:8px;margin:14px 0}.completed-plan-details{padding:12px 0}.completed-plan-details summary{cursor:pointer;font-weight:600}
+@media(max-width:550px){#plansWeek{grid-template-columns:repeat(7,minmax(140px,1fr));overflow-x:auto;padding-bottom:12px;scroll-snap-type:x proximity}#plansWeek .calendar-day{scroll-snap-align:start}.plans-pagination{gap:8px}#plansCounters{grid-template-columns:repeat(2,minmax(0,1fr))}}
+#plansCounters{grid-template-columns:repeat(6,minmax(0,1fr))}.plans-day-more{width:100%;font-size:11px;padding:9px 5px;white-space:normal;margin-top:8px}.plans-day-more small{display:block;margin-top:4px}
+@media(max-width:1100px){#plansCounters{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:550px){#plansCounters{grid-template-columns:repeat(2,minmax(0,1fr))}}
