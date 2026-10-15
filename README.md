@@ -278,3 +278,12 @@ Paramètres → Import de rapports met uniquement APAVE au premier plan. Les imp
 Les informations de dernière date déclarée dans MemoryFlow sont présentées comme une entrée distincte dans l’onglet Commentaires, avec l’auteur, la date de reprise, les dates déclarées et les détails source. Elles ne sont plus affichées dans l’onglet Contrôles. Cette présentation s’applique aussi aux fiches existantes, sans réécriture des données ni duplication dans le commentaire personnel. Le bandeau utilise par défaut le même logo Goodyear intégré que les rapports ; un logo personnalisé reste prioritaire.
 
 Les paramètres de formulaire de connexion éventuellement présents dans l’adresse sont retirés au démarrage. Les formulaires de connexion/réinitialisation bloquent la soumission native tant que leurs gestionnaires JavaScript ne sont pas installés, afin de ne pas envoyer les champs dans une URL. Vérification : `python tests/memoryflow_comment_brand_browser.py` et `python tests/auth_browser.py`.
+
+
+## Plans d’action de maintenance
+
+Dans la fiche équipement → Carnet de maintenance, les réparations à faire sont séparées des interventions réalisées. Chaque action comporte un titre, un plan de travaux, une origine (Manuel ou APAVE), une référence de rapport facultative, un responsable facultatif, une priorité et une échéance facultative. Filtres par état et priorité, recherche textuelle ; priorité haute en premier, puis échéance. Les dates inconnues restent « À définir ». Aucun délai APAVE n’est inventé.
+
+Exécuter **supabase/010_maintenance_actions.sql**, après 009, dans SQL Editor. Les tables sont indépendantes du parc et des contrôles. Lecture réservée aux membres du workspace, écriture aux administrateurs/éditeurs, révisions pour bloquer les modifications concurrentes et historique serveur des changements. La clôture exige une intervention de réparation (date, intervenant, travaux réalisés, photo facultative) enregistrée atomiquement avec l’action réalisée ; une nouvelle tentative de clôture identique ne crée pas de doublon. Les contrôles VGP, leurs KPI et les échéances restent inchangés. L’import automatique des actions APAVE et les KPI annuels attendent les futures règles métier. Les anciennes interventions et les photos privées sont conservées. Le mode local utilise une mise à niveau additive d’IndexedDB.
+
+Vérifications : `node tests/maintenance_actions_database.mjs`, `python tests/maintenance_actions_browser.py`, `python tests/equipment_page_browser.py`, `python tests/maintenance_cloud_browser.py`. Tests sur données fictives uniquement.

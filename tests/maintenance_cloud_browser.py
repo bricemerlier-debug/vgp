@@ -14,6 +14,7 @@ def api(route):
  if '/token?' in url:result={'access_token':'test','refresh_token':'test','expires_in':3600,'user':{'id':'20000000-0000-0000-0000-000000000001','email':'fictif@example.test'}}
  elif url.endswith('read_state'):result=core
  elif url.endswith('read_shift_calendar'):result={'revision':0,'rows':[],'imports':[]}
+ elif url.endswith('read_maintenance_actions'):result=[]
  elif url.endswith('read_equipment_maintenance'):result=entries
  elif '/storage/v1/object/sign/equipment-maintenance/' in url:
   if route.request.method=='POST':
