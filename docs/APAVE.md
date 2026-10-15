@@ -4,7 +4,7 @@ Le bouton **Importer un rapport APAVE** est disponible dans Matériel et dans Pa
 
 ## Activation Supabase
 
-L'aperçu fonctionne sans migration. Pour enregistrer en mode partagé, exécuter une fois [006_apave.sql](../supabase/006_apave.sql) dans le SQL Editor du projet, après les scripts 001, 003 et 004. Ce script crée un bucket **privé** `apave-reports`, deux tables, les politiques RLS et une procédure d'import. Il n'importe aucun contrôle et ne modifie aucune fiche existante. L'application vérifie son activation avant d'envoyer un PDF.
+L'aperçu fonctionne sans migration. Pour enregistrer en mode partagé, exécuter une fois [006_apave.sql](../supabase/006_apave.sql) dans le SQL Editor du projet, après les scripts 001, 003 et 004, puis exécuter [007_apave_automation.sql](../supabase/007_apave_automation.sql). Si 006 a déjà été installé, exécuter seulement 007. Le script 006 crée un bucket **privé** `apave-reports`, deux tables, les politiques RLS et une procédure d'import. Le 007 ajoute le résultat « Réalisé — observations à traiter », la mise au rebut documentée et leurs protections côté serveur. Ces scripts n’importent aucun contrôle et ne modifient aucune fiche existante. L'application vérifie son activation avant d'envoyer un PDF.
 
 Les lecteurs autorisés peuvent consulter ; seuls les éditeurs et administrateurs peuvent importer. Les autres espaces et utilisateurs anonymes sont exclus. Les fichiers ne peuvent pas être remplacés ou supprimés par les clients de l'application, même en présence d'une autre politique Storage permissive. Les protections métier existantes restent actives. Aucune clé secrète n'est utilisée dans le navigateur.
 
@@ -13,11 +13,11 @@ Les lecteurs autorisés peuvent consulter ; seuls les éditeurs et administrateu
 1. Choisir le PDF original. L'analyse, page par page, affiche sa progression. Limites de cette version : 100 Mo, 1 200 pages ; la limite globale Storage du projet peut être inférieure.
 2. Consulter l'aperçu paginé, rechercher un équipement et ouvrir le PDF à la page indiquée. Les dates viennent de **Date de la vérification**, jamais de la date d'édition du rapport. Pour un accessoire non vérifié, la date du lot reste une date de contexte, et aucune date de contrôle effectué n'est créée.
 3. Les correspondances ne sont proposées que sur une égalité exacte du numéro interne ou du numéro de série, après suppression des espaces aux extrémités et comparaison sans distinction majuscules/minuscules. Un suffixe différent reste un autre identifiant. Les correspondances contradictoires, identifiants répétés ou absents imposent un choix manuel. Aucun rapprochement approximatif et aucune nouvelle fiche automatique.
-4. Cocher les lignes à importer et corriger leur fiche si besoin. Le choix initial **Conserver le constat APAVE** enregistre le résultat source dans la fiche sans changer les statistiques. Pour une vérification complète et exploitable, choisir explicitement le résultat métier voulu. Une observation n'est jamais automatiquement traduite en « Bon état » ou « Mauvais état ».
+4. Cocher les lignes à importer et corriger leur fiche si besoin. Les vérifications complètes et exploitables reçoivent une proposition : **Bon état** si la conclusion l’indique explicitement ; **Mauvais état — à jeter** pour une mise au rebut / réforme explicite ; **Réalisé — observations à traiter** pour les autres vérifications avec observations, sans présumer de la conformité ni de la réparabilité. La mise au rebut est appliquée après confirmation du lot, selon la consigne de l’utilisateur. On peut corriger toute proposition ou choisir **Conserver le constat APAVE** pour ne pas créer de contrôle réalisé.
 5. Confirmer la vérification des associations, puis cliquer sur Valider et accepter le récapitulatif. Avant cette étape, aucune écriture d'import n'a lieu, y compris dans Storage.
 6. Les contrôles réalisés apparaissent dans l'historique habituel ; les constats partiels/non vérifiés ou sans résultat métier attribué apparaissent dans une section distincte de la fiche. Chacun propose **Voir le rapport APAVE** et sa plage de pages.
 
-**Les non-vérifiés, partiels, incomplets et matériels hors suivi ne peuvent pas valider une VGP complète.** L'import ne met pas automatiquement au rebut un matériel et ne déclare pas un matériel perdu. Une vérification complète validée est ajoutée aux contrôles existants et utilise leur calcul de prochaine échéance. L'ancien planning n'est pas reconstruit : aucune date prévue passée n'est inventée pour gonfler les KPI mensuels.
+**Les non-vérifiés, partiels, incomplets et matériels hors suivi ne peuvent pas valider une VGP complète.** Une conclusion de mise au rebut / réforme confirmée archive le matériel avec un contrôle et le PDF APAVE comme justificatif. Un matériel absent/non présenté conserve sa situation et son échéance ; il n’est ni archivé ni déclaré perdu automatiquement. Une vérification complète validée est ajoutée aux contrôles existants et utilise leur calcul de prochaine échéance. Le contrôle est rattaché à une échéance existante si celle-ci est atteinte à la date de vérification ; une échéance future n’est pas marquée faite par anticipation. L’ancien planning n’est pas inventé. Le prochain contrôle est calculé selon la périodicité de la fiche et la date réelle APAVE.
 
 ## Stockage et doublons
 
@@ -41,10 +41,12 @@ En mode local, les constats peuvent être testés sur des données fictives, mai
 npm ci
 npm run build
 node tests/apave.test.mjs
+node tests/apave_automation.test.mjs
 node tests/apave_cloud.mjs
 node tests/apave_database.mjs
 node tests/apave_volume.mjs
 python tests/apave_browser.py
+python tests/apave_automation_browser.py
 python tests/apave_cloud_browser.py
 ```
 

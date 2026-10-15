@@ -1,3 +1,4 @@
+import {due,latestInspection} from './domain.mjs';
 // APAVE Leara: deterministic text extraction only. No image rendering or external services.
 const apaveKey=v=>String(v??'').trim().toLocaleUpperCase('fr');
 const apaveDate=v=>{const m=String(v).match(/\b(\d{2})\/(\d{2})\/(\d{4})\b/);if(!m)return null;const s=`${m[3]}-${m[2]}-${m[1]}`;return !isNaN(Date.parse(s))&&new Date(s).toISOString().slice(0,10)===s?s:null;};
@@ -48,7 +49,7 @@ export function parseApavePages(pages){
    if(!isAccessory){const sourceObservations=piece.pages.map(n=>typeof pages[n-1]==='object'?pages[n-1].observationText:null).filter(Boolean);if(sourceObservations.length)observations=sourceObservations.join('\n\n');}
    const scopeText=isAccessory?'':text.match(/Contenu et conditions de la vérification\s*([\s\S]*?)(?=\nRésultat de la vérification|$)/i)?.[1]?.trim()||'';
    if(!resultText&&/Equipement non vérifié\s*:/i.test(scopeText))resultText=scopeText;
-   const notVerified=/[ée]quipements? non v[ée]rifi[ée]|absents? ou non pr[ée]sent[ée]|v[ée]rification (?:non (?:effectu[ée]e|r[ée]alis[ée]e)|impossible)/i.test(resultText);
+   const notVerified=/^(?:[ée]quipement\s+)?(?:non contr[ôo]l[ée]|non v[ée]rifi[ée]|introuvable|missing|absent|non pr[ée]sent[ée])\b|[ée]quipements? non v[ée]rifi[ée]|absents? ou non pr[ée]sent[ée]|v[ée]rification (?:non (?:effectu[ée]e|r[ée]alis[ée]e)|impossible)/i.test(resultText);
    const partial=/n['’]a pas [ée]t[ée] compl[èe]te|v[ée]rification (?:partielle|limit[ée]e)|impos[ée] une certaine limite à la v[ée]rification|essais?[^.]{0,65}(?:non r[ée]alis[ée]s?|impossibles)|n['’](?:a|ont) pas pu [êe]tre/i.test((scopeText+'\n'+resultText+'\n'+observations).replace(/\s+/g,' '));
    const state=notVerified?'not_verified':partial?'partial':resultText?'verified':'unknown';
    const issues=[];if(!ids.length)issues.push('Identifiant absent');if(!contextDate)issues.push('Date de vérification absente');if(!verifier)issues.push('Vérificateur absent');if(!resultText)issues.push('Résultat non reconnu');
@@ -71,6 +72,16 @@ export async function extractApavePdf(bytes,pdfjs,onProgress=()=>{},signal=null)
  try{const pdf=await task.promise;if(pdf.numPages>1200)throw Error('Limite de 1 200 pages par rapport.');const pages=[];for(let n=1;n<=pdf.numPages;n++){if(signal?.aborted)throw Error('Analyse annulée.');const page=await pdf.getPage(n),content=await page.getTextContent();const lines=apaveLines(content.items),heading=lines.find(l=>l.text==='Observations');const observationText=heading?apaveLines(content.items.filter(i=>i.transform[4]>=220&&i.transform[5]<heading.y-4&&i.transform[5]>50)).map(l=>l.text).join('\n'):null;const observationTopics=heading?apaveLines(content.items.filter(i=>i.transform[4]<220&&i.transform[5]<heading.y-4&&i.transform[5]>50)).map(l=>l.text):[];pages.push({text:lines.map(l=>l.text).join('\n'),observationText,observationTopics});page.cleanup();onProgress(n,pdf.numPages);if(n%5===0)await new Promise(r=>setTimeout(r,0));}return parseApavePages(pages);}finally{signal?.removeEventListener('abort',abort);await task.destroy();}
 }
 export function apavePageLabel(pages){return pages.length===1?`Page ${pages[0]}`:pages.every((n,i)=>!i||n===pages[i-1]+1)?`Pages ${pages[0]} à ${pages.at(-1)}`:`Pages ${pages.join(', ')}`;}
+// Only explicit conclusions are proposed; an isolated observation never means good or bad.
+export function apaveSuggestedResult(source,equipment=null){
+ if(source.state!=='verified'||source.issues?.length||!source.date||!source.verifier||equipment?.archived||equipment?.needsReverification||equipment?.pendingArchive)return '';
+ const text=source.resultText.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+ if(/\b(?:pas|non|ne pas)\s+(?:a\s+)?(?:mettre|mis|reformer|reforme[es]*|detruire|detruit)/.test(text))return '';
+ if(/^(?:etat defectueux\s*[-—:]?\s*)?(?:a mettre au rebut|mis(?:e)? au rebut|a reformer|reforme[es]*|detruit[es]*)\b/.test(text)&&!/[?]|\b(?:si|eventuel|eventuellement)\b/.test(text)){if(equipment&&(latestInspection(equipment)?.date>source.date||equipment.archiveHistory?.at(-1)?.date>source.date))return '';return 'Mauvais état — à jeter';}
+ if(/^(?:bon etat[.!]?|sans (?:anomalie|observation)[.!]?)$/.test(text)||/n['’]ont pas fait apparaitre d['’]anomalie ni de defectuosite/.test(text))return 'Bon état';
+ if(/^(?:mauvais etat|etat defectueux)\s*[-—:]?\s*(?:reparable|a reparer)[.!]?$/.test(text))return 'Mauvais état — réparable';
+ return source.resultText.trim()?'Réalisé — observations à traiter':'';
+}
 export function applyApaveImport(state,report,choices,{actor,actorId=null,newId=()=>crypto.randomUUID(),at=new Date().toISOString(),confirmed=false}={}){
  if(!confirmed)throw Error('Confirmez les correspondances et les résultats avant l’import.');
  if(!/^[a-f0-9]{64}$/.test(report.sha256)||!report.reportNumber||!Number.isInteger(report.pageCount))throw Error('Référence du rapport invalide.');
@@ -83,15 +94,20 @@ export function applyApaveImport(state,report,choices,{actor,actorId=null,newId=
   if(!source||!e)throw Error('Choisissez une fiche pour chaque ligne sélectionnée.');
   if(seen.has(source.sourceKey)||next.equipment.some(e=>(e.apaveChecks||[]).some(c=>c.reportHash===report.sha256&&c.sourceKey===source.sourceKey)))throw Error('Ce constat APAVE est déjà importé.');seen.add(source.sourceKey);
   const normalizedResult=choice.result||null;
-  if(normalizedResult&&!['Bon état','Mauvais état — réparable','Mauvais état — à jeter'].includes(normalizedResult))throw Error('Résultat métier invalide.');
-  if(normalizedResult&&(source.state!=='verified'||source.issues.length||!source.date||!source.verifier||e.archived||e.needsReverification))throw Error('Un constat non vérifié, partiel, incomplet ou sur du matériel hors suivi ne peut pas valider une VGP complète.');
+  if(normalizedResult&&!['Bon état','Mauvais état — réparable','Mauvais état — à jeter','Réalisé — observations à traiter'].includes(normalizedResult))throw Error('Résultat métier invalide.');
+  if(normalizedResult&&(source.state!=='verified'||source.issues.length||!source.date||!source.verifier||e.archived||e.needsReverification||e.pendingArchive))throw Error('Un constat non vérifié, partiel, incomplet ou sur du matériel hors suivi ne peut pas valider une VGP complète.');
   if(normalizedResult&&(performed.has(e.id)||next.equipment.some(x=>x.controls.some(c=>c.apave?.reportHash===report.sha256&&x.id===e.id))))throw Error('Plusieurs contrôles pour le même matériel dans ce rapport : vérifiez les doublons.');
+  if(normalizedResult==='Mauvais état — à jeter'&&(latestInspection(e)?.date>source.date||e.archiveHistory?.at(-1)?.date>source.date))throw Error('Ce rapport est antérieur à la situation actuelle : mise au rebut à examiner manuellement.');
   if(normalizedResult)performed.add(e.id);
-  const controlId=normalizedResult?newId():null;
+  const controlId=normalizedResult?newId():null,planned=normalizedResult?due(e):null;const latestBefore=latestInspection(e);const plannedDate=planned&&planned<=source.date&&(!latestBefore||source.date>=latestBefore.date)?planned:null;
   const entry={...structuredClone(source),id:newId(),reportHash:report.sha256,reportNumber:report.reportNumber,normalizedResult,controlId,reviewedAt:at,reviewedBy:actor,reviewedById:actorId};
   (e.apaveChecks??=[]).push(entry);
   if(controlId){const snapshot=Object.fromEntries(['identifier','designation','serialNumber','location','sector','zone','team','owner'].map(k=>[k,e[k]||'']));snapshot.siteId=e.siteId;
-   e.controls.push({id:controlId,reportId:`APAVE-${report.reportNumber}-${source.sourceKey}`,date:source.date,intervenant:source.verifier,result:normalizedResult,observations:source.observations,created:Date.parse(at),recordedAt:at,enteredBy:actor,enteredById:actorId,attachment:null,equipmentSnapshot:snapshot,apave:{reportHash:report.sha256,reportNumber:report.reportNumber,sourceKey:source.sourceKey,pages:source.pages}});
+   e.controls.push({id:controlId,reportId:`APAVE-${report.reportNumber}-${source.sourceKey}`,date:source.date,plannedDate,intervenant:source.verifier,result:normalizedResult,observations:source.observations,created:Date.parse(at),recordedAt:at,enteredBy:actor,enteredById:actorId,attachment:null,equipmentSnapshot:snapshot,apave:{reportHash:report.sha256,reportNumber:report.reportNumber,sourceKey:source.sourceKey,pages:source.pages}});
+   if(normalizedResult==='Mauvais état — à jeter'){
+    e.archived=true;e.pendingArchive=null;
+    (e.archiveHistory??=[]).push({id:newId(),type:'archive',workflow:'apave-disposal',reason:'Mis au rebut',date:source.date,requester:source.verifier,account:actor,observations:source.resultText,created:Date.parse(at),controlId,apave:{reportHash:report.sha256,reportNumber:report.reportNumber,sourceKey:source.sourceKey,pages:source.pages},operatorConfirmed:true});
+   }
   }
  }
  if(!existing)(next.apaveReports??=[]).push({sha256:report.sha256,reportNumber:report.reportNumber,pageCount:report.pageCount,size:report.size,fileName:report.fileName,path:report.path,parserVersion:report.parserVersion,importedAt:at,importedBy:actor});

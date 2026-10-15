@@ -31,7 +31,7 @@ export function dashboard(equipment,today){
  const active=equipment.filter(e=>!e.archived),controlled=active.filter(e=>latestInspection(e)),upToDate=active.filter(e=>due(e)&&due(e)>=today).length;
  const overdue=active.filter(e=>status(e,today)==='En retard').length,soon=active.filter(e=>status(e,today)==='À faire').length,planned=active.filter(e=>status(e,today)==='Échéance à plus d’un mois').length,undefinedCount=active.filter(e=>!due(e)).length;
  return {total:active.length,archived:equipment.length-active.length,lostArchived:equipment.filter(lossArchived).length,controlled:controlled.length,upToDate,missing:active.length-controlled.length,percent:active.length?Math.round(upToDate/active.length*100):null,overdue,soon,planned,undefinedCount,performed:equipment.reduce((n,e)=>n+e.controls.filter(isInspection).length,0),anomalies:controlled.filter(e=>latestInspection(e).result!=='Bon état').length,
- results:['Bon état','Mauvais état — réparable','Mauvais état — à jeter'].map(result=>({label:result,count:controlled.filter(e=>latestInspection(e).result===result).length})),sectors:['A1','A2','B1','B2','B3','Pas de secteur',''].map(sector=>{const items=active.filter(e=>(e.sector||'')===sector);return {sector,total:items.length,controlled:items.filter(e=>due(e)&&due(e)>=today).length}})};
+ results:['Bon état','Mauvais état — réparable','Mauvais état — à jeter','Réalisé — observations à traiter'].map(result=>({label:result,count:controlled.filter(e=>latestInspection(e).result===result).length})),sectors:['A1','A2','B1','B2','B3','Pas de secteur',''].map(sector=>{const items=active.filter(e=>(e.sector||'')===sector);return {sector,total:items.length,controlled:items.filter(e=>due(e)&&due(e)>=today).length}})};
 }
 
 export function reminders(equipment) {
@@ -61,6 +61,7 @@ export function reportConclusion(result,verifier,date){
   if(result==='Bon état')return intro+'L’équipement est déclaré en bon état au regard du contrôle réalisé, sous réserve des observations indiquées. Cette déclaration porte sur le constat du vérificateur ; elle ne remplace pas la validation des critères de conformité applicables par l’entreprise.';
   if(result==='Mauvais état — réparable')return intro+'L’équipement présente un mauvais état réparable. Une réparation est nécessaire. Aucun avis favorable de conformité n’est délivré par ce rapport.';
   if(result==='Mauvais état — à jeter')return intro+'L’équipement présente un mauvais état et est orienté vers la mise au rebut. Aucun avis favorable de conformité n’est délivré par ce rapport.';
+  if(result==='Réalisé — observations à traiter')return intro+'Le rapport APAVE contient des observations à traiter. Le contrôle est enregistré comme réalisé ; aucun avis favorable sur l’état ou la conformité n’est déduit de ces observations.';
   return `L’équipement est déclaré introuvable le ${date} par ${verifier}. Aucun examen de son état n’a pu être effectué ; aucune conclusion de conformité ne peut être établie.`;
 }
 
@@ -123,7 +124,7 @@ export function homeSummary(equipment,today){
  const issues=active.filter(e=>latestInspection(e)&&latestInspection(e).result!=='Bon état');
  return {current,unknownHistory:progress.unknownHistory,activeCount:active.length,overdue,soon,week,undefinedDates,priorities,issues};
 }
-export function isInspection(c){return !!c&&['Bon état','Mauvais état — réparable','Mauvais état — à jeter'].includes(c.result)&&typeof c.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(c.date)&&typeof c.intervenant==='string'&&!!c.intervenant.trim();}
+export function isInspection(c){return !!c&&(c.result!=='Réalisé — observations à traiter'||!!c.apave?.sourceKey)&&['Bon état','Mauvais état — réparable','Mauvais état — à jeter','Réalisé — observations à traiter'].includes(c.result)&&typeof c.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(c.date)&&typeof c.intervenant==='string'&&!!c.intervenant.trim();}
 export function latestInspection(e){return [...e.controls].filter(isInspection).sort((a,b)=>b.date.localeCompare(a.date)||b.created-a.created)[0];}
 export function calculatedDeadline(e){
  if(e.needsReverification||latest(e)?.result==='Introuvable'&&!e.archived)return null;

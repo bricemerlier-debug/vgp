@@ -12,7 +12,7 @@ def api(route):
  if route.request.method=='OPTIONS':route.fulfill(status=204,headers=headers);return
  if '/token?' in url:result={'access_token':'test','refresh_token':'test','expires_in':3600,'user':{'id':user,'email':'fictif@example.com'}}
  elif url.endswith('read_state'):result=state
- elif url.endswith('apave_ready'):result=ready
+ elif url.endswith('apave_automation_ready'):result=ready
  elif '/storage/v1/object/sign/' in url:
   if route.request.method=='POST':
    signed.append(route.request.post_data_json);result={'signedURL':'/object/sign/apave-reports/'+url.split('/apave-reports/')[1]+'?token=TEMPORARY'}
@@ -25,7 +25,7 @@ def api(route):
  route.fulfill(json=result,headers=headers)
 with sync_playwright() as p:
  b=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox']);context=b.new_context(viewport={'width':1440,'height':1000});context.route('**/cloud-config.js',lambda r:r.fulfill(body="window.VGP_CLOUD={enabled:true,url:'https://test.supabase.co',publicKey:'sb_publishable_test',workspaceId:'"+w+"'};document.documentElement.classList.add('cloud-locked');",content_type='text/javascript'));context.route('https://test.supabase.co/**',api);page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto('http://127.0.0.1:8000/#material');page.locator('#loginForm [name=email]').fill('fictif@example.com');page.locator('#loginForm [name=password]').fill('test');page.locator('#loginForm button').first.click();page.locator('#apaveImport').click();page.locator('#apaveFile').set_input_files(path);expect(page.locator('#apaveStatus')).to_contain_text('1 éléments',timeout=30000);assert uploads==[] and commits==[]
- page.locator('[data-apave-result]').select_option('Mauvais état — réparable');page.locator('#apaveConfirmed').check();page.once('dialog',lambda d:d.accept());page.locator('#apaveApply').click();expect(page.locator('#apaveError')).to_contain_text('006_apave.sql');assert uploads==[] and commits==[]
+ page.locator('[data-apave-result]').select_option('Réalisé — observations à traiter');page.locator('#apaveConfirmed').check();page.once('dialog',lambda d:d.accept());page.locator('#apaveApply').click();expect(page.locator('#apaveError')).to_contain_text('007_apave_automation.sql');assert uploads==[] and commits==[]
  ready=True;page.once('dialog',lambda d:d.accept());page.locator('#apaveApply').click();expect(page.locator('#apaveStatus')).to_contain_text('1 constat(s) importé(s)');assert len(uploads)==1 and len(commits)==1;controls=state['payload']['equipment'][0]['controls'];assert len(controls)==2;assert all(controls[0][k]==v for k,v in old.items());assert controls[1]['date']=='2026-07-09';assert controls[1]['intervenant']=='TEST FICTIF';assert controls[1]['enteredById']==user;assert controls[1]['apave']['reportHash']==state['payload']['apaveReports'][0]['sha256'];assert 'base64' not in json.dumps(commits)
  page.locator('#apaveClose').click();page.locator('[data-open=e1]').click()
  with page.expect_popup() as popup:page.locator('#detail [data-apave-hash]').click()
