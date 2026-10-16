@@ -241,3 +241,5 @@ button.material-sort-header{display:inline-flex;align-items:center;justify-conte
 .settings-menu .settings-logout{margin-top:16px;border-top:1px solid #ccd9e7;border-left:3px solid #a53d30;color:#85241d;background:#fbe8e4;font-weight:700}
 
 .home-goal>div:first-child{flex:1;min-width:0}.home-month-heading{display:flex;align-items:center;gap:20px;flex-wrap:wrap}.home-month-heading h2{margin-right:auto}.home-month-heading .calendar-controls{gap:6px}.home-month-heading button{min-height:44px}.home-month-heading #homeCurrentMonth{white-space:nowrap}@media(max-width:600px){.home-month-heading{gap:8px}.home-month-heading .calendar-controls{width:100%}.home-goal>div:first-child{width:100%}}
+
+.menu-toggle{width:auto;min-width:44px;height:44px;padding:10px 14px;margin-right:0;font-size:13px}@media(hover:hover) and (pointer:fine){.menu-toggle:not(:focus-visible){position:absolute;width:1px;height:1px;min-width:0;padding:0;margin:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;pointer-events:none}.menu-toggle:focus-visible{position:fixed;top:12px;left:12px;z-index:110;background:#004990;color:#fff;outline:3px solid #ffda00;outline-offset:2px}}
