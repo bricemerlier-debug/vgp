@@ -27,7 +27,7 @@ with sync_playwright() as p:
  first,second=pages;first.once('dialog',lambda d:d.accept());first.locator('#shiftImportApply').click();expect(first.locator('#shiftImportStatus')).to_contain_text('Planning enregistré');assert len(writes)==1;assert len(writes[0]['entries'])==5;assert writes[0]['source']['sheet']=='calendrier global';assert 'base64' not in json.dumps(writes)
  second.once('dialog',lambda d:d.accept());second.locator('#shiftImportApply').click();expect(second.locator('#shiftImportError')).to_contain_text('REVISION_CONFLICT');assert len(writes)==1;second.locator('#shiftImportAnalyze').click();expect(second.locator('#shiftImportStatus')).to_contain_text('déjà présent');expect(second.locator('#shiftImportApply')).to_be_disabled()
  for page in pages:
-  page.locator('#shiftImportClose').click();expect(page.locator('#shiftCurrentContent .shift-live-team')).to_have_text('Équipe B');expect(page.locator('#shiftCurrentContent')).to_contain_text('05:00–13:00');assert page.evaluate('document.documentElement.scrollWidth')==page.viewport_size['width']
+  page.locator('#shiftImportClose').click();expect(page.locator('#headerShiftContent strong')).to_have_text('Équipe B');expect(page.locator('#headerShiftContent')).to_contain_text('05:00–13:00');assert page.evaluate('document.documentElement.scrollWidth')==page.viewport_size['width']
  # Shared header follows the same imported calendar on every page and timezone.
  for page in pages:
   expect(page.locator('#headerShiftContent')).to_contain_text('Équipe B')
@@ -47,6 +47,6 @@ with sync_playwright() as p:
  first.screenshot(path='/tmp/vgp-header-shift-desktop.png')
  second.screenshot(path='/tmp/vgp-header-shift-mobile.png')
  assert len(writes)==1
- assert core['revision']==7 and core['payload']['equipment']==[];assert not errors,errors;b.close()
+ assert core['revision']==7 and core['payload']['equipment']==[];assert page.locator('#shiftCurrentContent').count()==0;assert not errors,errors;b.close()
 os.unlink(path)
 print('PASS planning cloud simulé : deux appareils/fuseaux cohérents, import sans classeur transmis, conflit concurrent bloqué, doublon après relecture et parc VGP intact.')

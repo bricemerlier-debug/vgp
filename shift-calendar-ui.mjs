@@ -23,9 +23,6 @@ export function installShiftCalendar({cloud=null}={}){
  qs('#headerShiftLive').onclick=()=>{headerOffset=0;renderHeader();};
  function renderCurrent(){
   const current=shiftCurrent(state.rows),p=shiftParisParts(),stamp=state.revision+'|'+p.date+'|'+p.hour+'|'+p.minute;if(stamp===clockKey)return;clockKey=stamp;renderHeader(current);
-  const row=current.assignment,next=current.next.assignment;
-  qs('#shiftCurrentContent').innerHTML=`<div><b class="shift-live-team">${row?'Équipe '+safe(row.team):current.state==='off'?'Aucune équipe prévue':'Planning non renseigné'}</b><p>${safe(SHIFT_CODES[current.code])} · ${hourFmt(current.start)}–${hourFmt(current.end)}${current.code==='N'?' · nuit du '+dateFmt(current.date):''}</p><p><b>Prochaine relève :</b> ${hourFmt(current.end)} · ${next?'Équipe '+safe(next.team)+' — '+safe(SHIFT_CODES[current.next.code]):current.next.state==='off'?'Aucune équipe prévue au poste suivant':'Planning non renseigné pour le poste suivant'}</p></div><button type="button" class="secondary" id="shiftCurrentOpen">Consulter le planning 5×8</button>`;
-  qs('#shiftCurrentOpen').onclick=()=>qs('[data-view="shiftCalendar"]').click();
  }
  function render(){
   clockKey='';renderCurrent();const start=qs('#shiftCalendarDate').value||SHIFT_MIN_DATE,span=Number(qs('#shiftCalendarSpan').value),team=qs('#shiftCalendarTeam').value,current=shiftCurrentSlot(),today=todayDate(),index=new Map(state.rows.map(r=>[r.date+'|'+r.team,r]));
