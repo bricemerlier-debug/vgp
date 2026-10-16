@@ -239,3 +239,5 @@ button.material-sort-header{display:inline-flex;align-items:center;justify-conte
 .navigation-hover-edge{position:fixed;inset:0 auto 0 0;width:10px;z-index:90}.navigation[open]{z-index:100;box-shadow:8px 0 28px #102f5230}@media(hover:none),(pointer:coarse){.navigation-hover-edge{display:none}}
 
 .settings-menu .settings-logout{margin-top:16px;border-top:1px solid #ccd9e7;border-left:3px solid #a53d30;color:#85241d;background:#fbe8e4;font-weight:700}
+
+.home-goal>div:first-child{flex:1;min-width:0}.home-month-heading{display:flex;align-items:center;gap:20px;flex-wrap:wrap}.home-month-heading h2{margin-right:auto}.home-month-heading .calendar-controls{gap:6px}.home-month-heading button{min-height:44px}.home-month-heading #homeCurrentMonth{white-space:nowrap}@media(max-width:600px){.home-month-heading{gap:8px}.home-month-heading .calendar-controls{width:100%}.home-goal>div:first-child{width:100%}}
