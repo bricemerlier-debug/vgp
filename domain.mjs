@@ -112,7 +112,7 @@ export function weeklySchedule(equipment,start){
  for(const day of days)day.entries.sort((a,b)=>a.name.localeCompare(b.name,'fr')||a.identifier.localeCompare(b.identifier,'fr',{numeric:true}));return days;
 }
 
-export function equipmentAlerts(equipment,today){return equipment.filter(e=>!e.archived&&['À faire','En retard'].includes(status(e,today))).map(e=>({equipmentId:e.id,name:equipmentName(e),identifier:e.identifier,date:due(e),state:status(e,today)})).sort((a,b)=>a.date.localeCompare(b.date)||a.identifier.localeCompare(b.identifier,'fr'))}
+export function equipmentAlerts(equipment,today){return equipment.filter(e=>!e.archived&&['À faire','En retard'].includes(status(e,today))).map(e=>({equipmentId:e.id,name:equipmentName(e),identifier:e.identifier,date:due(e),state:status(e,today)})).sort((a,b)=>b.date.localeCompare(a.date)||a.identifier.localeCompare(b.identifier,'fr'))}
 
 // Tableau de bord opérationnel : contrôle réalisé et conformité restent distincts.
 export function homeSummary(equipment,today){
