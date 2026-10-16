@@ -1,0 +1,14 @@
+"""Historique unifié : affichage/PDF locaux, aucune écriture de production."""
+from pathlib import Path
+exec((Path(__file__).with_name('material_sort.py')).read_text().split('with sync_playwright() as p:')[0])
+e=source['equipment'][0];e['controls']=[{'id':'actual','reportId':'17','date':'2026-10-10','intervenant':'Contrôleur fictif','result':'Bon état','observations':'Contrôle de test','created':1}];e['archiveHistory']=[{'id':'loss','reportId':'18','workflow':'loss-declaration','type':'archive','reason':'Équipement perdu','date':'2026-10-16','requester':'Contrôleur fictif','account':'test@example.com','observations':'Introuvable après recherche'}];e['archived']=True
+with sync_playwright() as p:
+ b=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+ for path in ['/#material','/prototype-vgp.html#material']:
+  page=b.new_page(viewport={'width':390,'height':844},accept_downloads=True);errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.route('**/cloud-config.js',lambda r:r.fulfill(body='window.VGP_CLOUD={enabled:false};',content_type='text/javascript'));page.add_init_script('if(!localStorage.getItem("vgp-prototype-v1"))localStorage.setItem("vgp-prototype-v1",'+json.dumps(json.dumps(source))+');');page.goto('http://127.0.0.1:8000'+path);page.locator('#list [data-open="sort-fictif-1"]').click();expect(page.locator('#overviewTab')).to_have_text('Contrôles (2)');rows=page.locator('.control-history-table tbody tr');expect(rows).to_have_count(2);expect(rows.nth(0)).to_contain_text('16/10/2026');expect(rows.nth(0)).to_contain_text('Introuvable');expect(rows.nth(0)).to_contain_text('Contrôleur fictif');expect(rows.nth(0).locator('td').nth(3)).to_have_text('18');expect(rows.nth(1)).to_contain_text('Bon état');expect(rows.nth(0).locator('.control-result')).to_have_class('control-result control-result-lost')
+  for row in [rows.nth(0),rows.nth(1)]:
+   with page.expect_download() as download:row.get_by_role('button',name='Télécharger le PDF').click()
+   assert Path(download.value.path()).read_bytes().startswith(b'%PDF')
+  page.evaluate("()=>{window.previewTarget={location:{href:''},close(){}};window.open=()=>window.previewTarget}");rows.nth(0).get_by_role('button',name='Lire le rapport').click();page.wait_for_function("window.previewTarget.location.href.startsWith('blob:')");assert page.evaluate("async()=>{const r=await fetch(window.previewTarget.location.href);return (await r.text()).startsWith('%PDF')}");assert json.loads(page.evaluate('localStorage.getItem("vgp-prototype-v1")'))==source;assert page.evaluate('document.documentElement.scrollWidth')==390;assert not errors,errors;page.close()
+ b.close()
+print('PASS historique : compteur introuvable inclus, lignes triées, statuts, contrôleur/numéro, PDF lecture/téléchargement, mobile et données inchangées sur module/autonome.')

@@ -1,0 +1,4 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {equipmentControlHistory} from '../equipment-control-history.mjs';
+test('compte les déclarations sans doubler les contrôles historiques migrés',()=>{const e={controls:[{id:'real',date:'2026-10-10',result:'Bon état'},{id:'old',date:'2026-10-11',result:'Introuvable'}],archiveHistory:[{id:'loss',originalControlId:'old',workflow:'loss-declaration',date:'2026-10-11',requester:'Testeur'},{id:'found',workflow:'restore-found',date:'2026-10-12'}]};const before=JSON.stringify(e),rows=equipmentControlHistory(e);assert.equal(rows.length,2);assert.deepEqual(rows.map(r=>r.id),['loss','real']);assert.equal(rows[0].result,'Introuvable');assert.equal(rows[0].intervenant,'Testeur');assert.equal(JSON.stringify(e),before);e.historyDisplayRemovals=[{eventId:'loss'}];assert.deepEqual(equipmentControlHistory(e).map(r=>r.id),['real']);});
