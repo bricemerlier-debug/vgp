@@ -1,0 +1,15 @@
+"""KPI par type, variantes regroupées ; données locales, aucune production."""
+from pathlib import Path
+exec((Path(__file__).with_name('workspace_paths_browser.py')).read_text().split('with sync_playwright() as p:')[0])
+source['equipment']=[gear(i,'ANNEAU-'+str(i)) for i in range(1,5)]+[gear(5,'ARCHIVE',archive=True),gear(6,'MANILLE')]
+for i,e in enumerate(source['equipment'][:4]):
+ e['firstControlDate']='2026-12-31' if i<3 else '2026-09-01'
+ if i%2:e['variantId']='anneau-m30';e['standardName']='Anneau de retournement · M30'
+source['equipment'][-1].update(typeId='manille',variantId='',standardName='Manille',firstControlDate='2026-09-01')
+source['equipmentTypes'].append({'id':'vide','name':'Type sans matériel','variants':[]})
+with sync_playwright() as p:
+ b=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+ for path in ['/#kpi','/prototype-vgp.html#kpi']:
+  page=b.new_page(viewport={'width':390,'height':844});errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.clock.install(time=datetime(2026,10,16,10,tzinfo=timezone.utc));page.route('**/cloud-config.js',lambda r:r.fulfill(body='window.VGP_CLOUD={enabled:false};',content_type='text/javascript'));page.add_init_script('localStorage.setItem("vgp-prototype-v1",'+json.dumps(json.dumps(source))+');');page.goto('http://127.0.0.1:8000'+path);row=page.locator('#kpiTypeStatsList [data-kpi-type="anneau-retournement"]');expect(row).to_have_count(1);expect(row).to_contain_text('75 %');expect(row).to_contain_text('3 / 4 équipements');expect(row).to_have_class('sector-progress sector-warning');expect(page.locator('[data-kpi-type="manille"]')).to_have_class('sector-progress sector-low');expect(page.locator('[data-kpi-type="vide"]')).to_contain_text('Non applicable');expect(page.locator('[data-kpi-type="vide"]')).to_be_disabled();assert page.locator('#kpiTypeStats').bounding_box()['y']>page.locator('#kpiVisual').bounding_box()['y'];row.focus();row.press('Enter');expect(page.locator('#kpiListTitle')).to_have_text('Équipements · Anneau de retournement');expect(page.locator('#kpiListContent [data-kpi-open-equipment]')).to_have_count(4);expect(page.locator('#kpiListContent')).to_contain_text('ANNEAU-1');expect(page.locator('#kpiListContent')).to_contain_text('ANNEAU-2');expect(page.locator('#kpiListContent')).not_to_contain_text('ARCHIVE');expect(page.locator('#kpiListContent')).not_to_contain_text('MANILLE');page.keyboard.press('Escape');expect(row).to_be_focused();page.locator('#monthlyYear').fill('2022');page.locator('#monthlyYear').dispatch_event('change');expect(row).to_contain_text('75 %');assert page.evaluate('document.documentElement.scrollWidth')==390;assert json.loads(page.evaluate('localStorage.getItem("vgp-prototype-v1")'))==source;assert not errors,errors;page.close()
+ b.close()
+print('PASS KPI types : en bas de page, variantes regroupées, 75 % jaune/0 % rouge/non applicable vert, consultation groupée au clavier, archives exclues, mobile/module/autonome, aucune écriture.')
