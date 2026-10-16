@@ -235,3 +235,5 @@ button.material-sort-header{display:inline-flex;align-items:center;justify-conte
 .scrapped-row .equipment-context{color:#fff;font-size:13px;font-weight:500}.scrapped-row .owner-review-label{color:#ffe59a}.lost-row .equipment-context{color:#593681;font-size:13px}
 
 .home-month-counts{display:flex;gap:36px;flex-wrap:wrap;margin:18px 0}.home-month-counts>div{display:flex;flex-direction:column;gap:5px}.home-month-counts strong{font-size:30px;color:#003e70;line-height:1.2}.home-month-counts strong span{font-size:20px;font-weight:500;color:#526780}.home-month-counts>div>span{font-size:13px;color:#385c7f}
+
+.navigation-hover-edge{position:fixed;inset:0 auto 0 0;width:10px;z-index:90}.navigation[open]{z-index:100;box-shadow:8px 0 28px #102f5230}@media(hover:none),(pointer:coarse){.navigation-hover-edge{display:none}}

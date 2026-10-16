@@ -1,3 +1,4 @@
+import {installSlidingNavigation} from './sliding-navigation.mjs';
 import {equipmentControlHistory} from './equipment-control-history.mjs';
 import {installEquipmentDraftGuard} from './equipment-draft-guard.mjs';
 import {installOwnerReturnMail} from './owner-return-mail.mjs';
@@ -238,9 +239,7 @@ $('#settingsToggle').onclick=()=>{$('#settingsToggle').setAttribute('aria-expand
 function renderAssociationList(){const q=searchKey($('#associationSearch').value);const items=data.equipment.filter(e=>!materialArchived(e)&&searchKey([e.identifier,equipmentNamingSearch(e),e.serialNumber,e.siteId,e.sector,e.zone,e.location,...equipmentOwners(e)].join(' ')).includes(q));$('#associationList').innerHTML=items.length?`<table><thead><tr><th>Équipement</th><th>Propriétaire(s) actuel(s)</th><th></th></tr></thead><tbody>${items.map(e=>`<tr><td>${equipmentLabel(e)}</td><td>${esc(equipmentOwners(e).join(', '))||'Non renseigné'}</td><td><button class="secondary" data-associate="${e.id}" ${equipmentHasOwner(e,selectedOwner)?'disabled':''}>${equipmentHasOwner(e,selectedOwner)?'Déjà associé':'Associer'}</button></td></tr>`).join('')}</tbody></table>`:'<p class="empty">Aucun équipement actif correspondant.</p>';$('#associationList').querySelectorAll('[data-associate]').forEach(button=>button.onclick=async()=>{const e=data.equipment.find(e=>e.id===button.dataset.associate),owner=selectedOwner;if(!e||materialArchived(e)||owner===null||button.disabled)return;if(equipmentOwners(e).length&&!confirm(`Associer également l’équipement ${e.identifier} à ${owner} ? Les propriétaires déjà associés seront conservés.`))return;button.disabled=true;try{const next=copyData(data);addEquipmentOwner(next.equipment.find(item=>item.id===e.id),owner);if(await save(next)){$('#associateDialog').close();$('#message').textContent=`Équipement ${e.identifier} associé à ${owner}${memoryOnly?' pour cette session uniquement':''}.`;$('#ownerProfileName').focus();}else $('#associationError').textContent=$('#message').textContent;}catch(error){$('#associationError').textContent=error.message;}finally{button.disabled=false;}});}
 
 $('#associationSearch').oninput=renderAssociationList;
-$('#menuToggle').onclick=()=>{$('#menuToggle').setAttribute('aria-expanded','true');$('#navigation').showModal()};
-$('#navigation').addEventListener('close',()=>$('#menuToggle').setAttribute('aria-expanded','false'));
-$('#navigation').addEventListener('click',ev=>{if(ev.target===$('#navigation')){const rect=ev.target.getBoundingClientRect();if(ev.clientX<rect.left||ev.clientX>rect.right||ev.clientY<rect.top||ev.clientY>rect.bottom)ev.target.close()}});
+installSlidingNavigation();
 document.querySelectorAll('[data-view]').forEach(button=>button.onclick=()=>setView(button.dataset.view));
 $('#clearOwnerFilter').onclick=()=>{ownerFilter=null;render()};
 $('#createOwner').onclick=()=>openOwnerCreation('list');
