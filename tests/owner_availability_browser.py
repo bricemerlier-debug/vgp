@@ -5,6 +5,7 @@ exec((Path(__file__).with_name('workspace_paths_browser.py')).read_text().split(
 source['owners']=['Alice','Bob'];source['ownerContacts']=[{'owner':'Alice','email':'','team':'B'}]
 source['equipment'][0].update(owner='Alice',team='A',firstControlDate='2026-10-15')
 source['equipment'][2].update(owner='Bob',team='',firstControlDate='2026-10-15')
+source['equipment'].append(gear(4,'SANS-AFFECTATION','Pas de secteur'));source['equipment'][-1].update(team='Pas d’équipe',firstControlDate='2026-10-15')
 planning={'revision':1,'rows':[{'date':'2026-10-15','team':'B','code':'M','sourceCell':'A1'},{'date':'2026-10-16','team':'B','code':'S','sourceCell':'A2'}],'imports':[]}
 with sync_playwright() as p:
  b=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox']);page=b.new_page(viewport={'width':390,'height':844});errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
@@ -15,6 +16,9 @@ with sync_playwright() as p:
  card=page.locator('#weeklyCalendar [data-calendar-equipment="1"]');expect(card).to_contain_text('Alice · Équipe B');expect(card).to_contain_text('Présent en même temps aujourd’hui');expect(card).to_contain_text('8 h–13 h')
  expect(page.locator('#weeklyCalendar [data-calendar-equipment="3"] [data-owner-presence]')).to_be_hidden()
  expect(card.locator('.calendar-owner')).to_have_text('Propriétaire : Alice')
+ expect(page.locator('#weeklyCalendar [data-calendar-equipment="3"] .calendar-assignment')).not_to_contain_text('Équipe')
+ expect(page.locator('#weeklyCalendar [data-calendar-equipment="4"] .calendar-owner')).to_have_count(0)
+ expect(page.locator('#weeklyCalendar [data-calendar-equipment="4"] .calendar-assignment')).to_have_count(0)
  expect(page.locator('#weeklyCalendar [data-calendar-equipment="3"] .calendar-owner')).to_have_text('Propriétaire : Bob')
  expect(page.locator('#homeWeeklyCalendar [data-calendar-equipment="3"] .calendar-owner')).to_have_text('Propriétaire : Bob')
  card.click();expect(page.locator('#detailContent [data-owner-presence]')).to_contain_text('Alice · Équipe B')
