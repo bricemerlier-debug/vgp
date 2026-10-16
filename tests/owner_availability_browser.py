@@ -14,6 +14,9 @@ with sync_playwright() as p:
  page.goto('http://127.0.0.1:8000/'+('index.html' if os.getenv('VGP_TEST_MODULE') else 'prototype-vgp.html')+'#planning')
  card=page.locator('#weeklyCalendar [data-calendar-equipment="1"]');expect(card).to_contain_text('Alice · Équipe B');expect(card).to_contain_text('Présent en même temps aujourd’hui');expect(card).to_contain_text('8 h–13 h')
  expect(page.locator('#weeklyCalendar [data-calendar-equipment="3"] [data-owner-presence]')).to_be_hidden()
+ expect(card.locator('.calendar-owner')).to_have_text('Propriétaire : Alice')
+ expect(page.locator('#weeklyCalendar [data-calendar-equipment="3"] .calendar-owner')).to_have_text('Propriétaire : Bob')
+ expect(page.locator('#homeWeeklyCalendar [data-calendar-equipment="3"] .calendar-owner')).to_have_text('Propriétaire : Bob')
  card.click();expect(page.locator('#detailContent [data-owner-presence]')).to_contain_text('Alice · Équipe B')
  # Le changement de créneau actualise le texte sans fermer un formulaire ouvert.
  page.locator('#edit').click();page.clock.fast_forward(5*60*60*1000);expect(page.locator('#editor')).to_be_visible();expect(page.locator('#detailContent [data-owner-presence]')).to_contain_text('16/10');expect(page.locator('#detailContent [data-owner-presence]')).to_contain_text('13 h–17 h');page.locator('[data-close=editor]').click()
