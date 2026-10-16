@@ -190,3 +190,5 @@ main{max-width:1240px;padding-top:40px}.intro{margin-bottom:32px}h1{color:var(--
 @media(max-width:600px){#namingView .equipment-tabs{gap:6px}#namingView .equipment-tabs button{padding:12px 10px}#planningView .weekly-calendar{grid-template-columns:repeat(7,minmax(140px,1fr))}#importsView .panel,#namingView .panel,#reminderSimulation{padding:16px}.active-filters{font-size:12px}#administrationView .actions{display:flex;flex-direction:column;align-items:stretch}}
 #namingView #autoNamingDialog{padding:0;max-height:none;width:100%;min-width:0;position:relative}#namingView .naming-review-table{position:relative;isolation:isolate;max-width:100%}
 @media(max-width:600px){#namingView .naming-review-table td:nth-child(2),#namingView .naming-review-table th:nth-child(2){position:static}#namingView .naming-review-table th:nth-child(2){position:sticky;top:0}}
+
+.plans-quick-filters{display:flex;align-items:center;flex-wrap:wrap;gap:12px 24px;margin-bottom:18px}.plans-quick-filters>.equipment-tabs{flex-wrap:wrap;max-width:100%;margin-bottom:0}
