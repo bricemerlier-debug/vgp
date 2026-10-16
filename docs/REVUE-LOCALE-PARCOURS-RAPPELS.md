@@ -14,6 +14,10 @@
 | `supabase/functions/vgp-digests/index.ts` et SQL 005 | Code de fonction de bilans et réservation atomique ; simulation par défaut, chemin Microsoft 365 sous indicateur serveur | Code existant conservé et testé avec `fetch` simulé. Ni déploiement ni activation vérifiés ou revendiqués |
 | Navigation et nomenclature | Calendrier dupliqué, imports dans un dialogue de paramètres, deux parcours de standardisation, compteurs réinitialisant les filtres | Modules métier conservés, sections réorganisées et contexte conservé |
 
+## Navigation regroupée après la revue initiale
+
+Le menu sert désormais à changer entre trois espaces : **Matériel et contrôles VGP**, **Plans d’action**, **Personnel**. Des onglets en haut de page donnent accès directement à Liste du matériel / KPI VGP / Planification, et à Contrôleurs / Personnel affecté au matériel. Les onglets Suivi / KPI des plans d’action sont conservés. Aujourd’hui et les outils d’import/administration restent disponibles. Les anciennes URL et les modules métier sont conservés ; `tests/grouped_navigation_browser.py` vérifie les onglets, le clavier, les recherches conservées, les retours fiche, le 5×8 et le mobile sans modifier les données.
+
 ## Parcours à examiner
 
 - **Aujourd’hui** (`#home`) : priorités et résumé hebdomadaire, deux équipements au maximum par jour puis accès à Planification. Les états Introuvable et Mis au rebut restent dans l'agenda complet.

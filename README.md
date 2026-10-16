@@ -1,6 +1,6 @@
 ## Parcours et rappels en simulation
 
-Navigation en sept parcours, nomenclature unifiée et rappels **en simulation uniquement** : [version locale, preuves et étapes IT](docs/REVUE-LOCALE-PARCOURS-RAPPELS.md). `prototype-vgp.html` reste hors connexion à Supabase. Les nouveaux contacts et la file du navigateur sont isolés dans IndexedDB ; aucun compte Microsoft 365 ni ordonnanceur n’est activé. Le worker serveur simulé se teste sur une base SQLite locale. La publication du site a été autorisée après la revue locale ; elle n’active aucun envoi, aucun compte Microsoft 365 ni aucun traitement serveur.
+Navigation en trois espaces (Matériel et contrôles VGP, Plans d’action, Personnel), nomenclature unifiée et rappels **en simulation uniquement** : [version locale, preuves et étapes IT](docs/REVUE-LOCALE-PARCOURS-RAPPELS.md). `prototype-vgp.html` reste hors connexion à Supabase. Les nouveaux contacts et la file du navigateur sont isolés dans IndexedDB ; aucun compte Microsoft 365 ni ordonnanceur n’est activé. Le worker serveur simulé se teste sur une base SQLite locale. La publication du site a été autorisée après la revue locale ; elle n’active aucun envoi, aucun compte Microsoft 365 ni aucun traitement serveur.
 
 ## Planning des équipes 5×8
 
@@ -147,7 +147,7 @@ Test : `python tests/preview.py` sert le fichier autonome dans une iframe sandbo
 
 ## Métrologie : navigation par activité
 
-La version locale utilise les parcours Aujourd’hui, Matériel, Planification, Actions correctives, Imports et rapports, Pilotage, Référentiels / administration. Le contenant reste hors périmètre. Les équipements VGP, leurs contrôles et leurs sauvegardes gardent le même format et la même clé de stockage.
+Le menu distingue trois espaces : Matériel et contrôles VGP (onglets Liste du matériel / KPI VGP / Planification), Plans d’action (Suivi / KPI existants) et Personnel (Contrôleurs / Personnel affecté au matériel). Aujourd’hui reste accessible, et les imports ainsi que l’administration sont regroupés dans Outils. Les recherches, filtres, année des KPI et semaine affichée restent conservés entre les onglets. Le contenant reste hors périmètre. Les équipements VGP, leurs contrôles et leurs sauvegardes gardent le même format et la même clé de stockage.
 
 ## Identifiants VGP et séparation des archives
 

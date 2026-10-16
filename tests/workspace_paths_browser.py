@@ -18,7 +18,13 @@ with sync_playwright() as p:
   else:blocked.append(route.request.url);route.abort()
  context.route('**/*',network);context.add_init_script('if(!localStorage.getItem("vgp-prototype-v1"))localStorage.setItem("vgp-prototype-v1",'+json.dumps(json.dumps(source))+');')
  page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)));page.clock.install(time=datetime(2026,10,1,5,tzinfo=timezone.utc));page.goto('http://127.0.0.1:8000/#material');expect(page.locator('#materialView')).to_be_visible()
- def nav(view):page.locator('#menuToggle').click();page.locator('#navigation [data-view='+view+']').click()
+ def nav(view):
+  if view in ['kpi','planning']:
+   if not page.locator('#vgpWorkspace').is_visible():
+    page.locator('#menuToggle').click();page.locator('#navigation [data-view=material]').click()
+   page.locator('#vgpWorkspace [data-workspace-view='+view+']').click()
+  else:
+   page.locator('#menuToggle').click();page.locator('#navigation [data-view='+view+']').click()
  assert page.locator('#materialView #weeklyCalendar').count()==0
  assert page.locator('#search').bounding_box()['y']<page.locator('#stats').bounding_box()['y']
  page.locator('#search').fill('ACTIF');page.locator('#filter').select_option('À faire');page.locator('#sectorFilter').select_option('B2');page.locator('#typeFilter').select_option('anneau-retournement');page.locator('#variantFilter').select_option('anneau-m16');expect(page.locator('#list tbody tr')).to_have_count(1);expect(page.locator('#list')).to_contain_text('ACTIF-16');expect(page.locator('#activeFilters')).to_contain_text('Recherche : ACTIF');expect(page.locator('#activeFilters')).to_contain_text('Type : Anneau')
