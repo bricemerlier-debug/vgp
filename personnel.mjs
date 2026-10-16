@@ -11,7 +11,7 @@ export function personnelOperationPreview(state,kind,sourceId,targetId=null){
  const equipment=state.equipment.filter(e=>kind==='owner'?equipmentHasOwner(e,source.name):e.controls.some(c=>controls.includes(c)));
  const sourceContact=kind==='controller'?profile:(state.ownerContacts||[]).find(c=>personKey(c.owner)===personKey(source.name))||{};
  const targetContact=target?(kind==='controller'?state.controllerProfiles.find(p=>p.id===target.id):(state.ownerContacts||[]).find(c=>personKey(c.owner)===personKey(target.name))||{}):{};
- const fields=kind==='controller'?['email','signature']:['email','team','service','sector','zone'],copied=[],conflicts=[];
+ const fields=kind==='controller'?['email','signature']:['email','team','service','jobTitle','sector','zone'],copied=[],conflicts=[];
  for(const field of fields){if(!sourceContact[field])continue;if(field==='zone'&&!sectorZones(targetContact.sector||sourceContact.sector).includes(sourceContact.zone))continue;if(!targetContact[field])copied.push(field);else if(JSON.stringify(targetContact[field])!==JSON.stringify(sourceContact[field]))conflicts.push(field);}
  return {kind,source,target,equipment:equipment.map(e=>({id:e.id,identifier:e.identifier})),controls:controls.length,copied,conflicts,sourceContact,targetContact};
 }

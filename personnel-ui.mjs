@@ -1,7 +1,7 @@
 import {personnelChoices,personnelOperationPreview,applyPersonnelOperation} from './personnel.mjs';
 export function installPersonnelOperations({read,save,valid,author,before=()=>true,onChanged=()=>{}}){
  const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- const labels={email:'Adresse e-mail',signature:'Signature',team:'Équipe',service:'Service',sector:'Secteur',zone:'Zone'};
+ const labels={email:'Adresse e-mail',signature:'Signature',team:'Équipe',service:'Service',jobTitle:'Poste',sector:'Secteur',zone:'Zone'};
  const dialog=document.createElement('dialog');dialog.id='personMergeDialog';dialog.setAttribute('aria-labelledby','personMergeTitle');dialog.innerHTML=`<form id="personMergeForm"><div class="dialoghead"><h2 id="personMergeTitle">Fusionner une fiche</h2><button type="button" class="close" id="personMergeClose" aria-label="Fermer">×</button></div><p id="personMergeSource"></p><label>Fiche existante à conserver *<select id="personMergeTarget" required><option value="">Choisir une fiche</option></select></label><div id="personMergePreview"></div><label class="approval-check"><input id="personMergeConfirmed" type="checkbox" required>J’ai vérifié la fiche de destination et les informations de la fusion.</label><p id="personMergeError" class="error" role="alert"></p><button type="submit" id="personMergeApply" disabled>Confirmer la fusion</button></form>`;document.body.append(dialog);
  const q=s=>dialog.querySelector(s);let context=null,busy=false;
  const value=(contact,field)=>field==='signature'?(contact.signature?.name||'Aucune'):contact[field]||'Non renseigné';
