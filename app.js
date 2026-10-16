@@ -54,9 +54,8 @@ if(window.VGP_CLOUD?.enabled){
  if(cloud.session){try{await openCloud()}catch(error){$('#authError').textContent=error.message;}}
  if(!cloudState)await new Promise(resolve=>{$('#loginForm').onsubmit=async event=>{event.preventDefault();const button=$('#loginForm button');button.disabled=true;try{const form=new FormData(event.target);await cloud.login(form.get('email'),form.get('password'),form.get('remember')==='on');event.target.reset();await openCloud();resolve()}catch(error){$('#authError').textContent=error.message}finally{button.disabled=false}}});
  document.documentElement.classList.remove('cloud-locked');$('#authGate').hidden=true;
- if(cloud.persistenceWarning)$('#message').textContent=cloud.persistenceWarning;$('.header-settings small').textContent='DONNÉES CENTRALISÉES';$('#cloudAccount').hidden=false;
- $('#cloudLogout').onclick=async()=>{try{await cloud.logout()}finally{location.reload()}};
- $('#cloudRefresh').onclick=()=>{if(equipmentEditorGuard.dirty()){equipmentEditorGuard.request(()=>{$('#editor').close();location.reload();});return;}if(confirm('Recharger les données partagées ? Les formulaires non enregistrés seront fermés.'))location.reload()};
+ if(cloud.persistenceWarning)$('#message').textContent=cloud.persistenceWarning;$('#cloudLogout').hidden=false;
+ $('#cloudLogout').onclick=async()=>{const button=$('#cloudLogout');if(button.disabled)return;const logout=async()=>{if(hasUnsavedForm()){if(!confirm('Des modifications ne sont pas enregistrées. Se déconnecter et les abandonner ?'))return;dirtyForms.clear();}button.disabled=true;try{await cloud.logout();}finally{location.reload();}};if(equipmentEditorGuard.dirty()){equipmentEditorGuard.request(()=>{$('#editor').close();logout();});return;}await logout();};
 }else $('#authGate').hidden=true;
 let storedRaw=null;
 try{storedRaw=localStorage.getItem(KEY)}catch{memoryOnly=true;$('#storageNotice').hidden=false}
