@@ -1,5 +1,5 @@
 import {SHIFT_TEAMS,SHIFT_CODES,SHIFT_MIN_DATE,shiftDayAdd,shiftParisParts,shiftCurrent,shiftCurrentSlot,shiftNextSlot,shiftOccupant,shiftSlot,shiftSlotState,shiftRowsValid,parseShiftGlobal,shiftImportPreview,shiftUpcoming} from './shift-calendar.mjs';
-export function installShiftCalendar({cloud=null}={}){
+export function installShiftCalendar({cloud=null,onChange=()=>{}}={}){
  const qs=s=>document.querySelector(s),safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),key='vgp-shift-calendar-v1';
  let state={revision:0,rows:[],imports:[]},preview=null,grid=null,loading=false,busy=false,clockKey='',fileToken=0,headerOffset=0,headerSlotKey='';
  const dateFmt=date=>new Date(date+'T12:00:00Z').toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric',timeZone:'UTC'});
@@ -22,7 +22,7 @@ export function installShiftCalendar({cloud=null}={}){
  qs('#headerShiftNext').onclick=()=>{if(headerOffset<21)headerOffset++;renderHeader();};
  qs('#headerShiftLive').onclick=()=>{headerOffset=0;renderHeader();};
  function renderCurrent(){
-  const current=shiftCurrent(state.rows),p=shiftParisParts(),stamp=state.revision+'|'+p.date+'|'+p.hour+'|'+p.minute;if(stamp===clockKey)return;clockKey=stamp;renderHeader(current);
+  const current=shiftCurrent(state.rows),p=shiftParisParts(),stamp=state.revision+'|'+p.date+'|'+p.hour+'|'+p.minute;if(stamp===clockKey)return;clockKey=stamp;renderHeader(current);onChange(state.rows);
  }
  function render(){
   clockKey='';renderCurrent();const start=qs('#shiftCalendarDate').value||SHIFT_MIN_DATE,span=Number(qs('#shiftCalendarSpan').value),team=qs('#shiftCalendarTeam').value,current=shiftCurrentSlot(),today=todayDate(),index=new Map(state.rows.map(r=>[r.date+'|'+r.team,r]));
@@ -65,5 +65,5 @@ export function installShiftCalendar({cloud=null}={}){
   finally{busy=false;qs('#shiftImportClose').disabled=false;qs('#shiftImportFile').disabled=false;qs('#shiftImportAnalyze').disabled=false;updateApply();await load();render();}};
  render();load();setInterval(()=>{const old=clockKey;renderCurrent();if(old!==clockKey&&!qs('#shiftCalendarView').hidden)render();},1000);
  setInterval(()=>{if(!qs('#shiftImportDialog').open)load();},60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){clockKey='';render();if(!qs('#shiftImportDialog').open)load();}});
- window.addEventListener('storage',event=>{if(!cloud&&event.key===key)load();});return {render,load};
+ window.addEventListener('storage',event=>{if(!cloud&&event.key===key)load();});return {render,load,rows:()=>state.rows};
 }
