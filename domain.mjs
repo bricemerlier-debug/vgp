@@ -53,6 +53,9 @@ export function monthlyProgress(equipment,year,today){
  return {months,unknownHistory};
 }
 
+// Cumul pondéré des échéances : les mois futurs ne pénalisent pas l’année en cours.
+export function annualCompletion(report,year,today){const currentYear=Number(today.slice(0,4)),throughMonth=Number(year)<currentYear?12:Number(year)===currentYear?Number(today.slice(5,7)):0,months=report.months.filter(m=>m.month<=throughMonth),total=months.reduce((n,m)=>n+m.total,0),done=months.reduce((n,m)=>n+m.done,0);return {throughMonth,total,done,percent:total?Math.round(done*100/total):null};}
+
 export function fillEmailTemplate(template,values){return template.replace(/\{\{\s*([a-z_]+)\s*\}\}/g,(match,key)=>Object.hasOwn(values,key)?String(values[key]):match)}
 
 export function reportConclusion(result,verifier,date){
