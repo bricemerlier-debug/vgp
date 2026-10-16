@@ -43,9 +43,11 @@ export function reminders(equipment) {
 
 export function monthlyProgress(equipment,year,today){
  const months=Array.from({length:12},(_,index)=>({month:index+1,total:0,done:0,onTime:0,late:0,excluded:0,remaining:0,overdue:0,percent:null,completionPercent:null,entries:[]}));let unknownHistory=0;
- for(const e of equipment){unknownHistory+=e.controls.filter(c=>isInspection(c)&&!c.plannedDate).length;
- for(const o of obligationEntries(e)){if(Number(o.date.slice(0,4))!==Number(year))continue;const m=months[Number(o.date.slice(5,7))-1];const done=!!o.done&&o.controlDate<=today,onTime=done&&o.controlDate<=o.date,late=done&&!onTime;const end=new Date(Date.UTC(year,m.month,0)).toISOString().slice(0,10);const currentExcluded=!!o.excludedAt&&o.excludedAt<=today&&!done,excluded=currentExcluded&&o.excludedAt<=o.date,overdue=!done&&o.date<today&&!excluded;
- m.entries.push({...o,done,onTime,late,excluded,currentExcluded,archived:!!e.archived,overdue});}
+ const closureState=reason=>['Équipement perdu','Introuvable — enregistrement historique'].includes(reason)?'lost':reason==='Mis au rebut'?'scrapped':null;
+ for(const e of equipment){unknownHistory+=e.controls.filter(c=>isInspection(c)&&!c.plannedDate).length;const archive=e.archived?[...(e.archiveHistory||[])].reverse().find(a=>a.type==='archive'):null,archiveState=closureState(archive?.reason);
+ for(const o of obligationEntries(e)){if(Number(o.date.slice(0,4))!==Number(year))continue;const m=months[Number(o.date.slice(5,7))-1],inspectionDone=!!o.done&&o.controlDate<=today,reason=closureState(o.excludedReason)||(!o.excludedAt?archiveState:null),resolutionDate=closureState(o.excludedReason)?o.excludedAt:reason?archive?.date:null,closed=!!reason&&!!resolutionDate&&resolutionDate<=today,done=inspectionDone||closed,onTime=inspectionDone&&o.controlDate<=o.date,late=inspectionDone&&!onTime;
+ const currentExcluded=!!o.excludedAt&&o.excludedAt<=today&&!done,excluded=currentExcluded&&o.excludedAt<=o.date,overdue=!done&&o.date<today&&!excluded,state=done&&archiveState&&archive.date<=today?archiveState:closed?reason:inspectionDone?'done':'pending';
+ m.entries.push({...o,done,inspectionDone,onTime,late,excluded,currentExcluded,state,resolutionDate:closed?resolutionDate:archiveState&&archive.date<=today?archive.date:null,archived:!!e.archived,overdue});}
  }
  for(const m of months){m.total=m.entries.length;m.done=m.entries.filter(o=>o.done).length;m.onTime=m.entries.filter(o=>o.onTime).length;m.late=m.entries.filter(o=>o.late).length;m.excluded=m.entries.filter(o=>o.excluded).length;m.remaining=m.entries.filter(o=>!o.done&&!o.currentExcluded&&!o.archived).length;m.overdue=m.entries.filter(o=>o.overdue).length;m.percent=m.total?Math.round(m.onTime/m.total*100):null;m.completionPercent=m.total?Math.round(m.done/m.total*100):null;}
  return {months,unknownHistory};
