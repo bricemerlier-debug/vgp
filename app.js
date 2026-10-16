@@ -79,7 +79,7 @@ async function refreshNamingData({ignoreForm=null}={}){
 
 let lastUpdated=new Date(),syncError='',syncing=false;
 const dirtyForms=new Set();
-const bulkOwnersUI=installBulkEquipmentOwners({read:()=>data,save,valid,refresh:form=>refreshNamingData({ignoreForm:form}),rerender:render,isReader:()=>cloud?.role==='reader',cleanForm:form=>dirtyForms.delete(form),message:text=>{if(text!==undefined)$('#message').textContent=text;return $('#message').textContent;}});
+const bulkOwnersUI=installBulkEquipmentOwners({read:()=>data,save,valid,refresh:form=>refreshNamingData({ignoreForm:form}),rerender:render,isReader:()=>cloud?.role==='reader',getAuthor:accountName,getDate:today,cleanForm:form=>dirtyForms.delete(form),message:text=>{if(text!==undefined)$('#message').textContent=text;return $('#message').textContent;}});
 const equipmentEditorGuard=installEquipmentDraftGuard({form:$('#equipmentForm'),editor:$('#editor'),onClean:()=>dirtyForms.delete($('#equipmentForm')),saveForm:()=>$('#equipmentForm').onsubmit({preventDefault(){},target:$('#equipmentForm')})});
 function hasUnsavedForm(except=null){return [...dirtyForms].some(form=>form!==except&&form.isConnected&&(form.getClientRects().length>0||currentView==='equipment'&&$('#detail').contains(form)))}
 document.addEventListener('input',event=>{const form=event.target.closest('form');if(form)dirtyForms.add(form)});
