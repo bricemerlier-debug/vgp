@@ -1,0 +1,79 @@
+
+$ python tools/build.py
+
+$ node --test tests/reminders.test.mjs tests/reminder_worker.test.mjs tests/nomenclature.test.mjs tests/naming_review.test.mjs tests/ownership.test.mjs tests/digest.test.mjs tests/weekly.test.mjs
+✔ bilan sectorisé : retards prioritaires, limites incluses, aucune fausse réalisation (11.887358ms)
+✔ mois bissextile, décembre et jours de déclenchement (0.459683ms)
+850 fiches analysées/validées en 3072 ms.
+✔ type explicite, repère distinct, accents/pluriels/abréviations et aucune fusion palan/pont (5.035525ms)
+✔ validation explicite, correction, conservation intégrale du suivi et recherche de tous les anciens noms (3.660511ms)
+✔ un ancien nom de salarié ne devient jamais propriétaire ni variante (0.509048ms)
+✔ règles exactes réutilisées uniquement après aperçu confirmé, corrections et désactivation historisées (1.556478ms)
+✔ repères APAVE exacts, doublons ambiguës et champs inconnus restent bloqués (0.372071ms)
+✔ volume : 850 équipements, sans mutation, prévisualisation et validation groupée (3076.528311ms)
+✔ ancien nom daté dans les commentaires automatiques, texte existant intact et sans doublon à la revalidation (1.19342ms)
+✔ type et variantes dépendantes, création sans doublons de libellé (1.679213ms)
+✔ classification conserve nom libre, contrôles, PDF et échéances historiques (2.766683ms)
+✔ groupes exacts de noms, aucune fusion sémantique, filtres et archives (1.759644ms)
+✔ anciennes sauvegardes admises, classification incohérente refusée (0.209296ms)
+✔ legacy owners and multiple associations remain distinct without duplicating names (2.23405ms)
+✔ future reminders include both owners, deduplicate e-mail and retain missing addresses (0.37105ms)
+✔ J-30 exact partagé aperçu/plan : fins de mois, année bissextile, année suivante, J0 et DST Paris (18.479391ms)
+✔ contacts explicites, plusieurs détenteurs, escalade J0, adresses manquantes et doublons non fusionnés (0.918265ms)
+✔ double exécution concurrente, persistance après réouverture, jamais envoyé (7.107299ms)
+✔ réseau simulé : reprises bornées, attente croissante, succès sans double (8.524867ms)
+✔ timeout fournisseur : résultat incertain, pas de relance automatique (8.458367ms)
+✔ contrôle après mise en file ET entre réservation et transport : annulation sans message (4.210129ms)
+✔ réaffectation du propriétaire ou du contact annule les anciennes étapes ; nouveau détenteur explicite (5.31053ms)
+✔ changement d’adresse, archivage, étape passée et J0 (12.300832ms)
+✔ aucun branchement réel possible, payload Microsoft 365 préparé sans réseau (1.203896ms)
+✔ jours exacts, fins de mois et délais de 30/14/7 jours (1.702528ms)
+✔ nouveau contrôle recalcule tous les rappels (0.458742ms)
+✔ semaine du lundi au dimanche, changement de mois/année (1.137415ms)
+✔ échéance puis contrôle réalisé : calendrier conservé, alerte résolue, archives exclues (0.932066ms)
+✔ perte et rebut restent au jour prévu, sans faux contrôle ni nouvelle échéance après rebut (8.648965ms)
+✔ un contrôle fait conserve son avancement mais affiche la situation actuelle perte/rebut (2.02232ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3174.1207
+
+$ node tests/cloud.mjs
+Client cloud : Auth, migration et relecture, échec réseau, clés et analyse Excel validés.
+
+$ node tests/database.mjs
+PostgreSQL : RLS, rôles, migration, pièces jointes, doublons, historique, conflits et transactions validés.
+
+$ node tests/digest_worker.mjs
+PASS worker : secret obligatoire, simulation sans mail/réservation, lundi premier du mois, réservation concurrente et absence de relance ambiguë. Tous les appels réseau sont simulés.
+
+$ node tests/digest_database.mjs
+PASS SQL bilans idempotent, RLS visiteurs/non-membres, écriture serveur seule et unicité de période.
+
+$ python tests/workspace_paths_browser.py
+PASS : recherche actif/archives et statut/secteur/type/variante, compteur sans perte, retour et focus, pages sans dialogue imbriqué, onglets clavier, introuvable, simulation persistante idempotente, données métier inchangées, viewport 390 px, HTML autonome, aucun réseau externe.
+
+$ python tests/workspace_reader_browser.py
+PASS : lecteur fictif, liste/recherche/fiche accessibles, modification refusée sans appel d’écriture ; RLS vérifiée séparément sur PostgreSQL isolé.
+
+$ python tests/home_browser.py
+PASS : accueil 75 % puis 100 %, listes et contrôle directs, ID, logo, agenda, synchronisation automatique, brouillons préservés, panne signalée et mobile.
+
+$ python tests/naming_review_browser.py
+PASS nomenclature navigateur : aperçu sans écriture, correction/validation/exclusion, ambiguïtés, règles, historique, périodes inchangées, recherches anciennes, propriétaire non inventé, import Excel confirmé, rechargement et mobile.
+
+$ python tests/naming_review_cloud_browser.py
+PASS nomenclature cloud simulé : lecture fraîche, aucune écriture avant validation humaine, conflit concurrent bloqué, réanalyse puis sauvegarde sans écraser l’autre poste, règles et recherche persistantes.
+
+$ python tests/nomenclature_browser.py
+PASS : noms libres conservés, types et variantes créés, deux fiches standardisées après aperçu, recherche par ancien et nouveau nom, historique, persistance et mobile.
+
+$ python tests/material_naming_filters_browser.py
+PASS filtres catalogue : menus recherchables, type/variantes exacts, tous les onglets/statuts, archives, contrôles réalisés et mois, reset/dépendance, retour fiche, mobile et zéro écriture.
+
+$ python tests/calendar_status_colors.py
+PASS agenda accueil/matériel : couleurs visibles et libellés, fait tardif vert, introuvables/rebut conservés et cliquables, données inchangées et mobile.

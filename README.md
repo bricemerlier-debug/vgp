@@ -1,3 +1,7 @@
+## Parcours et rappels en simulation
+
+Navigation en sept parcours, nomenclature unifiée et rappels **en simulation uniquement** : [version locale, preuves et étapes IT](docs/REVUE-LOCALE-PARCOURS-RAPPELS.md). `prototype-vgp.html` reste hors connexion à Supabase. Les nouveaux contacts et la file du navigateur sont isolés dans IndexedDB ; aucun compte Microsoft 365 ni ordonnanceur n’est activé. Le worker serveur simulé se teste sur une base SQLite locale. La publication du site a été autorisée après la revue locale ; elle n’active aucun envoi, aucun compte Microsoft 365 ni aucun traitement serveur.
+
 ## Planning des équipes 5×8
 
 Équipe en poste sur l’accueil, calendrier 7/30 jours, import du classeur officiel et stockage partagé séparé du parc VGP : [activation, format et tests](docs/PLANNING-5X8.md). Référence : « calendrier global », à partir du 01/10/2026 ; sous-équipes exclues.
@@ -20,7 +24,7 @@ Une [page de conversion](conversion-excel.html) prépare le classeur directement
 
 # Noms standardisés
 
-Types, variantes et reprise des anciens noms par groupes : voir [le guide](docs/NOMS-STANDARDISES.md). Cette fonctionnalité est publiée sur le site : types et variantes dans les fiches, puis standardisation par groupes dans les paramètres.
+Types, variantes et reprise des anciens noms par groupes : voir [le guide](docs/NOMS-STANDARDISES.md). La version locale regroupe désormais propositions, catalogue et correspondances dans une page ; les règles métier sont conservées.
 
 # Mise en service autorisée
 
@@ -143,7 +147,7 @@ Test : `python tests/preview.py` sert le fichier autonome dans une iframe sandbo
 
 ## Métrologie : navigation par activité
 
-Le site s’appelle Métrologie. Dans le menu, VGP regroupe Matériel, Propriétaires et KPI. Contenant regroupe Matériel et KPI : ces deux pages sont pour l’instant des espaces à compléter, sans gestion de contenants ni indicateurs calculés. Les équipements VGP, leurs contrôles et leurs sauvegardes gardent le même format et la même clé de stockage.
+La version locale utilise les parcours Aujourd’hui, Matériel, Planification, Actions correctives, Imports et rapports, Pilotage, Référentiels / administration. Le contenant reste hors périmètre. Les équipements VGP, leurs contrôles et leurs sauvegardes gardent le même format et la même clé de stockage.
 
 ## Identifiants VGP et séparation des archives
 
@@ -163,7 +167,7 @@ Test : `python tests/owner_association.py` avec serveur sur le port 8000.
 
 ## E-mail propriétaire et rappels (simulation)
 
-La fiche propriétaire permet d’enregistrer une adresse e-mail, incluse dans les sauvegardes. Le calendrier calcule quatre rappels pour chaque équipement VGP actif avec une échéance : un mois calendaire avant (jour ajusté en fin de mois), 14 jours avant, 7 jours avant, puis le jour de l’échéance. Chaque message peut être prévisualisé avec le destinataire, l’identifiant du matériel et sa date limite. Les dates sont recalculées après chaque contrôle et les associations sont relues : aucun calendrier périmé n’est stocké. Les archives ne génèrent aucun rappel. Les dates antérieures sont signalées comme passées, sans prétendre qu’un envoi a eu lieu.
+La fiche propriétaire permet d’enregistrer une adresse e-mail, incluse dans les sauvegardes. Le calendrier calcule quatre rappels pour chaque équipement VGP actif avec une échéance : 30 jours exacts avant, 14 jours avant, 7 jours avant, puis le jour de l’échéance. Chaque message peut être prévisualisé avec le destinataire, l’identifiant du matériel et sa date limite. Les dates sont recalculées après chaque contrôle et les associations sont relues : aucun calendrier périmé n’est stocké. Les archives ne génèrent aucun rappel. Les dates antérieures sont signalées comme passées, sans prétendre qu’un envoi a eu lieu.
 
 Aucun e-mail n’est envoyé, aucun traitement d’arrière-plan n’est actif et aucun journal d’envoi n’est simulé comme réel. Le message du jour de l’échéance contient une consigne interne proposée de suspension d’usage, explicitement à valider par l’entreprise. Ce message ne crée pas une règle réglementaire ni un blocage automatique du matériel dans le prototype.
 

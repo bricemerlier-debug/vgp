@@ -1,3 +1,4 @@
+import {reminderDates} from './reminder-dates.mjs';
 import {goodyearReportLogo} from './assets/report-logo.mjs';
 import {pdfFonts} from './assets/report-fonts.mjs';
 export function equipmentName(e){return e.standardName||e.designation;}
@@ -37,11 +38,7 @@ export function dashboard(equipment,today){
 export function reminders(equipment) {
   if(equipment.archived)return [];
   const deadline=due(equipment);if(!deadline)return [];
-  const before=days=>{const d=new Date(deadline+'T00:00:00Z');d.setUTCDate(d.getUTCDate()-days);return d.toISOString().slice(0,10)};
-  return [{kind:'month',label:'Un mois avant',date:addMonths(deadline,-1)},
-    {kind:'twoWeeks',label:'Deux semaines avant',date:before(14)},
-    {kind:'week',label:'Une semaine avant',date:before(7)},
-    {kind:'deadline',label:'Jour de l’échéance',date:deadline}].map(r=>({...r,deadline,equipmentId:equipment.id}));
+  return reminderDates(deadline).map(r=>({...r,equipmentId:equipment.id}));
 }
 
 export function monthlyProgress(equipment,year,today){

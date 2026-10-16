@@ -1,0 +1,75 @@
+{
+  "scope": "Recette isolée, données fictives, aucun mail réel, aucune publication",
+  "results": [
+    {
+      "command": "python tools/build.py",
+      "exit_code": 0,
+      "seconds": 0.04
+    },
+    {
+      "command": "node --test tests/reminders.test.mjs tests/reminder_worker.test.mjs tests/nomenclature.test.mjs tests/naming_review.test.mjs tests/ownership.test.mjs tests/digest.test.mjs tests/weekly.test.mjs",
+      "exit_code": 0,
+      "seconds": 3.22
+    },
+    {
+      "command": "node tests/cloud.mjs",
+      "exit_code": 0,
+      "seconds": 0.06
+    },
+    {
+      "command": "node tests/database.mjs",
+      "exit_code": 0,
+      "seconds": 1.89
+    },
+    {
+      "command": "node tests/digest_worker.mjs",
+      "exit_code": 0,
+      "seconds": 0.1
+    },
+    {
+      "command": "node tests/digest_database.mjs",
+      "exit_code": 0,
+      "seconds": 1.84
+    },
+    {
+      "command": "python tests/workspace_paths_browser.py",
+      "exit_code": 0,
+      "seconds": 5.97
+    },
+    {
+      "command": "python tests/workspace_reader_browser.py",
+      "exit_code": 0,
+      "seconds": 1.44
+    },
+    {
+      "command": "python tests/home_browser.py",
+      "exit_code": 0,
+      "seconds": 2.9
+    },
+    {
+      "command": "python tests/naming_review_browser.py",
+      "exit_code": 0,
+      "seconds": 4.4
+    },
+    {
+      "command": "python tests/naming_review_cloud_browser.py",
+      "exit_code": 0,
+      "seconds": 2.02
+    },
+    {
+      "command": "python tests/nomenclature_browser.py",
+      "exit_code": 0,
+      "seconds": 3.2
+    },
+    {
+      "command": "python tests/material_naming_filters_browser.py",
+      "exit_code": 0,
+      "seconds": 3.05
+    },
+    {
+      "command": "python tests/calendar_status_colors.py",
+      "exit_code": 0,
+      "seconds": 1.52
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "equipment": [
+    {
+      "id": "simulation-e1",
+      "identifier": "SIMULATION-1",
+      "designation": "Équipement fictif",
+      "owner": "Métrologie fictive",
+      "months": 12,
+      "controls": [],
+      "firstControlDate": "2026-10-31",
+      "periodicityValidation": {
+        "validated": true,
+        "months": 12,
+        "reason": "Règle fictive pour le test",
+        "by": "Testeur fictif",
+        "at": "2026-01-01T00:00:00Z"
+      },
+      "dateValidation": {
+        "validated": true,
+        "source": "Document fictif",
+        "reason": "Première échéance justifiée dans le test",
+        "by": "Testeur fictif"
+      }
+    }
+  ],
+  "reminderContacts": [
+    {
+      "id": "simulation-contact",
+      "name": "Métrologie fictive",
+      "type": "service",
+      "email": "metrologie@example.invalid",
+      "verification": "confirmed",
+      "updatedAt": "2026-09-01T12:00:00Z"
+    }
+  ],
+  "reminderAssignments": [
+    {
+      "equipmentId": "simulation-e1",
+      "contactId": "simulation-contact",
+      "role": "primary",
+      "status": "confirmed",
+      "ownershipStamp": "[\"métrologie fictive\"]",
+      "updatedAt": "2026-09-01T12:00:00Z"
+    }
+  ],
+  "mailTemplates": [
+    {
+      "kind": "month",
+      "subject": "VGP {{numero_interne}}",
+      "body": "Bonjour {{nom_proprietaire}}, retour au service Métrologie avant le {{date_controle}}."
+    },
+    {
+      "kind": "twoWeeks",
+      "subject": "VGP {{numero_interne}}",
+      "body": "Bonjour {{nom_proprietaire}}, retour au service Métrologie avant le {{date_controle}}."
+    },
+    {
+      "kind": "week",
+      "subject": "VGP {{numero_interne}}",
+      "body": "Bonjour {{nom_proprietaire}}, retour au service Métrologie avant le {{date_controle}}."
+    },
+    {
+      "kind": "deadline",
+      "subject": "VGP {{numero_interne}}",
+      "body": "Bonjour {{nom_proprietaire}}, retour au service Métrologie avant le {{date_controle}}."
+    }
+  ]
+}

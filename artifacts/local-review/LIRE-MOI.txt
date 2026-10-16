@@ -1,0 +1,16 @@
+VERSION LOCALE À EXAMINER — 16/10/2026
+
+Cette copie ne se connecte pas à Supabase. Aucun mail réel ni ordonnanceur.
+
+Ouvrir prototype-vgp.html dans Chrome/Edge pour la revue locale (données fictives).
+Pour les imports PDF et les modules servis par HTTP, lancer depuis ce dossier :
+  python -m http.server 8000 --bind 127.0.0.1
+Puis ouvrir l'application locale dans le navigateur.
+
+Parcours : menu à trois barres.
+Rappels : Référentiels / administration > Bilans et rappels > Simulation.
+Les contacts et la file de simulation sont persistés uniquement dans ce navigateur.
+
+Preuves : artifacts/local-review/ (captures, validation.log et validation.json).
+Fonctionnement et étapes IT futures : docs/REVUE-LOCALE-PARCOURS-RAPPELS.md.
+Rien n'a été publié ou déployé pour cette revue.

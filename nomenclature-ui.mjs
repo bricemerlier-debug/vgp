@@ -1,5 +1,5 @@
 import {suggestEquipmentNaming,applyNamingReview,saveNamingRule,standardizedLabel,historicalEquipmentName,namingSearchKey,technicalVariantIssue} from './nomenclature.mjs';
-export function installNamingReview({read,save,valid,author,newId,revision,refresh=async()=>{},onClose=()=>{}}){
+export function installNamingReview({read,save,valid,author,newId,revision,refresh=async()=>{},onClose=()=>{},navigate=()=>{},catalogue=()=>{}}){
  const $=s=>document.querySelector(s),safe=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const dialog=$('#autoNamingDialog');dialog.addEventListener('close',onClose);let preview=null,busy=false,page=0;
  const copy=value=>structuredClone(value),snapshot=()=>JSON.stringify(read()),labels={rule:'Règle validée',high:'Élevée',medium:'À vérifier',ambiguous:'Ambiguë',unmatched:'Non reconnue'};
@@ -29,8 +29,8 @@ export function installNamingReview({read,save,valid,author,newId,revision,refre
   $('#namingRuleList').querySelectorAll('[data-rule-toggle]').forEach(button=>button.onclick=async()=>{if(busy)return;const next=copy(read()),rule=next.namingRules[Number(button.dataset.ruleToggle)];if(!confirm(`${rule.enabled?'Désactiver':'Réactiver'} cette règle ? Aucun équipement existant ne sera modifié.`))return;saveNamingRule(next,{...rule,enabled:!rule.enabled},author(),new Date().toISOString());await persistRules(next);});
  }
  async function persistRules(next){busy=true;$('#namingRuleError').textContent='';try{if(!valid(next))throw Error('Règle invalide.');if(!await save(next))throw Error($('#message').textContent||'Écriture refusée.');preview=null;$('#autoNamingRows').innerHTML='';$('#autoNamingStatus').textContent='Règles enregistrées. Relancez l’analyse pour utiliser les nouvelles correspondances.';$('#namingRuleStatus').textContent='Règle enregistrée, sans modification des équipements.';rulesRender();counter();}catch(error){$('#namingRuleError').textContent=error.message;}finally{busy=false;counter();}}
- function open(){if(busy)return;$('#settingsMenu').close();dialog.showModal();rulesRender();analyze();}
- for(const id of ['autoNamingOpen','autoNamingMaterial'])$('#'+id).onclick=open;
+ function open(){if(busy)return;$('#settingsMenu').close();navigate();rulesRender();if(!preview)analyze();}
+ $('#autoNamingMaterial').onclick=open;
  $('#autoNamingAnalyze').onclick=()=>{if(!busy)analyze();};
  for(const id of ['autoNamingSearch','autoNamingFilter','autoNamingIncludeNamed'])$('#'+id).addEventListener(id==='autoNamingSearch'?'input':'change',()=>{page=0;render();});
  $('#autoNamingPrevious').onclick=()=>{page--;render();};$('#autoNamingNext').onclick=()=>{page++;render();};
@@ -41,7 +41,7 @@ export function installNamingReview({read,save,valid,author,newId,revision,refre
  $('#autoNamingApply').onclick=async()=>{if(busy||!preview)return;try{if(preview.document!==snapshot()||preview.revision!==revision())throw Error('Les données ont changé : relancez l’analyse avant d’appliquer.');const n=preview.rows.filter(r=>r.selected).length,remember=$('#autoNamingRemember').checked;if(!confirm(`Standardiser ${n} fiche(s) validée(s)${remember?' et mémoriser leurs correspondances exactes pour les prochains imports':''} ? L’ancien nom sera ajouté aux commentaires avec la date. Les identifiants, localisations, propriétaires, contrôles et échéances seront conservés.`))return;const next=applyNamingReview(read(),preview.rows,{confirmed:true,by:author(),at:new Date().toISOString(),rememberRules:remember,newId});if(!valid(next))throw Error('Classification invalide.');busy=true;counter();if(!await save(next))throw Error($('#message').textContent||'Écriture refusée.');preview=null;$('#autoNamingRows').innerHTML='';$('#autoNamingStatus').textContent=`${n} fiche(s) standardisée(s). Les historiques sont conservés. Relancez l’analyse pour poursuivre.`;rulesRender();}catch(error){$('#autoNamingError').textContent=error.message;}finally{busy=false;counter();}};
  $('#namingRuleType').onchange=()=>{$('#namingRuleVariant').innerHTML=variantsOptions($('#namingRuleType').value);$('#namingRuleVariant').disabled=!$('#namingRuleType').value;};
  $('#namingRuleForm').onsubmit=async event=>{event.preventDefault();if(busy)return;$('#namingRuleError').textContent='';try{const next=copy(read());saveNamingRule(next,{id:newId(),sourceName:$('#namingRuleSource').value,typeId:$('#namingRuleType').value,variantId:$('#namingRuleVariant').value},author(),new Date().toISOString());if(!confirm('Enregistrer cette correspondance exacte pour les prochains imports ? Aucune fiche existante ne sera modifiée.'))return;await persistRules(next);}catch(error){$('#namingRuleError').textContent=error.message;}};
- $('#autoNamingClose').onclick=()=>{if(!busy)dialog.close();};dialog.addEventListener('cancel',event=>{if(busy)event.preventDefault();});
- $('#autoNamingCatalog').onclick=()=>{if(!busy){dialog.close();if(!$('#namingDialog').open)$('#namingSettings').click();}};
- return {open};
+ dialog.addEventListener('cancel',event=>{if(busy)event.preventDefault();});
+ $('#autoNamingCatalog').onclick=()=>{if(!busy)catalogue();};
+ return {open,refreshRules:rulesRender};
 }
