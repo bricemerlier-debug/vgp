@@ -2,7 +2,6 @@ export function maintenanceActionVisual(action,today){
  if(action.status==='done')return {key:'done',label:'Réalisée'};
  if(!action.due_date)return {key:'unknown',label:'Échéance à définir'};
  if(action.due_date<today)return {key:'late',label:'En retard'};
- if(action.status==='in_progress')return {key:'progress',label:'En cours'};
  if(action.deferrals?.length)return {key:'deferred',label:'Reportée'};
  return {key:'todo',label:'À faire'};
 }
