@@ -13,6 +13,7 @@ with sync_playwright() as p:
  page.add_init_script('if(!localStorage.getItem("vgp-prototype-v1")){localStorage.setItem("vgp-prototype-v1",'+json.dumps(json.dumps(source))+');localStorage.setItem("vgp-shift-calendar-v1",'+json.dumps(json.dumps(planning))+');}')
  page.route('**/cloud-config.js',lambda route:route.fulfill(body='window.VGP_CLOUD={enabled:false};',content_type='text/javascript'))
  page.goto('http://127.0.0.1:8000/'+('index.html' if os.getenv('VGP_TEST_MODULE') else 'prototype-vgp.html')+'#planning')
+ expect(page.locator('#weekCompletion strong')).to_have_text('0 %');expect(page.locator('#weekCompletion small')).to_have_text('0 / 3 échéances traitées');expect(page.locator('#homeWeekCompletion strong')).to_have_text('0 %');page.locator('#nextWeek').click();expect(page.locator('#weekCompletion small')).to_have_text('Aucune échéance cette semaine');expect(page.locator('#weekCompletion strong')).to_have_text('—');page.locator('#currentWeek').click()
  card=page.locator('#weeklyCalendar [data-calendar-equipment="1"]');expect(card).to_contain_text('Alice · Équipe B');expect(card).to_contain_text('Présent en même temps aujourd’hui');expect(card).to_contain_text('8 h–13 h')
  expect(page.locator('#weeklyCalendar [data-calendar-equipment="3"] [data-owner-presence]')).to_be_hidden()
  expect(card.locator('.calendar-owner')).to_have_text('Propriétaire : Alice')

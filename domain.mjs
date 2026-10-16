@@ -110,6 +110,9 @@ export function weeklySchedule(equipment,start){
  for(const day of days)day.entries.sort((a,b)=>a.name.localeCompare(b.name,'fr')||a.identifier.localeCompare(b.identifier,'fr',{numeric:true}));return days;
 }
 
+// Avancement opérationnel : une recherche clôturée ou une mise au rebut traite aussi l’échéance.
+export function weeklyCompletion(days){const entries=days.flatMap(day=>day.entries),total=entries.length,completed=entries.filter(e=>e.done||['lost','scrapped'].includes(e.state)).length;return {total,completed,percent:total?Math.round(completed*100/total):null};}
+
 export function equipmentAlerts(equipment,today){return equipment.filter(e=>!e.archived&&['À faire','En retard'].includes(status(e,today))).map(e=>({equipmentId:e.id,name:equipmentName(e),identifier:e.identifier,date:due(e),state:status(e,today)})).sort((a,b)=>b.date.localeCompare(a.date)||a.identifier.localeCompare(b.identifier,'fr'))}
 
 // Tableau de bord opérationnel : contrôle réalisé et conformité restent distincts.

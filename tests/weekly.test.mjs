@@ -1,7 +1,7 @@
 import {approved} from './fixtures.mjs';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {weekStart,weeklySchedule,equipmentAlerts} from '../domain.mjs';
+import {weekStart,weeklySchedule,weeklyCompletion,equipmentAlerts} from '../domain.mjs';
 test('semaine du lundi au dimanche, changement de mois/année',()=>{
  assert.equal(weekStart('2027-01-03'),'2026-12-28');assert.equal(weekStart('2026-10-12'),'2026-10-12');assert.equal(weeklySchedule([],'2026-12-28')[6].date,'2027-01-03');
 });
@@ -24,3 +24,5 @@ test('un contrôle fait conserve son avancement mais affiche la situation actuel
  for(const [e,state] of [[lost,'lost'],[scrapped,'scrapped']]){const before=structuredClone(e),entry=weeklySchedule([e],'2026-10-12')[3].entries[0];assert.equal(entry.state,state);assert.equal(entry.done,true);assert.equal(monthlyProgress([e],2026,'2026-10-16').months[9].done,1);assert.deepEqual(e,before);}
  reactivateFound(lost,{id:'found',date:'2026-10-16',author:'Testeur',comment:'Retrouvé',account:'Testeur'});assert.equal(weeklySchedule([lost],'2026-10-12')[3].entries[0].state,'done');assert.equal(weeklySchedule([checked],'2026-10-12')[3].entries[0].state,'done');
 });
+
+test('pourcentage hebdomadaire : réalisé même tardif, introuvable/rebut, à faire et semaine vide',()=>{const days=[{entries:[{done:true,late:true,state:'done'},{done:false,state:'lost'},{done:true,state:'scrapped'},{done:false,state:'pending'}]}];assert.deepEqual(weeklyCompletion(days),{total:4,completed:3,percent:75});assert.deepEqual(weeklyCompletion([{entries:[]}]),{total:0,completed:0,percent:null});assert.equal(weeklyCompletion([{entries:[{done:false,state:'pending'}]}]).percent,0);assert.equal(weeklyCompletion([{entries:[{done:true,state:'done'}]}]).percent,100);});
