@@ -317,7 +317,8 @@ function weeklySchedule(equipment,start){
  if(o.excludedAt&&!['Équipement perdu','Mis au rebut'].includes(o.excludedReason)&&!done)continue;
  if(!done&&e.archived&&!archive)continue;
  if(!done&&disposal&&o.date===addMonths(disposal.date,e.months)&&o.date!==disposal.plannedDate)continue;
- const reason=!done?(['Équipement perdu','Mis au rebut'].includes(o.excludedReason)?o.excludedReason:e.archived?archive?.reason:null):c.result==='Mauvais état — à jeter'?'Mis au rebut':null;
+ const currentReason=e.archived&&['Équipement perdu','Mis au rebut'].includes(archive?.reason)?archive.reason:null;
+ const reason=currentReason||(!done?(['Équipement perdu','Mis au rebut'].includes(o.excludedReason)?o.excludedReason:e.archived?archive?.reason:null):c.result==='Mauvais état — à jeter'?'Mis au rebut':null);
  const state=reason==='Équipement perdu'?'lost':reason==='Mis au rebut'?'scrapped':done?'done':'pending';
  days.find(d=>d.date===o.date).entries.push({equipmentId:e.id,name:equipmentName(e),identifier:e.identifier,date:o.date,done,late:done&&c.date>o.date,state});
  }}
