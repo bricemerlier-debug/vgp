@@ -1,3 +1,4 @@
+import {sectorZones} from './sectors.mjs';
 import {controllerForName,controlBelongsToController,activeControllers} from './controllers.mjs';
 import {equipmentOwners,equipmentHasOwner,removeEquipmentOwner} from './ownership.mjs';
 const personKey=v=>String(v??'').trim().toLocaleLowerCase('fr');
@@ -11,7 +12,7 @@ export function personnelOperationPreview(state,kind,sourceId,targetId=null){
  const sourceContact=kind==='controller'?profile:(state.ownerContacts||[]).find(c=>personKey(c.owner)===personKey(source.name))||{};
  const targetContact=target?(kind==='controller'?state.controllerProfiles.find(p=>p.id===target.id):(state.ownerContacts||[]).find(c=>personKey(c.owner)===personKey(target.name))||{}):{};
  const fields=kind==='controller'?['email','signature']:['email','team','service','sector','zone'],copied=[],conflicts=[];
- for(const field of fields){if(!sourceContact[field])continue;if(field==='zone'&&(targetContact.sector||sourceContact.sector)!=='B2')continue;if(!targetContact[field])copied.push(field);else if(JSON.stringify(targetContact[field])!==JSON.stringify(sourceContact[field]))conflicts.push(field);}
+ for(const field of fields){if(!sourceContact[field])continue;if(field==='zone'&&!sectorZones(targetContact.sector||sourceContact.sector).includes(sourceContact.zone))continue;if(!targetContact[field])copied.push(field);else if(JSON.stringify(targetContact[field])!==JSON.stringify(sourceContact[field]))conflicts.push(field);}
  return {kind,source,target,equipment:equipment.map(e=>({id:e.id,identifier:e.identifier})),controls:controls.length,copied,conflicts,sourceContact,targetContact};
 }
 export function applyPersonnelOperation(document,{kind,sourceId,targetId=null,operation,confirmed=false,by,at=new Date().toISOString()}){

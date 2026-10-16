@@ -1,3 +1,4 @@
+import {sectorZones} from './sectors.mjs';
 import {suggestEquipmentNaming} from './nomenclature.mjs';
 // Import d'ajouts seulement : aucun remplacement silencieux d'une fiche existante.
 const norm=v=>String(v??'').trim().toLocaleLowerCase('fr');
@@ -24,7 +25,7 @@ function analyzeSourceRows(rows,data,today){
  if(!row.lastDate&&(row.verifier||row.result))throw Error('Renseignez aussi la date du dernier contrôle.');
  if(heading(row.sector)==='pasdesecteur')row.sector='Pas de secteur';if(heading(row.team)==='pasdequipe')row.team='Pas d’équipe';
  if(row.sector&&!['A1','A2','B1','B2','B3','Pas de secteur'].includes(row.sector))throw Error('Secteur inconnu.');
- if(row.zone&&(!['DMCR','Yuzer'].includes(row.zone)||row.sector!=='B2'))throw Error('DMCR et Yuzer sont des zones du secteur B2.');
+ if(row.zone&&!sectorZones(row.sector).includes(row.zone))throw Error('Setup est un sous-secteur de B1 ; DMCR et Yuzer sont des sous-secteurs de B2.');
  if(row.team&&!['A','B','C','D','E','Jour','Pas d’équipe'].includes(row.team))throw Error('Équipe inconnue.');
  if(row.email&&(!row.owner||!/^\S+@\S+\.\S+$/.test(row.email)))throw Error('Adresse e-mail ou propriétaire invalide.');
  if(row.email&&emails.has(norm(row.owner))&&emails.get(norm(row.owner))!==norm(row.email))throw Error('Adresse différente du propriétaire existant : modifiez sa fiche séparément.');
