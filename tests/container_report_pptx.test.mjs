@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {readFileSync,writeFileSync} from 'node:fs';
+import {unzipSync,strFromU8} from 'fflate';
+import {fillContainerReportPptx} from '../tools/container-report-pptx.mjs';
+const template=readFileSync(new URL('../assets/container-report-template.pptx',import.meta.url));
+const values=[0,38,92,10,61,25,16,14,78,7,5,11];
+const bytes=fillContainerReportPptx(template,{month:'janvier',year:2026,counts:values,total:357});
+const files=unzipSync(bytes);
+const slide=strFromU8(files['ppt/slides/slide1.xml']);
+assert.equal(slide.includes('Bilan mois de JANVIER'),true);
+assert.equal(slide.includes('{{'),false);
+assert.equal(slide.includes('357'),true);
+assert.equal(Object.keys(files).filter(name=>/^ppt\/slides\/slide\d+\.xml$/.test(name)).length,1);
+writeFileSync('/tmp/container-report-view/test-report.pptx',bytes);
+console.log('Export PowerPoint mensuel validé.');

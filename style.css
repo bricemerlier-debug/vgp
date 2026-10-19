@@ -410,19 +410,18 @@ button.material-sort-header{display:inline-flex;align-items:center;justify-conte
 #containersView .container-report-controls .actions{align-items:end;flex-wrap:wrap}
 #containersView .container-report-controls label{font-weight:600}
 #containersView .container-report-controls input{display:block;margin-top:5px}
-#containersView .container-report-sheet{max-width:900px;margin:24px auto 0;padding:30px;background:#fff;border:1px solid #dce5ef;border-top:5px solid #ffcd00;border-radius:10px}
-#containersView .container-report-sheet h2{font-size:30px;margin:8px 0 18px}
-#containersView .container-report-total{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:20px}
-#containersView .container-report-total strong{font-size:40px;color:#0057a8;line-height:1}
-#containersView .container-report-total small{margin-left:auto;color:#536b82}
-#containersView .container-report-sheet table{width:100%}
-#containersView .container-report-sheet tbody th{text-align:left}
-@media(max-width:700px){#containersView .container-report-sheet{padding:16px}#containersView .container-report-sheet h2{font-size:24px}}
-@media print{body:has(#containerReportPanel:not([hidden])) header,body:has(#containerReportPanel:not([hidden])) .navigation,body:has(#containerReportPanel:not([hidden])) .container-report-controls,body:has(#containerReportPanel:not([hidden])) #containersView>.intro,body:has(#containerReportPanel:not([hidden])) #containersView>.tabs{display:none!important}body:has(#containerReportPanel:not([hidden])) #containerReportPanel{border:0;padding:0;box-shadow:none}body:has(#containerReportPanel:not([hidden])) #containerReportSheet{max-width:none;margin:0;border:0;padding:0}}
-#containersView .container-report-sheet{background:#242123;color:#fff;border-color:#242123;print-color-adjust:exact;-webkit-print-color-adjust:exact}
-#containersView .container-report-sheet .eyebrow,#containersView .container-report-sheet h2,#containersView .container-report-total strong{color:#ffcb32}
-#containersView .container-report-sheet .owner-equipment-list{background:#fff;color:#173e62}
-#containersView .container-report-sheet .foot,#containersView .container-report-total small{color:#d8dde4}
-
+#containersView .container-report-sheet{position:relative;width:100%;max-width:1200px;aspect-ratio:16/9;margin:24px auto;background:#242123 url('assets/container-report-background.png') center/100% 100% no-repeat;border:0;border-radius:0;box-shadow:none;overflow:hidden;container-type:inline-size;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+#containersView .container-report-sheet h2{position:absolute;left:2.2%;top:10.5%;margin:0;max-width:60%;font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:5.6cqw;line-height:1;letter-spacing:-.03em;text-transform:none;color:#ffbd29;white-space:nowrap}
+#containersView .container-report-table{position:absolute;left:3.4%;top:30.5%;width:43%;background:#fff;color:#111}
+#containersView .container-report-table table{width:100%;border-collapse:collapse;table-layout:fixed;font-family:Arial,sans-serif;color:#111;font-size:1.08cqw;line-height:1.1}
+#containersView .container-report-table th,#containersView .container-report-table td{border:1px solid #222;padding:.22cqw .2cqw;text-align:center;background:#fff;color:#111}
+#containersView .container-report-table thead th{background:#050505;color:#fff;border-color:#050505;font-weight:700;padding:.55cqw .2cqw;white-space:nowrap}
+#containersView .container-report-table thead th:first-child{width:30%}
+#containersView .container-report-table thead th:nth-child(2){width:44%}
+#containersView .container-report-table thead th:last-child{width:26%;font-size:1.9cqw}
+#containersView .container-report-table tbody th{font-weight:400}
+#containersView #containerReportTotalCell{font-size:5.5cqw;vertical-align:middle}
+@media(max-width:700px){#containersView .container-report-panel{padding:12px;overflow-x:auto}#containersView .container-report-sheet{width:100%;min-width:760px}}
+@media print{body:has(#containerReportPanel:not([hidden])) #containerReportSheet{width:100%;max-width:none;margin:0;page-break-inside:avoid}body:has(#containerReportPanel:not([hidden])) #containerReportPanel>.foot{display:none}}
 header .header-engineering-logo{display:block;width:72px;height:72px;object-fit:contain;flex:none;padding:6px;background:#fff;border-radius:8px}
 @media(max-width:700px){header .header-engineering-logo{width:52px;height:52px;padding:4px}}
