@@ -577,3 +577,16 @@ header .header-engineering-logo{display:block;width:72px;height:72px;object-fit:
 #containersView .container-agenda-notes{display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid #dce5ef;padding-top:18px;margin-top:20px}
 @media(max-width:900px){#containerAgendaDays{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:550px){#containerAgendaDays{grid-template-columns:1fr}#containerAgendaDays .calendar-day h3 span{display:inline;margin-left:8px}#containerAgendaDays .calendar-day{min-height:0}#containersView .container-agenda-heading{align-items:flex-start;gap:14px}}
+
+#containersView .container-due-exempt{color:#536b82}
+#containersView .container-row-exempt{border-left:4px solid #8794a5}
+#containersView .container-category-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(270px,100%),1fr));gap:16px}
+#containerCategoriesContent .container-controller-card{border:1px solid #dce5ef;border-radius:10px;padding:20px}
+#containerCategoriesContent .container-controller-card h3{margin:0 0 14px}
+#containerCategoriesContent .container-controller-card strong{font-size:26px;color:#003d78}
+#containerCategoriesContent .toolbar{justify-content:space-between}
+#containersView .container-intervention-history table{min-width:1100px}
+#containersView .container-intervention-history td{vertical-align:top}
+#containersView .container-intervention-history .container-report-comment{white-space:normal}
+#containersView .container-intervention-history .container-report-comment>small{display:block;margin-top:8px;color:#60748e}
+#containersView .container-intervention-history [data-container-pdf]{min-width:145px;font-size:12px}

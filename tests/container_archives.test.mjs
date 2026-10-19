@@ -13,7 +13,7 @@ const after={number:'CE9',subtype:'PC',interventions:[item('mise en benne','2025
 assert.equal(containerArchiveInfo(after).laterInterventions,1);
 const archived=container('mise en benne');
 const active={number:'CE2',subtype:'R2 - VERTE',interventions:[item('bon état')]};
-assert.deepEqual(containerStatusCounts([archived,active],'2026-10-19'),{current:1,overdue:0,unknown:0});
+assert.deepEqual(containerStatusCounts([archived,active],'2026-10-19'),{current:1,overdue:0,unknown:0,exempt:0});
 assert.equal(containerAnnualActivity([archived],2026)[1].actions.length,1);
 assert.equal(containerAnnualActivity([archived],2027)[1].due,0);
 console.log('Archivage et exclusion des échéances futures validés.');

@@ -11,6 +11,6 @@ const containers=[
  make('PLI AMIENS',[{date:'2026-10-01',type:'curatif'}]),
  make('PLI AMIENS',[])
 ];
-assert.deepEqual(containerStatusCounts(containers,today),{current:2,overdue:1,unknown:2});
+assert.deepEqual(containerStatusCounts(containers,today),{current:2,overdue:1,unknown:2,exempt:0});
 assert.equal(Object.values(containerStatusCounts(containers,today)).reduce((a,b)=>a+b,0),containers.length);
 console.log('Compteurs de statut des contenants validés.');
