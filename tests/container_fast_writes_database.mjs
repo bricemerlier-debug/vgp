@@ -5,7 +5,7 @@ import {freezeTracking} from '../domain.mjs';
 
 const db=new PGlite();
 await db.exec(`create role anon;create role authenticated;create schema auth;create table auth.users(id uuid primary key);create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;grant usage on schema public,auth to authenticated,anon;grant execute on function auth.uid() to authenticated;`);
-for(const file of ['001_schema.sql','003_tracking_guard.sql','004_fast_writes.sql','015_container_fast_writes.sql'])await db.exec(readFileSync('supabase/'+file,'utf8'));
+for(const file of ['001_schema.sql','003_tracking_guard.sql','004_fast_writes.sql','015_container_fast_writes.sql','016_container_import_timeout.sql'])await db.exec(readFileSync('supabase/'+file,'utf8'));
 const workspace='10000000-0000-0000-0000-000000000001',user='20000000-0000-0000-0000-000000000001';
 await db.query('insert into auth.users values($1)',[user]);
 await db.query('insert into public.workspaces values($1,$2)',[workspace,'Test isolé']);

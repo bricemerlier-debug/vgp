@@ -50,7 +50,7 @@ export class CloudStore{
    if(!await this.checkTrackingGuard())throw Error('Protection Supabase indisponible. Actualisez la page.');
    let result;
    try{result=await this.rpc('write_containers',{expected_revision:this.revision,containers},timeoutMs);}
-   catch(error){if(/délai serveur dépassé/i.test(error.message))throw Error('Import des contenants annulé par Supabase : la fonction dédiée write_containers a dépassé le délai serveur. Vérifiez les journaux ou un verrou sur workspace_state avant de réessayer.');throw error;}
+   catch(error){if(/délai serveur dépassé/i.test(error.message))throw Error('Import des contenants annulé par Supabase : la fonction dédiée write_containers a dépassé le délai serveur. Vérifiez les journaux Supabase avant de réessayer.');if(/lock timeout/i.test(error.message))throw Error('Import des contenants annulé : une autre écriture bloque temporairement les données. Actualisez la page et réessayez après la fin de cette écriture.');throw error;}
    if(!Number.isSafeInteger(result?.revision)||result.revision!==this.revision+1)throw Error('Enregistrement non confirmé : réponse Supabase invalide. Actualisez avant de réessayer.');
    this.revision=result.revision;
    return result;
