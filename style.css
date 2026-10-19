@@ -349,3 +349,11 @@ button.material-sort-header{display:inline-flex;align-items:center;justify-conte
 
 #containersView .container-detail-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 @media(max-width:700px){#containersView #containerDetail>.toolbar:first-child{align-items:flex-start;flex-wrap:wrap}}
+
+#containersView .container-facts{grid-template-columns:repeat(4,minmax(0,1fr))}
+#containersView .container-due{font-weight:650}
+#containersView .container-facts dd.container-due-overdue,#containersView .container-due-overdue{color:#a63a2e}
+#containersView .container-facts dd.container-due-soon,#containersView .container-due-soon{color:#986500}
+#containersView .container-facts dd.container-due-current,#containersView .container-due-current{color:#187451}
+#containersView .container-facts dd.container-due-unknown,#containersView .container-due-unknown{color:#546b82}
+@media(max-width:700px){#containersView .container-facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
