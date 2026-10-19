@@ -261,6 +261,8 @@ button.material-sort-header{display:inline-flex;align-items:center;justify-conte
 .container-mode header .app-version{color:#00356b;border-color:#00356b66}
 .container-mode header .header-shift{background:#0057a8;color:#fff}
 .container-mode #headerProgress{display:none}
+#containersView>.intro{justify-content:center;align-items:center;text-align:center}
+#containersView>.intro h1{margin:0}
 @media(max-width:700px){.site-mode-switch{margin:14px auto -10px;gap:8px;padding:0 16px}.site-mode-switch button{min-width:0;flex:1;max-width:180px}}
 
 .bulk-owner-toolbar{margin:16px 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}.bulk-owner-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.bulk-owner-actions [data-bulk-count]{font-size:13px;font-weight:600}.bulk-owner-cell{width:44px}.bulk-owner-cell input,[data-bulk-visible]{width:20px;height:20px;cursor:pointer;accent-color:#0057a8}#list tr.bulk-owner-selected{box-shadow:inset 4px 0 #0057a8;outline:2px solid #0057a8;outline-offset:-2px}.bulk-owner-preview{max-height:240px;overflow:auto;padding-left:24px;line-height:1.6;overflow-wrap:anywhere}#bulkOwnersForm>label{margin:18px 0}#bulkOwnersForm>details{margin:16px 0}#bulkOwnersForm summary{cursor:pointer}#bulkOwnersForm>button{margin-top:8px}
