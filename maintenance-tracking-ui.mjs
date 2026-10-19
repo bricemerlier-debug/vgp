@@ -1,4 +1,4 @@
-import {sectorLabel} from './sectors.mjs';
+import {sectorChoices,sectorLabel} from './sectors.mjs';
 import {maintenanceActionVisual,maintenanceWeek,selectMaintenanceActions} from './maintenance-tracking.mjs';
 export function installMaintenanceTracking({root,getEquipment,onEquipment}){
  const q=s=>root.querySelector(s),safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -29,7 +29,7 @@ export function installMaintenanceTracking({root,getEquipment,onEquipment}){
   root.querySelectorAll('[data-plans-action],[data-plans-complete]').forEach(b=>b.onclick=()=>{const a=dataset.actions.find(a=>a.id===(b.dataset.plansAction||b.dataset.plansComplete));if(a)onEquipment(a.equipment_id,{actionId:a.id,complete:!!b.dataset.plansComplete});});
   q('#plansPage').textContent=`Page ${page+1} / ${Math.max(1,Math.ceil(shown.length/size))}`;q('#plansPrevious').disabled=page===0;q('#plansNext').disabled=(page+1)*size>=shown.length;
  }
- function options(id,label,values){const el=q('#'+id),previous=el.value;el.innerHTML=`<option value="">${label}</option>`+[...new Set(values)].sort((a,b)=>a.localeCompare(b,'fr',{numeric:true})).map(v=>`<option value="${safe(v)}">${safe(id==='plansSector'?sectorLabel(v):v)}</option>`).join('');el.value=[...el.options].some(o=>o.value===previous)?previous:'';}
+ function options(id,label,values){const el=q('#'+id),previous=el.value,choices=id==='plansSector'?sectorChoices({includeNoSector:true,includeUnassigned:true}).map(({value,label})=>({value,label})): [...new Set(values)].sort((a,b)=>a.localeCompare(b,'fr',{numeric:true})).map(value=>({value,label:value}));el.innerHTML=`<option value="">${label}</option>`+choices.map(option=>`<option value="${safe(option.value)}">${safe(option.label)}</option>`).join('');el.value=[...el.options].some(o=>o.value===previous)?previous:'';}
  q('#plansWeekPrevious').onclick=()=>{offset--;render();};q('#plansWeekNext').onclick=()=>{offset++;render();};q('#plansWeekCurrent').onclick=()=>{offset=0;render();};q('#plansPrevious').onclick=()=>{page--;render();};q('#plansNext').onclick=()=>{page++;render();};
  for(const [id,key] of [['plansAll','all'],['plansOpen','open'],['plansDone','done']])q('#'+id).onclick=()=>{scope=key;q('#plansState').value='';page=0;render();};
  for(const level of [1,2,3])q('#plansLevel'+level).onclick=()=>{const select=q('#plansLevel');select.value=select.value===String(level)?'':String(level);select.dispatchEvent(new Event('change',{bubbles:true}));};

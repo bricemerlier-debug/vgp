@@ -2,6 +2,7 @@ import {sectorZones} from './sectors.mjs';
 import {controllerForName,controlBelongsToController,activeControllers} from './controllers.mjs';
 import {equipmentOwners,equipmentHasOwner,removeEquipmentOwner} from './ownership.mjs';
 const personKey=v=>String(v??'').trim().toLocaleLowerCase('fr');
+export function ownerServiceOptions(){return ['Maintenance','Métrologie','HSE','IT','RH'];}
 export function personnelChoices(state,kind){return kind==='controller'?activeControllers(state.controllerProfiles).map(p=>({id:p.id,name:p.name})): [...new Map([...(state.owners||[]),...(state.ownerContacts||[]).map(c=>c.owner),...state.equipment.flatMap(equipmentOwners)].filter(Boolean).map(name=>[personKey(name),{id:name,name}])).values()];}
 export function personnelOperationPreview(state,kind,sourceId,targetId=null){
  if(!['controller','owner'].includes(kind))throw Error('Type de fiche invalide.');const choices=personnelChoices(state,kind),source=choices.find(p=>kind==='owner'?personKey(p.id)===personKey(sourceId):p.id===sourceId),target=targetId?choices.find(p=>kind==='owner'?personKey(p.id)===personKey(targetId):p.id===targetId):null;
