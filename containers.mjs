@@ -45,6 +45,23 @@ export function containerAnnualActivity(containers,year){
 }
 export function containerRecordsValid(d){return d.containers===undefined||Array.isArray(d.containers)&&d.containers.every(c=>c&&typeof c.id==='string'&&typeof c.number==='string'&&c.number.trim()&&typeof c.type==='string'&&typeof c.subtype==='string'&&Array.isArray(c.interventions)&&c.interventions.every(i=>i&&typeof i.number==='string'&&typeof i.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(i.date)&&typeof i.controller==='string'&&typeof i.type==='string'&&typeof i.generalState==='string'&&typeof i.comment==='string'&&i.parts&&typeof i.parts==='object'&&!Array.isArray(i.parts)&&Object.entries(i.parts).every(([k,v])=>containerParts.includes(k)&&typeof v==='string')))&&new Set(d.containers.map(c=>c.id)).size===d.containers.length&&new Set(d.containers.map(c=>c.number.trim().toLocaleLowerCase('fr'))).size===d.containers.length&&new Set(d.containers.flatMap(c=>c.interventions.map(i=>c.number.trim().toLocaleLowerCase('fr')+'\u0000'+i.number.trim().toLocaleLowerCase('fr')))).size===d.containers.reduce((n,c)=>n+c.interventions.length,0)}
 
+export function containerMonthlyReport(containers,year,month){
+ const period=`${year}-${String(month).padStart(2,'0')}`;
+ const groups=new Map();
+ let interventions=0;
+ for(const container of containers){
+  const matches=(container.interventions||[]).filter(i=>String(i.date||'').slice(0,7)===period);
+  if(!matches.length)continue;
+  const type=container.subtype?.trim()||'Sans type renseigné';
+  const group=groups.get(type)||{type,containers:0,interventions:0};
+  group.containers++;
+  group.interventions+=matches.length;
+  interventions+=matches.length;
+  groups.set(type,group);
+ }
+ return {year,month,total:[...groups.values()].reduce((sum,g)=>sum+g.containers,0),interventions,groups:[...groups.values()].sort((a,b)=>a.type.localeCompare(b.type,'fr'))};
+}
+
 export function containerStatusCounts(containers,today=new Date()){
  const counts={current:0,overdue:0,unknown:0};
  for(const container of containers){
@@ -81,7 +98,9 @@ export function sortContainerList(containers, key='number', direction='asc'){
 }
 
 export function installContainersUI({root,read,save,saveContainers,canEdit,id,analyzeFiles}){
- let selected=null,editingContainerId=null,query='',selectedTypes=new Set(),selectedStatuses=new Set(),typeOptionsKey='',sortKey='number',sortDirection='asc',importPlan=null,importSnapshot=null,activeTab='list',kpiYear=new Date().getFullYear();
+ let selected=null,editingContainerId=null,query='',selectedTypes=new Set(),selectedStatuses=new Set(),typeOptionsKey='',sortKey='number',sortDirection='asc',importPlan=null,importSnapshot=null,activeTab='list',kpiYear=new Date().getFullYear(),reportDate=new Date();
+ reportDate.setDate(1);reportDate.setMonth(reportDate.getMonth()-1);
+ let reportYear=reportDate.getFullYear(),reportMonth=reportDate.getMonth()+1;
  const $=s=>document.querySelector(s), clean=s=>escContainer(s), state=()=>read().containers||[];
  const dateFr=s=>new Date(s+'T00:00:00').toLocaleDateString('fr-FR');
  const dueLabel=c=>{const p=containerPreventiveStatus(c);return p.due?`${dateFr(p.due)} · ${p.days<0?`${-p.days} j de retard`:p.days===0?'Aujourd’hui':`${p.days} j restants`}`:'À planifier · aucun préventif'};
@@ -91,12 +110,18 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,an
   activeTab=tab;
   $('#containerListTab').setAttribute('aria-selected',tab==='list');
   $('#containerKpiTab').setAttribute('aria-selected',tab==='kpi');
+  $('#containerReportTab').setAttribute('aria-selected',tab==='report');
   $('#containerListPanel').hidden=tab!=='list';
   $('#containerKpiPanel').hidden=tab!=='kpi';
-  if(tab==='list')list();else{$('#containerAdd').hidden=true;$('#containerImportButton').hidden=true;renderKpi();}
+  $('#containerReportPanel').hidden=tab!=='report';
+  if(tab==='list')list();else{$('#containerAdd').hidden=true;$('#containerImportButton').hidden=true;if(tab==='kpi')renderKpi();else renderReport();}
  }
  $('#containerListTab').onclick=()=>switchTab('list');
  $('#containerKpiTab').onclick=()=>switchTab('kpi');
+ $('#containerReportTab').onclick=()=>switchTab('report');
+ $('#containerReportMonth').onchange=e=>{const [year,month]=e.target.value.split('-').map(Number);if(year>=2026&&month>=1&&month<=12&&e.target.value<=$('#containerReportMonth').max){reportYear=year;reportMonth=month;renderReport()}};
+ $('#containerReportJanuary').onclick=()=>{reportYear=2026;reportMonth=1;renderReport()};
+ $('#containerReportPrint').onclick=()=>window.print();
  $('#containerKpiYear').onchange=e=>{const year=Number(e.target.value);if(Number.isInteger(year)&&year>=1900&&year<=9999){kpiYear=year;renderKpi()}else e.target.value=kpiYear;};
  $('#containerKpiPreviousYear').onclick=()=>{if(kpiYear>1900){kpiYear--;renderKpi();}};
  $('#containerKpiNextYear').onclick=()=>{if(kpiYear<9999){kpiYear++;renderKpi();}};
@@ -108,6 +133,18 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,an
   sub.value=subs.includes(previous)?previous:previous==='__other__'?'__other__':'';
   $('#containerForm [name=subtypeOther]').hidden=sub.value!=='__other__';
   $('#containerForm [name=subtypeOther]').required=sub.value==='__other__';
+ }
+ function renderReport(){
+  const period=`${reportYear}-${String(reportMonth).padStart(2,'0')}`;
+  const latest=new Date();latest.setDate(1);latest.setMonth(latest.getMonth()-1);
+  $('#containerReportMonth').max=`${latest.getFullYear()}-${String(latest.getMonth()+1).padStart(2,'0')}`;
+  $('#containerReportMonth').value=period;
+  const monthName=new Intl.DateTimeFormat('fr-FR',{month:'long',year:'numeric'}).format(new Date(reportYear,reportMonth-1,1));
+  const report=containerMonthlyReport(state(),reportYear,reportMonth);
+  $('#containerReportPeriod').textContent=`Bilan du mois de ${monthName}`;
+  $('#containerReportTotal').textContent=report.total;
+  $('#containerReportInterventions').textContent=`${report.interventions} intervention${report.interventions===1?'':'s'} enregistrée${report.interventions===1?'':'s'}`;
+  $('#containerReportRows').innerHTML=report.groups.length?report.groups.map(group=>`<tr><th scope="row">${clean(group.type)}</th><td>${group.containers}</td><td>${group.interventions}</td></tr>`).join(''):'<tr><td colspan="3">Aucune intervention enregistrée pour ce mois.</td></tr>';
  }
  function renderKpi(){
   const names=['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Août','Sep','Oct','Nov','Déc'];

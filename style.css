@@ -405,3 +405,21 @@ button.material-sort-header{display:inline-flex;align-items:center;justify-conte
 #containersView .container-kpi-year{display:flex;align-items:end;gap:8px}
 #containersView .container-kpi-year button{min-width:42px}
 #containersView .container-kpi-comparison{margin:-8px 0 20px;font-size:13px;color:#536b82}
+
+#containersView .container-report-controls{align-items:end;gap:14px;flex-wrap:wrap}
+#containersView .container-report-controls .actions{align-items:end;flex-wrap:wrap}
+#containersView .container-report-controls label{font-weight:600}
+#containersView .container-report-controls input{display:block;margin-top:5px}
+#containersView .container-report-sheet{max-width:900px;margin:24px auto 0;padding:30px;background:#fff;border:1px solid #dce5ef;border-top:5px solid #ffcd00;border-radius:10px}
+#containersView .container-report-sheet h2{font-size:30px;margin:8px 0 18px}
+#containersView .container-report-total{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+#containersView .container-report-total strong{font-size:40px;color:#0057a8;line-height:1}
+#containersView .container-report-total small{margin-left:auto;color:#536b82}
+#containersView .container-report-sheet table{width:100%}
+#containersView .container-report-sheet tbody th{text-align:left}
+@media(max-width:700px){#containersView .container-report-sheet{padding:16px}#containersView .container-report-sheet h2{font-size:24px}}
+@media print{body:has(#containerReportPanel:not([hidden])) header,body:has(#containerReportPanel:not([hidden])) .navigation,body:has(#containerReportPanel:not([hidden])) .container-report-controls,body:has(#containerReportPanel:not([hidden])) #containersView>.intro,body:has(#containerReportPanel:not([hidden])) #containersView>.tabs{display:none!important}body:has(#containerReportPanel:not([hidden])) #containerReportPanel{border:0;padding:0;box-shadow:none}body:has(#containerReportPanel:not([hidden])) #containerReportSheet{max-width:none;margin:0;border:0;padding:0}}
+#containersView .container-report-sheet{background:#242123;color:#fff;border-color:#242123;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+#containersView .container-report-sheet .eyebrow,#containersView .container-report-sheet h2,#containersView .container-report-total strong{color:#ffcb32}
+#containersView .container-report-sheet .owner-equipment-list{background:#fff;color:#173e62}
+#containersView .container-report-sheet .foot,#containersView .container-report-total small{color:#d8dde4}
