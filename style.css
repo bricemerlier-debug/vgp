@@ -423,3 +423,7 @@ button.material-sort-header{display:inline-flex;align-items:center;justify-conte
 #containersView .container-report-sheet .eyebrow,#containersView .container-report-sheet h2,#containersView .container-report-total strong{color:#ffcb32}
 #containersView .container-report-sheet .owner-equipment-list{background:#fff;color:#173e62}
 #containersView .container-report-sheet .foot,#containersView .container-report-total small{color:#d8dde4}
+
+#containersView .container-intro-identity{display:flex;align-items:center;gap:16px}
+#containersView .container-engineering-logo{width:96px;height:96px;object-fit:contain;flex:none}
+@media(max-width:600px){#containersView .container-intro-identity{gap:10px}#containersView .container-engineering-logo{width:68px;height:68px}}
