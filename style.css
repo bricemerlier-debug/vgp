@@ -446,3 +446,10 @@ header .header-engineering-logo{display:block;width:72px;height:72px;object-fit:
 #containersView .container-archive-panel .container-search{margin:18px 0}
 
 #containersView .container-archive-warning{display:block;margin-top:6px;color:#9b4f00;font-size:12px;font-weight:700}
+
+#containersView .container-report-details{margin-top:26px;border-top:1px solid #dce5ef;padding-top:20px}
+#containersView .container-report-details h3{margin:0 0 16px;color:#193f69}
+#containersView .container-report-details table{width:100%;min-width:1050px}
+#containersView .container-report-details th,#containersView .container-report-details td{vertical-align:top}
+#containersView .container-report-comment{max-width:320px;min-width:180px;overflow-wrap:anywhere;white-space:pre-wrap}
+@media print{body:has(#containerReportPanel:not([hidden])) .container-report-details{break-before:page}body:has(#containerReportPanel:not([hidden])) .container-report-details table{min-width:0;font-size:9pt}body:has(#containerReportPanel:not([hidden])) .container-report-details button{display:none}}
