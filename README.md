@@ -14,7 +14,7 @@ Analyse locale du PDF original, aperçu modifiable, stockage privé unique et li
 
 ## Correction des imports interrompus par Supabase
 
-Le correctif SQL 004 optimise les grands enregistrements sans supprimer les données ni désactiver les protections. Il doit être appliqué dans SQL Editor du projet existant : [étapes](docs/CORRECTIF-DELAI-SUPABASE.md). Le message de délai est désormais expliqué en français dans le site.
+Le correctif SQL 004 optimise les grands enregistrements sans supprimer les données ni désactiver les protections : [étapes](docs/CORRECTIF-DELAI-SUPABASE.md). Pour les imports de contenants encore bloqués alors que 004 est installé, `supabase/015_container_fast_writes.sql` ajoute une écriture ciblée des contenants. Appliquer ce script dans le SQL Editor du projet existant avant de confirmer un nouvel import. Le site ne lance aucun SQL automatiquement et conserve les écritures manuelles existantes si cette fonction n’est pas encore installée.
 
 ## Reprise des dernières dates MemoryFlow
 

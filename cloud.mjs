@@ -43,6 +43,17 @@ export class CloudStore{
  async checkTrackingGuard(){if(!this.config.requireTrackingGuard)return true;try{this.trackingReady=await this.rpc('tracking_ready',{})===true;}catch{this.trackingReady=false;}return this.trackingReady;}
  async read(adoptRevision=true){const state=await this.rpc('read_state',{});if(!Number.isSafeInteger(state?.revision)||!state.payload||typeof state.payload!=='object')throw Error('Réponse Supabase invalide : aucune donnée affichée n’a été remplacée.');if(['admin','editor','reader'].includes(state.role))this.role=state.role;if(adoptRevision)this.revision=state.revision;await this.checkTrackingGuard();return state;}
  async write(document,source=null,timeoutMs=15000){if(this.busy)throw Error('Un enregistrement est déjà en cours. Patientez.');this.busy=true;try{if(!await this.checkTrackingGuard())throw Error('Lecture seule : la protection Supabase doit être activée. Exécutez supabase/003_tracking_guard.sql dans le SQL Editor de Supabase, puis actualisez le site. Aucun changement enregistré.');const result=await this.rpc('write_state',{expected_revision:this.revision,document,source},timeoutMs);if(!Number.isSafeInteger(result?.revision)||result.revision!==this.revision+1)throw Error('Enregistrement non confirmé : réponse Supabase invalide. Actualisez avant de réessayer.');this.revision=result.revision;return result;}finally{this.busy=false;}}
+ async writeContainers(containers,timeoutMs=120000){
+  if(this.busy)throw Error('Un enregistrement est déjà en cours. Patientez.');
+  this.busy=true;
+  try{
+   if(!await this.checkTrackingGuard())throw Error('Protection Supabase indisponible. Actualisez la page.');
+   const result=await this.rpc('write_containers',{expected_revision:this.revision,containers},timeoutMs);
+   if(!Number.isSafeInteger(result?.revision)||result.revision!==this.revision+1)throw Error('Enregistrement non confirmé : réponse Supabase invalide. Actualisez avant de réessayer.');
+   this.revision=result.revision;
+   return result;
+  }finally{this.busy=false;}
+ }
  async migrate(document,source){if(this.revision!==0)throw Error('Migration initiale autorisée uniquement dans un espace vierge.');const result=await this.write(document,source);const readback=await this.read();if(canonical(document)!==canonical(readback.payload))throw Error('Les données relues ne correspondent pas. Conservez votre sauvegarde et contactez l’administrateur.');return {...result,payload:readback.payload};}
  async validate(receipt,document){await this.rpc('validate_migration',{receipt,expected_document:document});}
  async apaveReady(){try{return await this.rpc('apave_automation_ready',{})===true;}catch{return false;}}

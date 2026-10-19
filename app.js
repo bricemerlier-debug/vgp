@@ -74,7 +74,7 @@ const copyData=value=>typeof globalThis.structuredClone==='function'?globalThis.
 
 function upgrade(d){d.equipmentTypes??=initialEquipmentTypes();d.containers??=[];d.owners??=[];d.ownerContacts??=[];d.mailTemplates??=defaultMailTemplates();d.verifiers??=[];for(const e of d.equipment)for(const c of e.controls){if(c.intervenant&&!d.verifiers.some(name=>normalize(name)===normalize(c.intervenant)))d.verifiers.push(c.intervenant);c.reportId??=`VGP-${c.date.replaceAll('-','')}-${c.id.toUpperCase()}`;}let next=Math.max(0,...d.equipment.map(e=>Number.isSafeInteger(e.siteId)?e.siteId:0))+1;for(const e of d.equipment)if(!e.siteId)e.siteId=next++;d.nextVgpId=Math.max(d.nextVgpId??1,next);for(const e of d.equipment){for(const k of ['serialNumber','sector','zone','team','owner','comments'])e[k]??='';e.archived??=false;e.archiveHistory??=[];e.pendingArchive??=null;for(const owner of equipmentOwners(e))if(!d.owners.some(o=>normalize(o)===normalize(owner)))d.owners.push(owner)}upgradeControllers(d,uuid);for(const e of d.equipment)for(const a of e.archiveHistory)if(a.workflow==='loss-declaration'&&!a.reportId)a.reportId=a.originalControlId?e.controls.find(c=>c.id===a.originalControlId)?.reportId||nextReportNumber(d):nextReportNumber(d);return d}
 upgrade(data);
-const containersUI=installContainersUI({root:$('#containersView'),read:()=>data,save,canEdit:()=>cloud?.role!=='reader',id:uuid,analyzeFiles:analyzeContainerFiles});
+const containersUI=installContainersUI({root:$('#containersView'),read:()=>data,save,saveContainers:saveContainerRecords,canEdit:()=>cloud?.role!=='reader',id:uuid,analyzeFiles:analyzeContainerFiles});
 const ownerReturnMailUI=installOwnerReturnMail({getState:()=>data,getDate:today,refreshState:async()=>{if(hasUnsavedForm())throw Error('Enregistrez les modifications de la fiche avant de préparer le mail.');await refreshNamingData();},onClose:()=>$('#prepareOwnerReturnMail')?.focus()});
 const reminderSimulationUI=installReminderSimulation({read:()=>data,namespace:cloud?cloud.config.workspaceId+':'+(cloud.session?.user?.id||'session'): 'local-isole'});
 const workspaceNavigation=installWorkspaceNavigation({navigate:setView,openNaming:()=>namingReviewUI.open()});
@@ -143,6 +143,21 @@ function openOwnerCreation(context){ownerCreateContext=context;$('#ownerCreateFo
 $('#addOwner').onclick=()=>openOwnerCreation('equipment');
 $('#ownerCreateForm').onsubmit=async event=>{event.preventDefault();const button=event.target.querySelector('button:not([type])');if(button.disabled)return;const f=new FormData(event.target),owner=f.get('name').trim().replace(/\s+/g,' '),email=f.get('email').trim(),issue=ownerDetailsIssue(data,owner,email);if(issue){$('#ownerCreateError').textContent=issue;return;}button.disabled=true;try{const next=copyData(data);next.owners.push(owner);next.ownerContacts.push({owner,email});if(await save(next)){$('#ownerCreateDialog').close();if(ownerCreateContext==='equipment')ownerOptions(owner);}else $('#ownerCreateError').textContent=$('#message').textContent;}finally{button.disabled=false;}};
 async function save(next,replace=false,{timeoutMs=15000,renderAfter=true}={}){if(cloud?.role==='reader'){$('#message').textContent='Accès lecteur : aucune modification autorisée.';return false;}next=freezeTracking(upgrade(assignMissingProcessTeams(next).state),data,today(),accountName());if(storageNeedsRecovery&&!replace){$('#message').textContent='Enregistrement bloqué pour préserver les données existantes. Importez une sauvegarde valide.';return false}try{if(cloud){if(replace)throw Error('Le remplacement global est interdit en mode cloud. Utilisez la migration initiale dans Paramètres > Données.');await cloud.write(next,null,timeoutMs);}else if(!memoryOnly){try{localStorage.setItem(KEY,JSON.stringify(next))}catch(error){if(error.name!=='SecurityError')throw error;memoryOnly=true;$('#storageNotice').hidden=false}}data=next;lastUpdated=new Date();syncError='';dirtyForms.delete(document.activeElement?.closest('form'));storageNeedsRecovery=false;$('#export').disabled=false;if(renderAfter)render();return true}catch(error){$('#message').textContent=cloud?error.message:'Enregistrement impossible : stockage plein ou indisponible. Les nouvelles données ne sont pas sauvegardées. Exportez une sauvegarde.';return false}}
+async function saveContainerRecords(next,{bulk=false}={}){
+ if(!cloud)return save(next,false,{timeoutMs:120000,renderAfter:false});
+ if(cloud.role==='reader'){$('#message').textContent='Accès lecteur : aucune modification autorisée.';return false;}
+ if(storageNeedsRecovery){$('#message').textContent='Enregistrement bloqué pour préserver les données existantes. Importez une sauvegarde valide.';return false;}
+ try{
+  await cloud.writeContainers(next.containers,120000);
+  data={...data,containers:next.containers};lastUpdated=new Date();syncError='';
+  return true;
+ }catch(error){
+  const missing=/Could not find the function|PGRST202|schema cache|write_containers.*does not exist/i.test(error.message||'');
+  if(missing&&!bulk)return save(next,false,{timeoutMs:120000,renderAfter:false});
+  $('#message').textContent=missing?'Import rapide indisponible : installez supabase/015_container_fast_writes.sql dans le projet Supabase, puis actualisez la page. Aucun import enregistré.':error.message;
+  return false;
+ }
+}
 let controlContext='normal';
 function lastArchive(e){return [...(e.archiveHistory??[])].reverse().find(a=>a.type==='archive')}
 function needsScrapControl(e){return e.archived&&archiveReason(e)==='Mis au rebut'&&lastArchive(e)?.workflow!=='memoryflow-archive'&&!lastArchive(e)?.controlId}
