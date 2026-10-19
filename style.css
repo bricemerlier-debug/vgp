@@ -561,3 +561,19 @@ header .header-engineering-logo{display:block;width:72px;height:72px;object-fit:
 #containerControllersPanel .container-controller-card small{color:#60748e}
 #containerControllersPanel .container-controller-card .actions{margin-top:16px;gap:8px}
 #containerControllersPanel .container-controller-card button{font-size:12px;padding:10px 12px}
+
+#containersView .container-agenda-heading{justify-content:space-between;align-items:center}
+#containersView .container-agenda-heading h2{margin:0}
+#containerAgendaSummary{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:20px 0 16px}
+#containerAgendaSummary strong{color:#003d78;font-size:22px}
+#containerAgendaSummary>span{font-size:13px;color:#60748e}
+#containerAgendaDays{grid-template-columns:repeat(7,minmax(0,1fr));align-items:stretch}
+#containerAgendaDays .calendar-task{font-size:12px}
+#containerAgendaDays .calendar-pending{border-left:4px solid #c58b12;background:#fff5d8;color:#674b13}
+#containerAgendaDays .calendar-late{border-left:4px solid #ba4336;background:#fff0ed;color:#8c3028}
+#containerAgendaDays .calendar-done{border-left:4px solid #187451;background:#e9f5ef;color:#15583e}
+#containerAgendaDays .calendar-task small,#containerAgendaDays .calendar-task span{color:inherit}
+#containerAgendaDays .calendar-task span{font-weight:700;margin-top:9px}
+#containersView .container-agenda-notes{display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid #dce5ef;padding-top:18px;margin-top:20px}
+@media(max-width:900px){#containerAgendaDays{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:550px){#containerAgendaDays{grid-template-columns:1fr}#containerAgendaDays .calendar-day h3 span{display:inline;margin-left:8px}#containerAgendaDays .calendar-day{min-height:0}#containersView .container-agenda-heading{align-items:flex-start;gap:14px}}
