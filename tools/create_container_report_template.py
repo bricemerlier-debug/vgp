@@ -49,7 +49,7 @@ for r in range(rows):
   cell.text=''
   p=cell.text_frame.paragraphs[0];p.alignment=PP_ALIGN.CENTER
   run=p.add_run()
-  if r==0:run.text=('Types de contenants','Nombre de contenants réparés','Total')[c]
+  if r==0:run.text=('Types de contenants','Nombre d’interventions','Total')[c]
   elif c==0:run.text=labels[r-1]
   elif c==1:run.text='{{COUNT_%d}}'%(r-1)
   elif c==2:run.text='{{TOTAL}}'

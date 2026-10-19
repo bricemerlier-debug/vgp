@@ -425,3 +425,22 @@ button.material-sort-header{display:inline-flex;align-items:center;justify-conte
 @media print{body:has(#containerReportPanel:not([hidden])) #containerReportSheet{width:100%;max-width:none;margin:0;page-break-inside:avoid}body:has(#containerReportPanel:not([hidden])) #containerReportPanel>.foot{display:none}}
 header .header-engineering-logo{display:block;width:72px;height:72px;object-fit:contain;flex:none;padding:6px;background:#fff;border-radius:8px}
 @media(max-width:700px){header .header-engineering-logo{width:52px;height:52px;padding:4px}}
+#containersView .container-row-overdue td{background:#fff3f1}
+#containersView .container-row-overdue td:first-child{border-left:4px solid #bf3e30}
+#containersView .container-row-soon td{background:#fff9e9}
+#containersView .container-row-soon td:first-child{border-left:4px solid #b97900}
+#containersView .container-row-current td{background:#f1faf5}
+#containersView .container-row-current td:first-child{border-left:4px solid #188057}
+#containersView .container-row-unknown td,#containersView .container-row-archived td{background:#f4f6f8}
+#containersView .container-row-unknown td:first-child,#containersView .container-row-archived td:first-child{border-left:4px solid #75879a}
+#containersView .container-status-pill{display:inline-block;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:700}
+#containersView .container-status-pill.container-due-overdue{background:#fbd8d3;color:#922d24}
+#containersView .container-status-pill.container-due-soon{background:#ffedba;color:#775000}
+#containersView .container-status-pill.container-due-current{background:#dff1e6;color:#155b3f}
+#containersView .container-status-pill.container-due-unknown,#containersView .container-status-pill.container-due-archived{background:#e5eaf0;color:#4d6278}
+#containersView #containerRows td small,#containersView #containerArchiveRows td small{display:block;margin-top:5px;color:#536b82;overflow-wrap:anywhere}
+#containersView .container-archive-note{border-left:4px solid #75879a;background:#f2f5f8;color:#213a52}
+#containersView .container-archive-note p{margin:6px 0 0;overflow-wrap:anywhere}
+#containersView .container-archive-panel .container-search{margin:18px 0}
+
+#containersView .container-archive-warning{display:block;margin-top:6px;color:#9b4f00;font-size:12px;font-weight:700}
