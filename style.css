@@ -461,6 +461,15 @@ header .header-engineering-logo{display:block;width:72px;height:72px;object-fit:
 #containersView .container-analysis-grid>section{min-width:0}
 #containersView .container-analysis-grid h3{margin:0 0 12px}
 #containersView .container-analysis-grid .owner-equipment-list{max-height:440px;overflow:auto}
+#containersView .container-type-chart{display:flex;align-items:center;gap:24px;padding:12px 0}
+#containersView .container-type-pie{width:clamp(150px,16vw,220px);aspect-ratio:1;border-radius:50%;flex:none;box-shadow:0 0 0 1px #dce5ef,0 8px 22px #0a35631a}
+#containersView .container-type-legend{list-style:none;margin:0;padding:0;min-width:0;flex:1}
+#containersView .container-type-legend li{display:grid;grid-template-columns:12px minmax(0,1fr) auto auto;align-items:center;gap:9px;padding:10px 8px;border-bottom:1px solid #e3eaf3;color:#173e66;font-size:13px}
+#containersView .container-type-legend li:last-child{border-bottom:0}
+#containersView .container-type-legend li:hover{background:#eef5fc;border-radius:5px}
+#containersView .container-type-legend i{width:12px;height:12px;border-radius:3px}
+#containersView .container-type-legend strong{font-variant-numeric:tabular-nums}
+#containersView .container-type-legend small{min-width:48px;text-align:right;color:#536b82;font-variant-numeric:tabular-nums}
 #containersView .container-analysis-panel{--container-type-0:#136f63;--container-type-1:#6478b3;--container-type-2:#dd7036;--container-type-3:#e5ad3c;--container-type-4:#a861a5;--container-type-5:#52616f;--container-type-6:#8a9a5b;--container-type-7:#3e8ac4;--container-type-8:#15447c;--container-type-9:#b24c54;--container-type-10:#7e628f;--container-type-11:#8b7156}
 #containersView .container-week-legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin:15px 0;font-size:12px;color:#304c69}
 #containersView .container-week-legend span,#containersView .container-week-detail span{display:inline-flex;align-items:center;gap:5px}
@@ -484,5 +493,5 @@ header .header-engineering-logo{display:block;width:72px;height:72px;object-fit:
 #containersView .container-week-table summary{cursor:pointer;color:#0057a8;font-weight:700}
 #containersView .container-week-table .owner-equipment-list{max-height:680px;overflow:auto;margin-top:12px}
 #containersView .container-week-table table{min-width:1250px}
-@media(max-width:700px){#containersView .container-analysis-grid{grid-template-columns:1fr}}
+@media(max-width:700px){#containersView .container-analysis-grid{grid-template-columns:1fr}#containersView .container-type-chart{flex-wrap:wrap}#containersView .container-type-legend{flex-basis:100%}}
 @media print{body:has(#containerReportPanel:not([hidden])) .container-report-details{break-before:page}body:has(#containerReportPanel:not([hidden])) .container-report-details table{min-width:0;font-size:9pt}body:has(#containerReportPanel:not([hidden])) .container-report-details button{display:none}}
