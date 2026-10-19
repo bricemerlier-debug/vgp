@@ -26,7 +26,9 @@ def box(text,left,top,width,height,size,bold=False,color=(0,0,0),font='Arial',al
  run.font.name=font;run.font.size=Pt(size);run.font.bold=bold;run.font.color.rgb=RGBColor(*color)
  return shape
 
-box('Bilan mois de {{MONTH}}',.3,.85,8.1,.75,39,True,(255,189,41),'Arial Narrow')
+import sys
+annual='--annual' in sys.argv
+box('Bilan année {{YEAR}}' if annual else 'Bilan mois de {{MONTH}}',.3,.85,8.1,.75,39,True,(255,189,41),'Arial Narrow')
 labels=['Pli AMIENS','Cartouches PLT2','Cassettes R2 - BLEU','Cassettes R2 - JAUNE','Cassettes R2 - VERTE','Carcasses - PLAT','Carcasses - BACHE','GDF','PC','Chariots','Tracteurs','Divers']
 rows=13
 left,top,width,height=.46,2.29,5.71,3.12
@@ -55,4 +57,4 @@ for r in range(rows):
   elif c==2:run.text='{{TOTAL}}'
   run.font.name='Arial';run.font.size=Pt(47 if r==1 and c==2 else 8.8 if r else 9.5);run.font.bold=r==0
   run.font.color.rgb=RGBColor(*(255,255,255) if r==0 else (0,0,0))
-prs.save(root/'assets/container-report-template.pptx')
+prs.save(root/('assets/container-annual-report-template.pptx' if annual else 'assets/container-report-template.pptx'))

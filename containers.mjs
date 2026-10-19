@@ -99,6 +99,62 @@ export function containerMonthlyReport(containers,year,month){
  return {year,month,total:details.length,interventions:details.length,groups:values,details};
 }
 
+export function containerAnnualReport(containers,year){
+ const groups=new Map(containerReportTypes.map(([type])=>[type,{type,actions:0}]));
+ const months=Array.from({length:12},(_,index)=>({month:index+1,actions:0}));
+ for(const container of containers){
+  const group=groups.get(containerReportCategory(container.subtype));
+  for(const intervention of container.interventions||[]){
+   const date=String(intervention.date||'');
+   if(Number(date.slice(0,4))!==year)continue;
+   const month=months[Number(date.slice(5,7))-1];
+   if(!month)continue;
+   group.actions++;month.actions++;
+  }
+ }
+ return {year,total:months.reduce((sum,month)=>sum+month.actions,0),groups:[...groups.values()],months};
+}
+
+function containerIsoWeek(date){
+ const d=new Date(`${date}T00:00:00Z`);
+ if(Number.isNaN(d.getTime()))return null;
+ d.setUTCDate(d.getUTCDate()+4-(d.getUTCDay()||7));
+ const year=d.getUTCFullYear();
+ return {year,week:Math.ceil(((d-new Date(Date.UTC(year,0,1)))/86400000+1)/7)};
+}
+
+export function containerInterventionAnalysis(containers,year){
+ const byCategory=new Map(containerReportTypes.map(([type])=>[type,0]));
+ const byType=new Map(),byPart=new Map(),byContainer=new Map(),byWeek=new Map();
+ const months=Array(12).fill(0);
+ let total=0;
+ for(const container of containers){
+  let containerCount=0;
+  const category=containerReportCategory(container.subtype);
+  for(const intervention of container.interventions||[]){
+   const date=String(intervention.date||'');
+   if(Number(date.slice(0,4))!==year)continue;
+   const month=Number(date.slice(5,7));if(month<1||month>12)continue;
+   total++;containerCount++;months[month-1]++;byCategory.set(category,byCategory.get(category)+1);
+   const type=String(intervention.type||'').trim()||'Non renseigné';
+   byType.set(type,(byType.get(type)||0)+1);
+   for(const [part,value] of Object.entries(intervention.parts||{})){
+    if(!String(value||'').trim()||String(value).trim().toLowerCase()==='ok')continue;
+    byPart.set(part,(byPart.get(part)||0)+1);
+   }
+   const week=containerIsoWeek(date);
+   if(week&&week.year===year){
+    const key=week.week;
+    if(!byWeek.has(key))byWeek.set(key,{week:key,total:0,groups:new Map()});
+    const item=byWeek.get(key);item.total++;item.groups.set(category,(item.groups.get(category)||0)+1);
+   }
+  }
+  if(containerCount)byContainer.set(container.id,{id:container.id,number:container.number,subtype:container.subtype,count:containerCount});
+ }
+ const rank=map=>[...map].map(([label,count])=>({label,count})).sort((a,b)=>b.count-a.count||a.label.localeCompare(b.label,'fr'));
+ return {year,total,uniqueContainers:byContainer.size,months,categories:rank(byCategory),types:rank(byType),parts:rank(byPart),recurrence:[...byContainer.values()].sort((a,b)=>b.count-a.count||a.number.localeCompare(b.number,'fr',{numeric:true})),weeks:[...byWeek.values()].sort((a,b)=>a.week-b.week).map(w=>({week:w.week,total:w.total,groups:Object.fromEntries(w.groups)}))};
+}
+
 export function containerStatusCounts(containers,today=new Date()){
  const counts={current:0,overdue:0,unknown:0};
  for(const container of containers){
@@ -136,7 +192,7 @@ export function sortContainerList(containers, key='number', direction='asc'){
 }
 
 export function installContainersUI({root,read,save,saveContainers,canEdit,id,analyzeFiles}){
- let selected=null,editingContainerId=null,query='',selectedTypes=new Set(),selectedStatuses=new Set(),typeOptionsKey='',archiveQuery='',returnTab='list',sortKey='number',sortDirection='asc',importPlan=null,importSnapshot=null,activeTab='list',kpiYear=new Date().getFullYear(),reportDate=new Date();
+ let selected=null,editingContainerId=null,query='',selectedTypes=new Set(),selectedStatuses=new Set(),typeOptionsKey='',archiveQuery='',returnTab='list',sortKey='number',sortDirection='asc',importPlan=null,importSnapshot=null,activeTab='list',kpiYear=new Date().getFullYear(),analysisYear=new Date().getFullYear(),reportMode='month',reportDate=new Date();
  reportDate.setDate(1);reportDate.setMonth(reportDate.getMonth()-1);
  let reportYear=reportDate.getFullYear(),reportMonth=reportDate.getMonth()+1;
  const $=s=>document.querySelector(s), clean=s=>escContainer(s), state=()=>read().containers||[];
@@ -150,31 +206,38 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,an
   $('#containerListTab').setAttribute('aria-selected',tab==='list');
   $('#containerKpiTab').setAttribute('aria-selected',tab==='kpi');
   $('#containerArchiveTab').setAttribute('aria-selected',tab==='archive');
+  $('#containerAnalysisTab').setAttribute('aria-selected',tab==='analysis');
   $('#containerReportTab').setAttribute('aria-selected',tab==='report');
   $('#containerListPanel').hidden=tab!=='list';
   $('#containerKpiPanel').hidden=tab!=='kpi';
   $('#containerArchivePanel').hidden=tab!=='archive';
+  $('#containerAnalysisPanel').hidden=tab!=='analysis';
   $('#containerReportPanel').hidden=tab!=='report';
-  if(tab==='list')list();else{$('#containerAdd').hidden=true;$('#containerImportButton').hidden=true;if(tab==='kpi')renderKpi();else if(tab==='archive')renderArchive();else renderReport();}
+  if(tab==='list')list();else{$('#containerAdd').hidden=true;$('#containerImportButton').hidden=true;if(tab==='kpi')renderKpi();else if(tab==='archive')renderArchive();else if(tab==='analysis')renderAnalysis();else renderReport();}
  }
  $('#containerListTab').onclick=()=>switchTab('list');
  $('#containerKpiTab').onclick=()=>switchTab('kpi');
  $('#containerArchiveTab').onclick=()=>switchTab('archive');
  $('#containerArchiveSearch').oninput=e=>{archiveQuery=e.target.value;renderArchive()};
+ $('#containerAnalysisTab').onclick=()=>switchTab('analysis');
+ $('#containerAnalysisYear').onchange=e=>{const year=Number(e.target.value);if(Number.isInteger(year)&&year>=1900&&year<=9999){analysisYear=year;renderAnalysis()}else e.target.value=analysisYear};
  $('#containerReportTab').onclick=()=>switchTab('report');
+ $('#containerReportMonthly').onclick=()=>{reportMode='month';renderReport()};
+ $('#containerReportAnnual').onclick=()=>{reportMode='year';renderReport()};
+ $('#containerReportYear').onchange=e=>{const year=Number(e.target.value);if(Number.isInteger(year)&&year>=1900&&year<=9999){reportYear=year;renderReport()}else e.target.value=reportYear};
  $('#containerReportMonth').onchange=e=>{const [year,month]=e.target.value.split('-').map(Number);if(year>=2026&&month>=1&&month<=12&&e.target.value<=$('#containerReportMonth').max){reportYear=year;reportMonth=month;renderReport()}};
  $('#containerReportJanuary').onclick=()=>{reportYear=2026;reportMonth=1;renderReport()};
  $('#containerReportPrint').onclick=()=>window.print();
  $('#containerReportDownload').onclick=async()=>{
   const button=$('#containerReportDownload');button.disabled=true;
   try{
-   const response=await fetch('assets/container-report-template.pptx');
+   const response=await fetch(reportMode==='year'?'assets/container-annual-report-template.pptx':'assets/container-report-template.pptx');
    if(!response.ok)throw new Error('Modèle PowerPoint introuvable.');
-   const report=containerMonthlyReport(state(),reportYear,reportMonth);
+   const report=reportMode==='year'?containerAnnualReport(state(),reportYear):containerMonthlyReport(state(),reportYear,reportMonth);
    const month=new Intl.DateTimeFormat('fr-FR',{month:'long'}).format(new Date(reportYear,reportMonth-1,1));
    const bytes=globalThis.VGPFillContainerReportPptx(new Uint8Array(await response.arrayBuffer()),{month,year:reportYear,counts:report.groups.map(g=>g.actions),total:report.total});
    const url=URL.createObjectURL(new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.presentationml.presentation'}));
-   const link=document.createElement('a');link.href=url;link.download=`bilan-contenants-${reportYear}-${String(reportMonth).padStart(2,'0')}.pptx`;link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
+   const link=document.createElement('a');link.href=url;link.download=reportMode==='year'?`bilan-contenants-${reportYear}-annuel.pptx`:`bilan-contenants-${reportYear}-${String(reportMonth).padStart(2,'0')}.pptx`;link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
   }catch(error){alert(error.message||'Téléchargement impossible.')}finally{button.disabled=false}
  };
  $('#containerKpiYear').onchange=e=>{const year=Number(e.target.value);if(Number.isInteger(year)&&year>=1900&&year<=9999){kpiYear=year;renderKpi()}else e.target.value=kpiYear;};
@@ -189,16 +252,47 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,an
   $('#containerForm [name=subtypeOther]').hidden=sub.value!=='__other__';
   $('#containerForm [name=subtypeOther]').required=sub.value==='__other__';
  }
+ function renderAnalysis(){
+  const analysis=containerInterventionAnalysis(state(),analysisYear);
+  $('#containerAnalysisYear').value=analysisYear;
+  $('#containerAnalysisSummary').innerHTML=`<div><strong>${analysis.total}</strong><span>interventions</span></div><div><strong>${analysis.uniqueContainers}</strong><span>contenants distincts</span></div><div><strong>${analysis.total?Math.round(analysis.total/analysis.uniqueContainers*10)/10:0}</strong><span>interventions par contenant</span></div>`;
+  const table=(items,heading)=>items.length?`<div class="owner-equipment-list"><table><thead><tr><th>${heading}</th><th>Nombre</th></tr></thead><tbody>${items.map(item=>`<tr><td>${clean(item.label)}</td><td>${item.count}</td></tr>`).join('')}</tbody></table></div>`:'<p class="empty">Aucune donnée pour cette année.</p>';
+  $('#containerAnalysisTypes').innerHTML=table(analysis.types,'Type');
+  $('#containerAnalysisCategories').innerHTML=table(analysis.categories.filter(item=>item.count),'Type de contenant');
+  $('#containerAnalysisParts').innerHTML=table(analysis.parts,'Pièce / réparation');
+  $('#containerAnalysisRecurrence').innerHTML=analysis.recurrence.length?`<div class="owner-equipment-list"><table><thead><tr><th>Contenant</th><th>Type</th><th>Interventions</th><th>Fiche</th></tr></thead><tbody>${analysis.recurrence.slice(0,20).map(item=>`<tr><td><b>${clean(item.number)}</b></td><td>${clean(item.subtype)||'—'}</td><td>${item.count}</td><td><button type="button" class="secondary" data-container-analysis-open="${clean(item.id)}">Ouvrir</button></td></tr>`).join('')}</tbody></table></div>`:'<p class="empty">Aucune intervention pour cette année.</p>';
+  $('#containerAnalysisRecurrence').querySelectorAll('[data-container-analysis-open]').forEach(button=>button.onclick=()=>{switchTab('list');open(button.dataset.containerAnalysisOpen,'analysis')});
+  const categories=containerReportTypes.map(([type])=>type);
+  $('#containerAnalysisWeeks').innerHTML=analysis.weeks.length?`<table><thead><tr><th>Semaine</th>${categories.map(type=>`<th>${clean(type)}</th>`).join('')}<th>Total</th></tr></thead><tbody>${analysis.weeks.map(week=>`<tr><th scope="row">${analysisYear}/${String(week.week).padStart(2,'0')}</th>${categories.map(type=>`<td>${week.groups[type]||'—'}</td>`).join('')}<td><b>${week.total}</b></td></tr>`).join('')}</tbody></table>`:'<p class="empty">Aucune intervention pour cette année.</p>';
+ }
  function renderReport(){
   const period=`${reportYear}-${String(reportMonth).padStart(2,'0')}`;
   const latest=new Date();latest.setDate(1);latest.setMonth(latest.getMonth()-1);
   $('#containerReportMonth').max=`${latest.getFullYear()}-${String(latest.getMonth()+1).padStart(2,'0')}`;
   $('#containerReportMonth').value=period;
+  $('#containerReportYear').value=reportYear;
+  $('#containerReportMonthly').setAttribute('aria-pressed',String(reportMode==='month'));
+  $('#containerReportAnnual').setAttribute('aria-pressed',String(reportMode==='year'));
+  $('#containerReportMonthly').classList.toggle('secondary',reportMode!=='month');
+  $('#containerReportAnnual').classList.toggle('secondary',reportMode!=='year');
+  $('#containerReportMonthLabel').hidden=reportMode!=='month';
+  $('#containerReportYearLabel').hidden=reportMode!=='year';
+  $('#containerReportJanuary').hidden=reportMode!=='month';
+  $('#containerReportHeading').textContent=reportMode==='year'?'Rapport annuel des contenants':'Rapport mensuel des contenants';
+  $('#containerReportIntro').textContent=reportMode==='year'?'Bilan de toutes les interventions enregistrées pour l’année sélectionnée.':'Le dernier mois terminé est affiché par défaut dès le 1er du mois suivant. Bilan calculé à partir des interventions enregistrées.';
   const monthName=new Intl.DateTimeFormat('fr-FR',{month:'long',year:'numeric'}).format(new Date(reportYear,reportMonth-1,1));
-  const report=containerMonthlyReport(state(),reportYear,reportMonth);
-  $('#containerReportPeriod').textContent=`Bilan mois de ${monthName.split(' ')[0].toLocaleUpperCase('fr')}`;
-  $('#containerReportInterventions').textContent=`${report.interventions} intervention${report.interventions===1?'':'s'} enregistrée${report.interventions===1?'':'s'} sur le mois.`;
+  const report=reportMode==='year'?containerAnnualReport(state(),reportYear):containerMonthlyReport(state(),reportYear,reportMonth);
+  $('#containerReportPeriod').textContent=reportMode==='year'?`Bilan année ${reportYear}`:`Bilan mois de ${monthName.split(' ')[0].toLocaleUpperCase('fr')}`;
+  $('#containerReportInterventions').textContent=`${report.total} intervention${report.total===1?'':'s'} enregistrée${report.total===1?'':'s'} sur ${reportMode==='year'?'l’année':'le mois'}.`;
   $('#containerReportRows').innerHTML=report.groups.map((group,index)=>`<tr><th scope="row">${clean(group.type)}</th><td>${group.actions}</td>${index===0?`<td id="containerReportTotalCell" rowspan="${report.groups.length}">${report.total}</td>`:''}</tr>`).join('');
+  $('#containerReportAnnualMonths').hidden=reportMode!=='year';
+  $('#containerReportDetailsTitle').parentElement.hidden=reportMode==='year';
+  if(reportMode==='year'){
+   const names=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+   $('#containerReportAnnualRows').innerHTML=`<div class="owner-equipment-list"><table><thead><tr><th>Mois</th><th>Interventions</th><th>Détail</th></tr></thead><tbody>${report.months.map(({month,actions})=>`<tr><td>${names[month-1]}</td><td>${actions}</td><td><button type="button" class="secondary" data-container-annual-month="${month}" ${actions?'':'disabled'}>Voir les interventions</button></td></tr>`).join('')}</tbody></table></div>`;
+   $('#containerReportAnnualRows').querySelectorAll('[data-container-annual-month]').forEach(button=>button.onclick=()=>{reportMonth=Number(button.dataset.containerAnnualMonth);reportMode='month';renderReport();$('#containerReportDetailsTitle').scrollIntoView({block:'start',behavior:'smooth'})});
+   return;
+  }
   $('#containerReportDetailsTitle').textContent=`Interventions de ${monthName} · ${report.details.length}`;
   $('#containerReportDetailsRows').innerHTML=report.details.length?`<div class="owner-equipment-list"><table><thead><tr><th scope="col">Date</th><th scope="col">Contenant</th><th scope="col">Type de contenant</th><th scope="col">N° d’intervention</th><th scope="col">Type d’intervention</th><th scope="col">Contrôleur</th><th scope="col">Commentaire</th><th scope="col">Fiche</th></tr></thead><tbody>${report.details.map(({containerId,containerNumber,containerType,intervention})=>`<tr><td>${dateFr(intervention.date)}</td><td><b>${clean(containerNumber)}</b></td><td>${clean(containerType)||'—'}</td><td>${clean(intervention.number)}</td><td>${clean(intervention.type)||'—'}</td><td>${clean(intervention.controller)||'—'}</td><td class="container-report-comment">${clean(intervention.comment)||'—'}</td><td><button type="button" class="secondary" data-container-report-open="${clean(containerId)}">Ouvrir</button></td></tr>`).join('')}</tbody></table></div>`:'<p class="empty">Aucune intervention enregistrée pour ce mois.</p>';
   $('#containerReportDetailsRows').querySelectorAll('[data-container-report-open]').forEach(button=>button.onclick=()=>{switchTab('list');open(button.dataset.containerReportOpen,'report')});
@@ -260,7 +354,7 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,an
   $('#containerOverdueCount').textContent=counts.overdue;
   $('#containerUnknownCount').textContent=counts.unknown;
  $('#containerRows').innerHTML=rows.length?`<div class="owner-equipment-list"><table><thead><tr>${[['number','N° d’équipement'],['subtype','Type de contenant'],['due','Prochain préventif'],['last','Dernière intervention'],['count','Interventions']].map(([key,label])=>`<th scope="col" aria-sort="${sortKey===key?sortDirection==='asc'?'ascending':'descending':'none'}"><button type="button" class="container-sort" data-container-sort="${key}" aria-label="Trier par ${label}, ${sortKey===key&&sortDirection==='asc'?'ordre décroissant':'ordre croissant'}">${label}<span aria-hidden="true">${sortKey===key?sortDirection==='asc'?' ↑':' ↓':' ↕'}</span></button></th>`).join('')}<th scope="col"><span class="sr-only">Action</span></th></tr></thead><tbody>${rows.map(c=>{const last=[...c.interventions].sort((a,b)=>b.date.localeCompare(a.date))[0];return `<tr class="container-row-${containerPreventiveStatus(c).status}"><td><b>${clean(c.number)}</b></td><td>${clean(c.subtype)||'—'}</td><td><span class="container-status-pill ${dueClass(c)}">${statusLabel(c)}</span><small>${dueLabel(c)}</small></td><td>${last?new Date(last.date+'T00:00:00').toLocaleDateString('fr-FR'):'Aucune'}</td><td>${c.interventions.length}</td><td><button class="secondary" data-container-open="${clean(c.id)}">Ouvrir</button></td></tr>`}).join('')}</tbody></table></div>`:'<p class="empty">'+(all.length?'Aucun contenant ne correspond à la recherche.':'Aucun contenant enregistré. Vous pourrez créer les fiches manuellement ou les importer ultérieurement.')+'</p>';$('#containerRows').querySelectorAll('[data-container-sort]').forEach(b=>b.onclick=()=>{const key=b.dataset.containerSort;sortDirection=sortKey===key?(sortDirection==='asc'?'desc':'asc'):(key==='count'||key==='last'?'desc':'asc');sortKey=key;renderList();$('#containerRows').querySelector(`[data-container-sort=\"${key}\"]`)?.focus()});$('#containerRows').querySelectorAll('[data-container-open]').forEach(b=>b.onclick=()=>open(b.dataset.containerOpen));$('#containerAdd').disabled=!canEdit();$('#containerImportButton').disabled=!canEdit();}
- function open(idValue,origin='list'){const c=state().find(x=>x.id===idValue);if(!c)return;selected=c.id;returnTab=origin;$('#containerListPane').hidden=true;$('#containerDetailPane').hidden=false;$('#containerAdd').hidden=true;$('#containerImportButton').hidden=true;const last=[...c.interventions].sort((a,b)=>b.date.localeCompare(a.date))[0];$('#containerDetail').innerHTML=`<div class="toolbar"><div><p class="eyebrow">FICHE CONTENANT</p><h2>${clean(c.number)}</h2></div><div class="container-detail-actions"><button type="button" class="secondary" id="containerEdit">Modifier la fiche</button><button type="button" class="secondary" id="containerBack">← ${origin==='archive'?'Archives':origin==='report'?'Rapport mensuel':'Tous les contenants'}</button></div></div><dl class="container-facts"><div><dt>Type de contenant</dt><dd>${clean(c.subtype)||'Non renseigné'}</dd></div><div><dt>${containerArchiveInfo(c)?'Statut':`Prochain préventif · tous les ${containerPreventiveStatus(c).months} mois`}</dt><dd class="${dueClass(c)}">${dueLabel(c)}</dd></div><div><dt>Dernière intervention</dt><dd>${last?new Date(last.date+'T00:00:00').toLocaleDateString('fr-FR'):'Aucune intervention'}</dd></div><div><dt>Nombre d’interventions</dt><dd>${c.interventions.length}</dd></div></dl>${containerArchiveInfo(c)?`<aside class="container-archive-note"><b>Mis au rebut le ${dateFr(containerArchiveInfo(c).date)}</b> · Intervention ${clean(containerArchiveInfo(c).number)}<p>${clean(containerArchiveInfo(c).comment)}</p>${containerArchiveInfo(c).laterInterventions?`<p class="container-archive-warning">${containerArchiveInfo(c).laterInterventions} intervention${containerArchiveInfo(c).laterInterventions===1?'':'s'} enregistrée${containerArchiveInfo(c).laterInterventions===1?'':'s'} après le rebut · situation à vérifier.</p>`:''}</aside>`:''}<div class="toolbar"><h3>Historique des interventions</h3><button type="button" id="containerAddIntervention">+ Ajouter une intervention</button></div>${c.interventions.length?`<div class="owner-equipment-list"><table><thead><tr><th>N° intervention</th><th>Date</th><th>Type</th><th>Contrôleur</th><th>État général</th></tr></thead><tbody>${[...c.interventions].sort((a,b)=>b.date.localeCompare(a.date)).map(i=>`<tr><td><b>${clean(i.number)}</b></td><td>${new Date(i.date+'T00:00:00').toLocaleDateString('fr-FR')}</td><td>${clean(i.type)||'—'}</td><td>${clean(i.controller)||'—'}</td><td>${clean(i.generalState)||'—'}<details><summary>Détails</summary><p>${clean(i.comment)||'Aucun commentaire'}</p><dl class="container-parts">${containerParts.filter(p=>i.parts[p]).map(p=>`<div><dt>${clean(p)}</dt><dd>${clean(i.parts[p])}</dd></div>`).join('')}</dl></details></td></tr>`).join('')}</tbody></table></div>`:'<p class="empty">Aucune intervention enregistrée sur ce contenant.</p>'}`;$('#containerBack').onclick=()=>returnTab==='archive'?switchTab('archive'):returnTab==='report'?switchTab('report'):list();$('#containerEdit').disabled=!canEdit();$('#containerEdit').onclick=()=>openEdit(c);$('#containerAddIntervention').disabled=!canEdit();$('#containerAddIntervention').onclick=()=>openIntervention(c);}
+ function open(idValue,origin='list'){const c=state().find(x=>x.id===idValue);if(!c)return;selected=c.id;returnTab=origin;$('#containerListPane').hidden=true;$('#containerDetailPane').hidden=false;$('#containerAdd').hidden=true;$('#containerImportButton').hidden=true;const last=[...c.interventions].sort((a,b)=>b.date.localeCompare(a.date))[0];$('#containerDetail').innerHTML=`<div class="toolbar"><div><p class="eyebrow">FICHE CONTENANT</p><h2>${clean(c.number)}</h2></div><div class="container-detail-actions"><button type="button" class="secondary" id="containerEdit">Modifier la fiche</button><button type="button" class="secondary" id="containerBack">← ${origin==='archive'?'Archives':origin==='report'?'Rapport mensuel':origin==='analysis'?'Analyse interventions':'Tous les contenants'}</button></div></div><dl class="container-facts"><div><dt>Type de contenant</dt><dd>${clean(c.subtype)||'Non renseigné'}</dd></div><div><dt>${containerArchiveInfo(c)?'Statut':`Prochain préventif · tous les ${containerPreventiveStatus(c).months} mois`}</dt><dd class="${dueClass(c)}">${dueLabel(c)}</dd></div><div><dt>Dernière intervention</dt><dd>${last?new Date(last.date+'T00:00:00').toLocaleDateString('fr-FR'):'Aucune intervention'}</dd></div><div><dt>Nombre d’interventions</dt><dd>${c.interventions.length}</dd></div></dl>${containerArchiveInfo(c)?`<aside class="container-archive-note"><b>Mis au rebut le ${dateFr(containerArchiveInfo(c).date)}</b> · Intervention ${clean(containerArchiveInfo(c).number)}<p>${clean(containerArchiveInfo(c).comment)}</p>${containerArchiveInfo(c).laterInterventions?`<p class="container-archive-warning">${containerArchiveInfo(c).laterInterventions} intervention${containerArchiveInfo(c).laterInterventions===1?'':'s'} enregistrée${containerArchiveInfo(c).laterInterventions===1?'':'s'} après le rebut · situation à vérifier.</p>`:''}</aside>`:''}<div class="toolbar"><h3>Historique des interventions</h3><button type="button" id="containerAddIntervention">+ Ajouter une intervention</button></div>${c.interventions.length?`<div class="owner-equipment-list"><table><thead><tr><th>N° intervention</th><th>Date</th><th>Type</th><th>Contrôleur</th><th>État général</th></tr></thead><tbody>${[...c.interventions].sort((a,b)=>b.date.localeCompare(a.date)).map(i=>`<tr><td><b>${clean(i.number)}</b></td><td>${new Date(i.date+'T00:00:00').toLocaleDateString('fr-FR')}</td><td>${clean(i.type)||'—'}</td><td>${clean(i.controller)||'—'}</td><td>${clean(i.generalState)||'—'}<details><summary>Détails</summary><p>${clean(i.comment)||'Aucun commentaire'}</p><dl class="container-parts">${containerParts.filter(p=>i.parts[p]).map(p=>`<div><dt>${clean(p)}</dt><dd>${clean(i.parts[p])}</dd></div>`).join('')}</dl></details></td></tr>`).join('')}</tbody></table></div>`:'<p class="empty">Aucune intervention enregistrée sur ce contenant.</p>'}`;$('#containerBack').onclick=()=>returnTab==='archive'?switchTab('archive'):returnTab==='report'?switchTab('report'):returnTab==='analysis'?switchTab('analysis'):list();$('#containerEdit').disabled=!canEdit();$('#containerEdit').onclick=()=>openEdit(c);$('#containerAddIntervention').disabled=!canEdit();$('#containerAddIntervention').onclick=()=>openIntervention(c);}
  function openEdit(c){
   if(!canEdit())return;
   editingContainerId=c.id;

@@ -1,12 +1,14 @@
 import {unzipSync,zipSync,strFromU8,strToU8} from 'fflate';
 
 export function fillContainerReportPptx(template,{month,year,counts,total}){
- if(!Array.isArray(counts)||counts.length!==12||!Number.isInteger(total))throw new Error('Bilan mensuel incomplet.');
+ if(!Array.isArray(counts)||counts.length!==12||!Number.isInteger(total))throw new Error('Bilan incomplet.');
  const files=unzipSync(template);
  const path='ppt/slides/slide1.xml';
  if(!files[path])throw new Error('Modèle PowerPoint invalide.');
  let slide=strFromU8(files[path]);
- const replacements={MONTH:String(month).toLocaleUpperCase('fr'),TOTAL:String(total)};
+ const replacements={TOTAL:String(total)};
+ if(slide.includes('{{MONTH}}'))replacements.MONTH=String(month).toLocaleUpperCase('fr');
+ if(slide.includes('{{YEAR}}'))replacements.YEAR=String(year);
  counts.forEach((count,index)=>{replacements[`COUNT_${index}`]=String(count)});
  for(const [key,value] of Object.entries(replacements)){
   const marker=`{{${key}}}`;

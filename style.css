@@ -452,4 +452,16 @@ header .header-engineering-logo{display:block;width:72px;height:72px;object-fit:
 #containersView .container-report-details table{width:100%;min-width:1050px}
 #containersView .container-report-details th,#containersView .container-report-details td{vertical-align:top}
 #containersView .container-report-comment{max-width:320px;min-width:180px;overflow-wrap:anywhere;white-space:pre-wrap}
+#containersView .container-report-mode{display:flex;gap:8px;margin-top:14px}
+#containersView .container-analysis-summary{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0}
+#containersView .container-analysis-summary>div{display:flex;flex-direction:column;min-width:170px;padding:14px 18px;border:1px solid #dce5ef;border-radius:8px;background:#f5f8fc}
+#containersView .container-analysis-summary strong{font-size:28px;color:#003d78}
+#containersView .container-analysis-summary span{font-size:13px;color:#536b82}
+#containersView .container-analysis-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin:24px 0}
+#containersView .container-analysis-grid>section{min-width:0}
+#containersView .container-analysis-grid h3{margin:0 0 12px}
+#containersView .container-analysis-grid .owner-equipment-list{max-height:440px;overflow:auto}
+#containersView .container-analysis-panel>#containerAnalysisWeeks{overflow:auto;max-height:680px}
+#containersView .container-analysis-panel>#containerAnalysisWeeks table{min-width:1250px}
+@media(max-width:700px){#containersView .container-analysis-grid{grid-template-columns:1fr}}
 @media print{body:has(#containerReportPanel:not([hidden])) .container-report-details{break-before:page}body:has(#containerReportPanel:not([hidden])) .container-report-details table{min-width:0;font-size:9pt}body:has(#containerReportPanel:not([hidden])) .container-report-details button{display:none}}
