@@ -346,3 +346,6 @@ button.material-sort-header{display:inline-flex;align-items:center;justify-conte
 #containersView .container-part-fields label{font-size:12px}
 .container-intervention-dialog{width:min(860px,calc(100vw - 28px));max-height:min(90vh,900px);overflow:auto}
 @media(max-width:700px){#containersView .container-facts{grid-template-columns:repeat(2,minmax(0,1fr))}#containersView .container-part-fields,#containersView .container-parts{grid-template-columns:repeat(2,minmax(0,1fr))}#containersView .container-toolbar{align-items:flex-start}}
+
+#containersView .container-detail-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+@media(max-width:700px){#containersView #containerDetail>.toolbar:first-child{align-items:flex-start;flex-wrap:wrap}}
