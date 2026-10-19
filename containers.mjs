@@ -246,7 +246,6 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,an
  $('#containerReportAnnual').onclick=()=>{reportMode='year';renderReport()};
  $('#containerReportYear').onchange=e=>{const year=Number(e.target.value);if(Number.isInteger(year)&&year>=1900&&year<=9999){reportYear=year;renderReport()}else e.target.value=reportYear};
  $('#containerReportMonth').onchange=e=>{const [year,month]=e.target.value.split('-').map(Number);if(year>=2026&&month>=1&&month<=12&&e.target.value<=$('#containerReportMonth').max){reportYear=year;reportMonth=month;renderReport()}};
- $('#containerReportJanuary').onclick=()=>{reportYear=2026;reportMonth=1;renderReport()};
  $('#containerReportPrint').onclick=()=>window.print();
  $('#containerReportDownload').onclick=async()=>{
   const button=$('#containerReportDownload');button.disabled=true;
@@ -354,9 +353,7 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,an
   $('#containerReportAnnual').classList.toggle('secondary',reportMode!=='year');
   $('#containerReportMonthLabel').hidden=reportMode!=='month';
   $('#containerReportYearLabel').hidden=reportMode!=='year';
-  $('#containerReportJanuary').hidden=reportMode!=='month';
   $('#containerReportHeading').textContent=reportMode==='year'?'Rapport annuel des contenants':'Rapport mensuel des contenants';
-  $('#containerReportIntro').textContent=reportMode==='year'?'Bilan de toutes les interventions enregistrées pour l’année sélectionnée.':'Le dernier mois terminé est affiché par défaut dès le 1er du mois suivant. Bilan calculé à partir des interventions enregistrées.';
   const monthName=new Intl.DateTimeFormat('fr-FR',{month:'long',year:'numeric'}).format(new Date(reportYear,reportMonth-1,1));
   const report=reportMode==='year'?containerAnnualReport(state(),reportYear):containerMonthlyReport(state(),reportYear,reportMonth);
   $('#containerReportPeriod').textContent=reportMode==='year'?`Bilan année ${reportYear}`:`Bilan mois de ${monthName.split(' ')[0].toLocaleUpperCase('fr')}`;
