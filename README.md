@@ -1,3 +1,5 @@
+Le badge « MAJ » dans l’en-tête indique le numéro de la mise à jour publiée. Incrémenter ce numéro dans `index.html` à chaque publication, puis régénérer `prototype-vgp.html` avec `npm run build`.
+
 ## Parcours et rappels en simulation
 
 Navigation en trois espaces (Matériel et contrôles VGP, Plans d’action, Personnel), nomenclature unifiée et rappels **en simulation uniquement** : [version locale, preuves et étapes IT](docs/REVUE-LOCALE-PARCOURS-RAPPELS.md). `prototype-vgp.html` reste hors connexion à Supabase. Les nouveaux contacts et la file du navigateur sont isolés dans IndexedDB ; aucun compte Microsoft 365 ni ordonnanceur n’est activé. Le worker serveur simulé se teste sur une base SQLite locale. La publication du site a été autorisée après la revue locale ; elle n’active aucun envoi, aucun compte Microsoft 365 ni aucun traitement serveur.
