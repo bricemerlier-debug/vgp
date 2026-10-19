@@ -546,3 +546,13 @@ header .header-engineering-logo{display:block;width:72px;height:72px;object-fit:
 .navigation[open]{display:flex;flex-direction:column}
 #navigationLogout{width:100%;margin-top:auto;background:#f8e9e6;color:#8c3028;flex-shrink:0}
 @media(max-width:700px){.vgp-workspace-navigation{gap:10px}.vgp-action-tabs{margin-left:0;flex-wrap:wrap}.vgp-action-tabs button{padding:12px}.container-mode header .header-left .brand{grid-row:2}.container-mode header{row-gap:12px}#containersView .container-toolbar>.actions{margin-left:0;flex-wrap:wrap}}
+
+#containerControllersPanel>.toolbar{justify-content:space-between;align-items:flex-start}
+#containerControllersPanel .container-controller-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:16px}
+#containerControllersPanel .container-controller-card{min-width:0;border:1px solid #dce5ef;border-radius:10px;padding:20px;background:#fff}
+#containerControllersPanel .container-controller-card h3{margin:0 0 12px;overflow-wrap:anywhere}
+#containerControllersPanel .container-controller-card p{margin:8px 0;overflow-wrap:anywhere}
+#containerControllersPanel .container-controller-card strong{font-size:25px;color:#003d78}
+#containerControllersPanel .container-controller-card small{color:#60748e}
+#containerControllersPanel .container-controller-card .actions{margin-top:16px;gap:8px}
+#containerControllersPanel .container-controller-card button{font-size:12px;padding:10px 12px}
