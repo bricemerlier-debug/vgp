@@ -244,10 +244,12 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,an
   const archiveCount=state().length-all.length;
   $('#containerArchiveTab').textContent=`Archivés (${archiveCount})`;
   populateCategories();renderTypeFilters(all);
-  const filtered=filterContainerList(all,{query,types:[...selectedTypes],statuses:[...selectedStatuses]});
+  const matching=filterContainerList(all,{query,types:[...selectedTypes]});
+  const filtered=filterContainerList(matching,{statuses:[...selectedStatuses]});
   const rows=sortContainerList(filtered,sortKey,sortDirection);
   $('#containerCount').textContent=`${filtered.length} contenant${filtered.length===1?'':'s'} affiché${filtered.length===1?'':'s'} sur ${all.length} · ${filtered.reduce((n,c)=>n+c.interventions.length,0)} intervention${filtered.reduce((n,c)=>n+c.interventions.length,0)===1?'':'s'}`;
-  const counts=containerStatusCounts(filtered);
+  const counts=containerStatusCounts(matching);
+  $('#containerListPane').querySelectorAll('[data-container-summary-status]').forEach(button=>button.setAttribute('aria-pressed',String(selectedStatuses.has(button.dataset.containerSummaryStatus))));
   $('#containerCurrentCount').textContent=counts.current;
   $('#containerOverdueCount').textContent=counts.overdue;
   $('#containerUnknownCount').textContent=counts.unknown;
@@ -267,6 +269,7 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,an
  function openIntervention(c){const form=$('#containerInterventionForm');form.reset();form.elements.number.value='';form.elements.date.value=new Date().toISOString().slice(0,10);$('#containerInterventionTitle').textContent=`Nouvelle intervention · ${c.number}`;$('#containerPartFields').innerHTML=containerParts.map(p=>`<label>${clean(p)}<select data-native-select name="part:${clean(p)}"><option value="">Non renseigné</option><option>OK</option><option>À réparer</option><option>À remplacer</option><option>Sans objet</option></select></label>`).join('');$('#containerInterventionError').textContent='';$('#containerInterventionStatus').textContent='';$('#containerInterventionDialog').showModal();}
  $('#containerTypeFilters').onchange=e=>{if(e.target.type!=='checkbox')return;e.target.checked?selectedTypes.add(e.target.value):selectedTypes.delete(e.target.value);renderList()};
  $('#containerStatusFilters').onchange=e=>{if(e.target.type!=='checkbox')return;e.target.checked?selectedStatuses.add(e.target.value):selectedStatuses.delete(e.target.value);renderList()};
+ $('#containerListPane').querySelectorAll('[data-container-summary-status]').forEach(button=>button.onclick=()=>{const status=button.dataset.containerSummaryStatus;selectedStatuses.has(status)?selectedStatuses.delete(status):selectedStatuses.add(status);$('#containerStatusFilters').querySelectorAll('input').forEach(input=>input.checked=selectedStatuses.has(input.value));renderList()});
  $('#containerClearFilters').onclick=()=>{query='';selectedTypes.clear();selectedStatuses.clear();$('#containerSearch').value='';$('#containerTypeFilters').querySelectorAll('input').forEach(input=>input.checked=false);$('#containerStatusFilters').querySelectorAll('input').forEach(input=>input.checked=false);renderList()};
  $('#containerSearch').oninput=e=>{query=e.target.value;renderList()};$('#containerAdd').onclick=()=>{const f=$('#containerForm');f.reset();populateCategories();editingContainerId=null;$('#containerFormTitle').textContent='Créer une fiche contenant';$('#containerFormSubmit').textContent='Créer la fiche';$('#containerFormError').textContent='';$('#containerFormStatus').textContent='';$('#containerDialog').showModal()};$('#containerSubtypeChoice').onchange=e=>{const other=e.target.value==='__other__';$('#containerForm [name=subtypeOther]').hidden=!other;$('#containerForm [name=subtypeOther]').required=other;};
  $('#containerForm').onsubmit=async e=>{

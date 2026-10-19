@@ -13,4 +13,7 @@ assert.deepEqual(numbers({query:'r2 verte'}),['CE1','CE2']);
 assert.deepEqual(containerStatusCounts(filterContainerList(records,{types:['R2 - VERTE']},today),today),{current:1,overdue:1,unknown:0});
 assert.deepEqual(numbers({types:['R2 - VERTE','PC'],statuses:['overdue','unknown']}),['CE2','SE3']);
 assert.deepEqual(numbers({query:'CE',types:['R2 - VERTE','PC'],statuses:['overdue','unknown']}),['CE2']);
+const matching=filterContainerList(records,{types:['R2 - VERTE']},today);
+assert.deepEqual(containerStatusCounts(matching,today),{current:1,overdue:1,unknown:0});
+assert.deepEqual(filterContainerList(matching,{statuses:['overdue']},today).map(c=>c.number),['CE2']);
 console.log('Filtres cumulés des contenants validés.');
