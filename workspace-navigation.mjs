@@ -1,6 +1,6 @@
 // Navigation entre pages existantes : aucun changement des données ou des règles métier.
 export function installWorkspaceNavigation({navigate,openNaming}){
- const groups=[{id:'vgp',views:['material','kpi','planning','shiftCalendar']},{id:'personnel',views:['controllers','owners']}];
+ const groups=[{id:'vgp',views:['material','kpi','planning','shiftCalendar','actionKpi']},{id:'personnel',views:['controllers','owners']}];
  let referenceContext=false;
  const references=document.querySelector('#referenceNavigation');
  document.querySelector('#administrationView .actions').addEventListener('click',event=>{if(event.target.closest('button'))referenceContext=true;},true);

@@ -202,24 +202,22 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,an
  const statusLabel=c=>({overdue:'En retard',soon:'À échéance',current:'À jour',unknown:'Sans préventif',archived:'Mis au rebut'})[containerPreventiveStatus(c).status];
  function list(){selected=null;$('#containerListPane').hidden=false;$('#containerDetailPane').hidden=true;$('#containerAdd').hidden=false;$('#containerImportButton').hidden=false;renderList();}
  function switchTab(tab){
-  activeTab=tab;
-  $('#containerListTab').setAttribute('aria-selected',tab==='list');
+  if(tab==='analysis')tab='kpi';activeTab=tab;
+  $('#containerListTab').setAttribute('aria-selected',tab==='list'||tab==='archive');
   $('#containerKpiTab').setAttribute('aria-selected',tab==='kpi');
-  $('#containerArchiveTab').setAttribute('aria-selected',tab==='archive');
-  $('#containerAnalysisTab').setAttribute('aria-selected',tab==='analysis');
   $('#containerReportTab').setAttribute('aria-selected',tab==='report');
   $('#containerListPanel').hidden=tab!=='list';
   $('#containerKpiPanel').hidden=tab!=='kpi';
   $('#containerArchivePanel').hidden=tab!=='archive';
-  $('#containerAnalysisPanel').hidden=tab!=='analysis';
+  $('#containerAnalysisPanel').hidden=tab!=='kpi';
   $('#containerReportPanel').hidden=tab!=='report';
-  if(tab==='list')list();else{$('#containerAdd').hidden=true;$('#containerImportButton').hidden=true;if(tab==='kpi')renderKpi();else if(tab==='archive')renderArchive();else if(tab==='analysis')renderAnalysis();else renderReport();}
+  if(tab==='list')list();else{$('#containerAdd').hidden=true;$('#containerImportButton').hidden=true;if(tab==='kpi'){renderKpi();renderAnalysis();}else if(tab==='archive')renderArchive();else if(tab==='analysis')renderAnalysis();else renderReport();}
  }
  $('#containerListTab').onclick=()=>switchTab('list');
  $('#containerKpiTab').onclick=()=>switchTab('kpi');
  $('#containerArchiveTab').onclick=()=>switchTab('archive');
  $('#containerArchiveSearch').oninput=e=>{archiveQuery=e.target.value;renderArchive()};
- $('#containerAnalysisTab').onclick=()=>switchTab('analysis');
+ $('#containerArchiveBack').onclick=()=>switchTab('list');
  $('#containerAnalysisYear').onchange=e=>{const year=Number(e.target.value);if(Number.isInteger(year)&&year>=1900&&year<=9999){analysisYear=year;renderAnalysis()}else e.target.value=analysisYear};
  $('#containerReportTab').onclick=()=>switchTab('report');
  $('#containerReportMonthly').onclick=()=>{reportMode='month';renderReport()};
@@ -240,9 +238,9 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,an
    const link=document.createElement('a');link.href=url;link.download=reportMode==='year'?`bilan-contenants-${reportYear}-annuel.pptx`:`bilan-contenants-${reportYear}-${String(reportMonth).padStart(2,'0')}.pptx`;link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
   }catch(error){alert(error.message||'Téléchargement impossible.')}finally{button.disabled=false}
  };
- $('#containerKpiYear').onchange=e=>{const year=Number(e.target.value);if(Number.isInteger(year)&&year>=1900&&year<=9999){kpiYear=year;renderKpi()}else e.target.value=kpiYear;};
- $('#containerKpiPreviousYear').onclick=()=>{if(kpiYear>1900){kpiYear--;renderKpi();}};
- $('#containerKpiNextYear').onclick=()=>{if(kpiYear<9999){kpiYear++;renderKpi();}};
+ $('#containerKpiYear').onchange=e=>{const year=Number(e.target.value);if(Number.isInteger(year)&&year>=1900&&year<=9999){kpiYear=year;analysisYear=year;renderKpi();renderAnalysis()}else e.target.value=kpiYear;};
+ $('#containerKpiPreviousYear').onclick=()=>{if(kpiYear>1900){kpiYear--;analysisYear=kpiYear;renderKpi();renderAnalysis();}};
+ $('#containerKpiNextYear').onclick=()=>{if(kpiYear<9999){kpiYear++;analysisYear=kpiYear;renderKpi();renderAnalysis();}};
 
  function populateCategories(subtypeValue=''){
   const sub=$('#containerSubtypeChoice'),previous=subtypeValue||sub.value;
@@ -429,5 +427,5 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,an
   else $('#containerInterventionError').textContent=$('#message').textContent||'Enregistrement impossible. Actualisez la page avant de réessayer.';
  };
  $('#containerImportButton').onclick=()=>{importPlan=null;importSnapshot=null;$('#containerImportFiles').value='';$('#containerImportStatus').textContent='';$('#containerImportPreview').innerHTML='';$('#containerImportError').textContent='';$('#containerImportConfirmed').checked=false;$('#containerImportConfirmRow').hidden=true;$('#containerImportApply').disabled=true;$('#containerImportDialog').showModal()};$('#containerImportFiles').onchange=async e=>{importPlan=null;$('#containerImportApply').disabled=true;$('#containerImportConfirmRow').hidden=true;$('#containerImportPreview').innerHTML='';$('#containerImportError').textContent='';const files=[...e.target.files];if(!files.length)return;$('#containerImportStatus').textContent=`Analyse locale de ${files.length} classeur(s)…`;try{importSnapshot=JSON.stringify(state());importPlan=await analyzeFiles(files,state());const p=importPlan;const estimatedBytes=new TextEncoder().encode(JSON.stringify({...read(),containers:p.containers})).length;p.estimatedBytes=estimatedBytes;$('#containerImportStatus').textContent=`${p.files.length} fichier(s) · ${p.rows} ligne(s) lue(s) · ${p.addedContainers} fiche(s) contenant créée(s) · ${p.addedInterventions} intervention(s) rangée(s) dans leur fiche · ${p.recoveredContainerNumbers} numéro(s) retrouvé(s) sans ambiguïté dans un autre classeur · ${p.duplicates} doublon(s) ignoré(s) · ${p.errors} ligne(s) à vérifier. Données à enregistrer : ${(estimatedBytes/1048576).toFixed(1)} Mo.`;const items=[...p.issues.map(r=>({...r,kind:'À vérifier'})),...p.conflicts.map(r=>({...r,kind:'Type conservé'}))];$('#containerImportPreview').innerHTML=(p.reasons.length?`<p><b>Lignes ignorées par motif :</b> ${p.reasons.map(r=>`${r.count} · ${clean(r.reason)}`).join(' ; ')}</p>`:'')+(items.length?`<details open><summary>Détails affichés (${Math.min(items.length,40)} sur ${p.issueCount+p.conflictCount} lignes à vérifier)</summary><div class="owner-equipment-list"><table><thead><tr><th>Fichier / ligne</th><th>Contenant</th><th>Intervention</th><th>Analyse</th></tr></thead><tbody>${items.map(r=>`<tr><td>${clean(r.file)} · ${r.line}</td><td>${clean(r.number)||'—'}</td><td>${clean(r.intervention)||'—'}</td><td>${clean(r.kind)} · ${clean(r.reason)}</td></tr>`).join('')}</tbody></table></div></details>`:'<p>Aucune ligne à vérifier. Les doublons seront ignorés et aucune fiche existante ne sera remplacée.</p>');const ready=p.addedContainers+p.addedInterventions>0&&estimatedBytes<19*1048576;if(estimatedBytes>=19*1048576)$('#containerImportError').textContent='Le contenu complet dépasserait la limite actuelle de 20 Mo du serveur. Aucun élément n’a été enregistré. Contactez l’administrateur pour augmenter la capacité de stockage des contenants.';$('#containerImportConfirmRow').hidden=!ready;$('#containerImportApply').disabled=!ready||!canEdit();}catch(error){$('#containerImportError').textContent=error.message;$('#containerImportStatus').textContent='Analyse interrompue.';}};$('#containerImportConfirmed').onchange=()=>{$('#containerImportApply').disabled=!importPlan||!$('#containerImportConfirmed').checked||!canEdit()};$('#containerImportApply').onclick=async()=>{if(!importPlan||!$('#containerImportConfirmed').checked)return;if(importSnapshot!==JSON.stringify(state())){$('#containerImportError').textContent='Les contenants ont changé depuis l’analyse. Relancez l’aperçu avant de confirmer.';return;}const next=structuredClone(read());next.containers=importPlan.containers;$('#containerImportApply').disabled=true;$('#containerImportStatus').textContent='Enregistrement des fiches et interventions… Cela peut prendre jusqu’à 2 minutes.';if(await (saveContainers?saveContainers(next,{bulk:true}):save(next,false,{timeoutMs:120000,renderAfter:false}))){$('#containerImportDialog').close();list();}else{$('#containerImportStatus').textContent='Enregistrement non confirmé.';$('#containerImportError').textContent=$('#message').textContent||'Actualisez la page et vérifiez les contenants avant un nouvel essai.';importPlan=null;$('#containerImportConfirmed').checked=false;$('#containerImportConfirmRow').hidden=true;}};
- return {render:()=>{renderList();if(activeTab==='kpi')renderKpi()},list,open,validate:containerRecordsValid};
+ return {render:()=>{renderList();if(activeTab==='kpi'){renderKpi();renderAnalysis();}},list,open,validate:containerRecordsValid};
 }
