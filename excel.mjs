@@ -1,4 +1,4 @@
-import {sectorZones} from './sectors.mjs';
+import {sectorChoices,sectorZones} from './sectors.mjs';
 import {suggestEquipmentNaming} from './nomenclature.mjs';
 // Import d'ajouts seulement : aucun remplacement silencieux d'une fiche existante.
 const norm=v=>String(v??'').trim().toLocaleLowerCase('fr');
@@ -24,7 +24,7 @@ function analyzeSourceRows(rows,data,today){
  if(row.lastDate&&(!row.verifier||!['Bon état','Mauvais état — réparable','Mauvais état — à jeter','Introuvable'].includes(row.result)))throw Error('Un dernier contrôle exige un vérificateur et un résultat reconnu.');
  if(!row.lastDate&&(row.verifier||row.result))throw Error('Renseignez aussi la date du dernier contrôle.');
  if(heading(row.sector)==='pasdesecteur')row.sector='Pas de secteur';if(heading(row.team)==='pasdequipe')row.team='Pas d’équipe';
- if(row.sector&&!['A1','A2','B1','B2','B3','Pas de secteur'].includes(row.sector))throw Error('Secteur inconnu.');
+ if(row.sector&&!sectorChoices({includeNoSector:true}).some(option=>option.value===row.sector))throw Error('Secteur ou service inconnu.');
  if(row.zone&&!sectorZones(row.sector).includes(row.zone))throw Error('Setup est un sous-secteur de B1 ; DMCR, Yuzer et Démontage membrane sont des sous-secteurs de B2.');
  if(row.team&&!['A','B','C','D','E','Jour','Pas d’équipe'].includes(row.team))throw Error('Équipe inconnue.');
  if(row.email&&(!row.owner||!/^\S+@\S+\.\S+$/.test(row.email)))throw Error('Adresse e-mail ou propriétaire invalide.');

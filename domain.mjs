@@ -1,4 +1,5 @@
 import {reminderDates} from './reminder-dates.mjs';
+import {sectorChoices} from './sectors.mjs';
 import {goodyearReportLogo} from './assets/report-logo.mjs';
 import {pdfFonts} from './assets/report-fonts.mjs';
 export function equipmentName(e){return e.standardName||e.designation;}
@@ -32,7 +33,7 @@ export function dashboard(equipment,today){
  const active=equipment.filter(e=>!e.archived),controlled=active.filter(e=>latestInspection(e)),upToDate=active.filter(e=>due(e)&&due(e)>=today).length;
  const overdue=active.filter(e=>status(e,today)==='En retard').length,soon=active.filter(e=>status(e,today)==='À faire').length,planned=active.filter(e=>status(e,today)==='Échéance à plus d’un mois').length,undefinedCount=active.filter(e=>!due(e)).length;
  return {total:active.length,archived:equipment.length-active.length,lostArchived:equipment.filter(lossArchived).length,controlled:controlled.length,upToDate,missing:active.length-controlled.length,percent:active.length?Math.round(upToDate/active.length*100):null,overdue,soon,planned,undefinedCount,performed:equipment.reduce((n,e)=>n+e.controls.filter(isInspection).length,0),anomalies:controlled.filter(e=>latestInspection(e).result!=='Bon état').length,
- results:['Bon état','Mauvais état — réparable','Mauvais état — à jeter','Réalisé — observations à traiter'].map(result=>({label:result,count:controlled.filter(e=>latestInspection(e).result===result).length})),sectors:['A1','A2','B1','B2','B3','Pas de secteur',''].map(sector=>{const items=active.filter(e=>(e.sector||'')===sector);return {sector,total:items.length,controlled:items.filter(e=>due(e)&&due(e)>=today).length}})};
+ results:['Bon état','Mauvais état — réparable','Mauvais état — à jeter','Réalisé — observations à traiter'].map(result=>({label:result,count:controlled.filter(e=>latestInspection(e).result===result).length})),sectors:[...sectorChoices({includeNoSector:true}),{value:'',label:'Secteur non renseigné'}].map(({value:sector})=>{const items=active.filter(e=>(e.sector||'')===sector);return {sector,total:items.length,controlled:items.filter(e=>due(e)&&due(e)>=today).length}})};
 }
 
 export function reminders(equipment) {
