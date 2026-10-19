@@ -263,6 +263,18 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,an
   $('#containerAnalysisRecurrence').innerHTML=analysis.recurrence.length?`<div class="owner-equipment-list"><table><thead><tr><th>Contenant</th><th>Type</th><th>Interventions</th><th>Fiche</th></tr></thead><tbody>${analysis.recurrence.slice(0,20).map(item=>`<tr><td><b>${clean(item.number)}</b></td><td>${clean(item.subtype)||'—'}</td><td>${item.count}</td><td><button type="button" class="secondary" data-container-analysis-open="${clean(item.id)}">Ouvrir</button></td></tr>`).join('')}</tbody></table></div>`:'<p class="empty">Aucune intervention pour cette année.</p>';
   $('#containerAnalysisRecurrence').querySelectorAll('[data-container-analysis-open]').forEach(button=>button.onclick=()=>{switchTab('list');open(button.dataset.containerAnalysisOpen,'analysis')});
   const categories=containerReportTypes.map(([type])=>type);
+  const chart=$('#containerAnalysisChart'),detail=$('#containerAnalysisWeekDetail');
+  const max=Math.max(1,...analysis.weeks.map(week=>week.total));
+  const peak=Math.ceil(max/20)*20;
+  chart.innerHTML=analysis.weeks.length?`<div class="container-week-plot" style="--week-plot-height:220px;min-width:${Math.max(760,analysis.weeks.length*43)}px"><div class="container-week-grid" aria-hidden="true">${[4,3,2,1,0].map(n=>`<span>${Math.round(peak*n/4)}</span>`).join('')}</div><div class="container-week-bars">${analysis.weeks.map((week,index)=>`<button type="button" class="container-week-bar" data-container-week="${index}" aria-label="Semaine ${week.week} : ${week.total} interventions" style="--week-height:${Math.max(2,week.total/peak*100)}%"><span class="container-week-stack">${categories.map((type,i)=>week.groups[type]?`<span class="container-week-segment" style="--week-color:var(--container-type-${i});flex:${week.groups[type]}" title="${clean(type)} : ${week.groups[type]}" data-count="${week.groups[type]}"></span>`:'').join('')}</span><span class="container-week-number">${String(week.week).padStart(2,'0')}</span></button>`).join('')}</div></div>`:'<p class="empty">Aucune intervention pour cette année.</p>';
+  $('#containerAnalysisLegend').innerHTML=categories.map((type,i)=>`<span><i style="background:var(--container-type-${i})"></i>${clean(type)}</span>`).join('');
+  const showWeek=index=>{
+   const week=analysis.weeks[index];if(!week){detail.textContent='Aucune intervention pour cette année.';return}
+   chart.querySelectorAll('.container-week-bar').forEach((button,i)=>button.classList.toggle('is-active',i===index));
+   detail.innerHTML=`<strong>Semaine ${String(week.week).padStart(2,'0')} · ${week.total} intervention${week.total===1?'':'s'}</strong><div>${categories.map((type,i)=>week.groups[type]?`<span><i style="background:var(--container-type-${i})"></i>${clean(type)} <b>${week.groups[type]}</b></span>`:'').join('')}</div>`;
+  };
+  chart.querySelectorAll('.container-week-bar').forEach(button=>{button.onmouseenter=()=>showWeek(Number(button.dataset.containerWeek));button.onfocus=()=>showWeek(Number(button.dataset.containerWeek));button.onclick=()=>showWeek(Number(button.dataset.containerWeek))});
+  showWeek(analysis.weeks.length-1);
   $('#containerAnalysisWeeks').innerHTML=analysis.weeks.length?`<table><thead><tr><th>Semaine</th>${categories.map(type=>`<th>${clean(type)}</th>`).join('')}<th>Total</th></tr></thead><tbody>${analysis.weeks.map(week=>`<tr><th scope="row">${analysisYear}/${String(week.week).padStart(2,'0')}</th>${categories.map(type=>`<td>${week.groups[type]||'—'}</td>`).join('')}<td><b>${week.total}</b></td></tr>`).join('')}</tbody></table>`:'<p class="empty">Aucune intervention pour cette année.</p>';
  }
  function renderReport(){

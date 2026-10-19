@@ -461,7 +461,28 @@ header .header-engineering-logo{display:block;width:72px;height:72px;object-fit:
 #containersView .container-analysis-grid>section{min-width:0}
 #containersView .container-analysis-grid h3{margin:0 0 12px}
 #containersView .container-analysis-grid .owner-equipment-list{max-height:440px;overflow:auto}
-#containersView .container-analysis-panel>#containerAnalysisWeeks{overflow:auto;max-height:680px}
-#containersView .container-analysis-panel>#containerAnalysisWeeks table{min-width:1250px}
+#containersView .container-analysis-panel{--container-type-0:#136f63;--container-type-1:#6478b3;--container-type-2:#dd7036;--container-type-3:#e5ad3c;--container-type-4:#a861a5;--container-type-5:#52616f;--container-type-6:#8a9a5b;--container-type-7:#3e8ac4;--container-type-8:#15447c;--container-type-9:#b24c54;--container-type-10:#7e628f;--container-type-11:#8b7156}
+#containersView .container-week-legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin:15px 0;font-size:12px;color:#304c69}
+#containersView .container-week-legend span,#containersView .container-week-detail span{display:inline-flex;align-items:center;gap:5px}
+#containersView .container-week-legend i,#containersView .container-week-detail i{display:inline-block;width:10px;height:10px;border-radius:2px;flex:none}
+#containersView .container-week-chart{overflow-x:auto;padding:14px 6px 4px;border:1px solid #dce5ef;border-radius:10px;background:#f8fbff}
+#containersView .container-week-plot{position:relative;height:258px;padding-left:40px}
+#containersView .container-week-grid{position:absolute;inset:0 0 32px 0;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none}
+#containersView .container-week-grid span{display:flex;align-items:center;gap:8px;height:0;color:#60748e;font-size:11px}
+#containersView .container-week-grid span:after{content:"";height:1px;flex:1;background:#dae4ef}
+#containersView .container-week-bars{position:relative;display:flex;align-items:end;justify-content:space-around;gap:5px;height:100%;padding:0 8px}
+#containersView .container-week-bar{display:flex;flex-direction:column;align-items:center;justify-content:end;flex:1;min-width:25px;max-width:37px;height:100%;padding:0;background:none;border:0;border-radius:4px;color:#516b85;cursor:pointer}
+#containersView .container-week-bar:hover,#containersView .container-week-bar:focus-visible,#containersView .container-week-bar.is-active{background:#dcecff;color:#003d78;outline:none}
+#containersView .container-week-bar:focus-visible{box-shadow:0 0 0 2px #0057a8}
+#containersView .container-week-stack{display:flex;flex-direction:column-reverse;width:70%;height:var(--week-height);min-height:3px;margin-bottom:8px;border-radius:3px 3px 0 0;overflow:hidden;box-shadow:0 0 0 1px #fff}
+#containersView .container-week-bar:hover .container-week-stack,#containersView .container-week-bar:focus-visible .container-week-stack,#containersView .container-week-bar.is-active .container-week-stack{width:84%;box-shadow:0 0 0 2px #003d78}
+#containersView .container-week-segment{display:block;width:100%;min-height:1px;background:var(--week-color);flex-basis:0}
+#containersView .container-week-number{height:24px;line-height:24px;font-size:11px;font-weight:600}
+#containersView .container-week-detail{min-height:70px;margin-top:12px;padding:12px 15px;border:1px solid #cbddeb;border-radius:8px;background:#eef5fc;color:#173e66}
+#containersView .container-week-detail>div{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:8px;font-size:12px}
+#containersView .container-week-table{margin-top:16px}
+#containersView .container-week-table summary{cursor:pointer;color:#0057a8;font-weight:700}
+#containersView .container-week-table .owner-equipment-list{max-height:680px;overflow:auto;margin-top:12px}
+#containersView .container-week-table table{min-width:1250px}
 @media(max-width:700px){#containersView .container-analysis-grid{grid-template-columns:1fr}}
 @media print{body:has(#containerReportPanel:not([hidden])) .container-report-details{break-before:page}body:has(#containerReportPanel:not([hidden])) .container-report-details table{min-width:0;font-size:9pt}body:has(#containerReportPanel:not([hidden])) .container-report-details button{display:none}}
