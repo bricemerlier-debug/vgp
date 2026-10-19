@@ -324,3 +324,25 @@ button.material-sort-header{display:inline-flex;align-items:center;justify-conte
  #homeView .weekly-summary-header{grid-template-columns:1fr;gap:12px}#homeView .week-completion{justify-self:start}
 }
 @media(prefers-reduced-motion:reduce){#homeView button{transition:none}}
+
+/* Registre indépendant des contenants. */
+#containersView .container-list-panel{padding:24px}
+#containersView .container-toolbar{align-items:center;gap:16px}
+#containersView .container-toolbar h2{margin:0}
+#containersView .container-search{display:block;max-width:520px;margin:12px 0 22px;font-weight:600}
+#containersView .container-search input{display:block;width:100%;margin-top:6px}
+#containersView .container-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0 28px}
+#containersView .container-facts>div,#containersView .container-parts>div{padding:12px 14px;background:#f4f7fa;border:1px solid #e1e7ee;border-radius:8px}
+#containersView .container-facts dt,#containersView .container-parts dt{font-size:12px;color:#536b82}
+#containersView .container-facts dd,#containersView .container-parts dd{margin:4px 0 0;font-weight:650;color:#173e62}
+#containersView .container-detail h2{margin:0}
+#containersView #containerDetail>.toolbar:first-child{margin-bottom:18px}
+#containersView #containerDetail>.toolbar h3{margin:0}
+#containersView #containerDetail details{margin-top:8px}
+#containersView .container-parts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#containersView .container-checklist{margin:16px 0;padding:12px;border:1px solid #dce4ec;border-radius:8px}
+#containersView .container-checklist summary{font-weight:650;cursor:pointer}
+#containersView .container-part-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+#containersView .container-part-fields label{font-size:12px}
+.container-intervention-dialog{width:min(860px,calc(100vw - 28px));max-height:min(90vh,900px);overflow:auto}
+@media(max-width:700px){#containersView .container-facts{grid-template-columns:repeat(2,minmax(0,1fr))}#containersView .container-part-fields,#containersView .container-parts{grid-template-columns:repeat(2,minmax(0,1fr))}#containersView .container-toolbar{align-items:flex-start}}
