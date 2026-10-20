@@ -657,3 +657,12 @@ header .header-engineering-logo{display:block;width:72px;height:72px;object-fit:
 #materialView .equipment-list-filters .select-trigger{height:44px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #materialView .equipment-list-filters .material-search{font-weight:400}
 #materialView .equipment-list-filters input{height:44px}
+
+/* Fond de contenu commun aux onglets VGP, comme dans Contenants. */
+.vgp-tab-panel{min-width:0;padding:24px}
+#vgpWorkspace .vgp-tab-panel>.intro h2{font-size:20px}
+.vgp-tab-panel>.intro{margin-bottom:24px;flex-wrap:wrap}
+.vgp-tab-panel .owners-list{gap:16px;margin-bottom:0;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr))}
+.vgp-tab-panel .owner-card{min-width:0;padding:20px}
+#controllersView>.material-search{max-width:520px}
+@media(max-width:700px){.vgp-tab-panel{padding:16px}}
