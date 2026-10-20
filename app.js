@@ -24,7 +24,7 @@ import {extractApavePdf,apaveSuggestedResult,apaveStates,matchApaveRecords,apave
 import {goodyearReportLogo} from './assets/report-logo.mjs';
 import {buildDigest} from './digest.mjs';
 import {lifecycleCandidates,applyLifecycleImport} from './lifecycle-import.mjs';
-import {resolvedControllerId,activeControllers,controllerForName,controlBelongsToController,upgradeControllers,controllersValid} from './controllers.mjs';
+import {resolvedControllerId,activeControllers,controllerForName,controlBelongsToController,upgradeControllers,controllersValid} from './controllers.mjs?v=051';
 import {ownerDetailsIssue,equipmentOwners,equipmentHasOwner,addEquipmentOwner,removeEquipmentOwner,equipmentOwnershipValid,equipmentMailRecipients,ownerIdentityKey} from './ownership.mjs?v=050';
 import {installSearchableSelects} from './searchable-select.mjs';
 import {parseTrackingCsv,analyzeTrackingRows,applyTrackingImport} from './tracking-import.mjs';
