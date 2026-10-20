@@ -48,6 +48,10 @@ const escContainer=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt
 const containerControllerKey=name=>String(name||'').trim().replace(/\s+/g,' ').toLocaleLowerCase('fr');
 const containerControllerIdentityKey=name=>String(name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fr').replace(/[^\p{L}\p{N}]/gu,'');
 const containerControllerNames=value=>String(value||'').split(/\s*(?:\/|[;,+&]|\bet\b)\s*/i).map(name=>name.trim()).filter(Boolean).flatMap(name=>/^autre$/i.test(name)?['Friedlander']:/^autre\b/i.test(name)?[]:[name]);
+export function containerInterventionControllerValue(primary,secondary=''){
+ const seen=new Set();
+ return [primary,secondary].map(value=>String(value||'').trim()).filter(name=>{const key=containerControllerIdentityKey(name);if(!key||seen.has(key))return false;seen.add(key);return true;}).join(' / ');
+}
 const containerControllerDisplayName=value=>{
  const name=String(value||'').trim().replace(/\s+/g,' ');
  const initial=name.match(/^(.+?)(?:\s*\.|\s+)\s*([\p{L}])\.?$/u);
@@ -759,7 +763,7 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,cl
   $('#containerFormError').textContent='';$('#containerFormStatus').textContent='';
   $('#containerDialog').showModal();
  }
- function openIntervention(c){const form=$('#containerInterventionForm');form.reset();form.elements.controller.innerHTML='<option value="">Choisir un contrôleur</option>'+containerControllerRoster(read()).map(profile=>`<option value="${clean(profile.name)}">${clean(profile.name)}</option>`).join('');form.elements.date.value=new Date().toISOString().slice(0,10);$('#containerInterventionType').innerHTML='<option value="">Choisir un type</option>'+containerInterventionTypes.map(type=>`<option value="${clean(type)}">${clean(type[0].toLocaleUpperCase('fr')+type.slice(1))}</option>`).join('');$('#containerInterventionTitle').textContent=`Nouvelle intervention · ${c.number}`;$('#containerPartFields').innerHTML=containerCategorySettings(c).checks.map(p=>`<label>${clean(p)}<select data-native-select name="part:${clean(p)}"><option value="">Non renseigné</option><option>OK</option><option>À réparer</option><option>À remplacer</option><option>Sans objet</option></select></label>`).join('');$('#containerInterventionError').textContent='';$('#containerInterventionStatus').textContent='';$('#containerInterventionDialog').showModal();}
+ function openIntervention(c){const form=$('#containerInterventionForm'),roster=containerControllerRoster(read()).map(profile=>`<option value="${clean(profile.name)}">${clean(profile.name)}</option>`).join('');form.reset();form.elements.controller.innerHTML='<option value="">Choisir un contrôleur</option>'+roster;form.elements.controller2.innerHTML='<option value="">Aucun deuxième contrôleur</option>'+roster;form.elements.date.value=new Date().toISOString().slice(0,10);$('#containerInterventionType').innerHTML='<option value="">Choisir un type</option>'+containerInterventionTypes.map(type=>`<option value="${clean(type)}">${clean(type[0].toLocaleUpperCase('fr')+type.slice(1))}</option>`).join('');$('#containerInterventionTitle').textContent=`Nouvelle intervention · ${c.number}`;$('#containerPartFields').innerHTML=containerCategorySettings(c).checks.map(p=>`<label>${clean(p)}<select data-native-select name="part:${clean(p)}"><option value="">Non renseigné</option><option>OK</option><option>À réparer</option><option>À remplacer</option><option>Sans objet</option></select></label>`).join('');$('#containerInterventionError').textContent='';$('#containerInterventionStatus').textContent='';$('#containerInterventionDialog').showModal();}
  $('#containerTypeFilters').onchange=e=>{if(e.target.type!=='checkbox')return;e.target.checked?selectedTypes.add(e.target.value):selectedTypes.delete(e.target.value);renderList()};
  $('#containerStatusFilters').onchange=e=>{if(e.target.type!=='checkbox')return;e.target.checked?selectedStatuses.add(e.target.value):selectedStatuses.delete(e.target.value);renderList()};
  $('#containerListPane').querySelectorAll('[data-container-summary-status]').forEach(button=>button.onclick=()=>{const status=button.dataset.containerSummaryStatus;selectedStatuses.has(status)?selectedStatuses.delete(status):selectedStatuses.add(status);$('#containerStatusFilters').querySelectorAll('input').forEach(input=>input.checked=selectedStatuses.has(input.value));renderList()});
@@ -794,11 +798,14 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,cl
  $('#containerInterventionForm').onsubmit=async e=>{
   e.preventDefault();if(!canEdit())return;
   const form=e.currentTarget,button=$('#containerInterventionSubmit'),values=new FormData(form);
-  const current=state().find(c=>c.id===selected),type=String(values.get('type')||'').trim(),controller=String(values.get('controller')||'').trim();
+  const current=state().find(c=>c.id===selected),type=String(values.get('type')||'').trim(),controller1=String(values.get('controller')||'').trim(),controller2=String(values.get('controller2')||'').trim();
   $('#containerInterventionError').textContent='';
   if(!current){$('#containerInterventionError').textContent='Cette fiche est introuvable. Actualisez la page.';return;}
+  if(!controller1){$('#containerInterventionError').textContent='Choisissez le contrôleur 1 pour enregistrer cette intervention.';return;}
   if(!containerInterventionTypes.includes(type)){$('#containerInterventionError').textContent='Choisissez Préventif, Curatif ou Sécurité.';return;}
-  if(controller&&!containerControllerRoster(read()).some(profile=>profile.name===controller)){$('#containerInterventionError').textContent='Choisissez un contrôleur dans la liste.';return;}
+  const controllerRoster=containerControllerRoster(read());
+  if(!controllerRoster.some(profile=>profile.name===controller1)||controller2&&!controllerRoster.some(profile=>profile.name===controller2)){$('#containerInterventionError').textContent='Choisissez les contrôleurs dans la liste.';return;}
+  const controller=containerInterventionControllerValue(controller1,controller2);
   const parts=Object.fromEntries(containerCategorySettings(current).checks.map(p=>[p,String(values.get('part:'+p)||'')]).filter(([,v])=>v));
   const next=structuredClone(read()),container=next.containers.find(c=>c.id===selected);
   if(!container){$('#containerInterventionError').textContent='Cette fiche est introuvable. Actualisez la page.';return;}

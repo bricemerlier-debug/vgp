@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {containerControllerRoster,containerControllerProfilesValid,containerRecordsValid,nextContainerInterventionNumber} from '../containers.mjs';
+import {containerControllerRoster,containerControllerProfilesValid,containerRecordsValid,nextContainerInterventionNumber,containerInterventionControllerValue} from '../containers.mjs';
 
 const document={
  controllerProfiles:[{id:'vgp',name:'Contrôleur VGP',email:'vgp@example.test'}],
@@ -31,6 +31,9 @@ assert.equal(roster.find(profile=>profile.name==='Dylan P.').email,'dylan@exampl
 assert.ok(roster.find(profile=>profile.name==='Laurent B.').actions.some(action=>action.intervention.number==='4'));
 assert.ok(roster.find(profile=>profile.name==='Stéphane G.').actions.some(action=>action.intervention.number==='4'));
 assert.ok(containerRecordsValid(document));
+assert.equal(containerInterventionControllerValue('Laurent B.','Stéphane G.'),'Laurent B. / Stéphane G.');
+assert.equal(containerInterventionControllerValue('Laurent B.','laurent.b.'),'Laurent B.');
+assert.equal(containerInterventionControllerValue('Laurent B.',''),'Laurent B.');
 assert.equal(containerControllerProfilesValid([{id:'1',name:'A',email:''},{id:'2',name:' a ',email:''}]),false);
 assert.equal(containerControllerProfilesValid([{id:'1',name:'A',email:'invalide'}]),false);
 assert.equal(nextContainerInterventionNumber(document.containers),'11');
