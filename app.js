@@ -1,6 +1,6 @@
-import {reconcileInventory} from './inventory-reconciliation.mjs';
+import {reconcileInventory,inventoryEntryCode} from './inventory-reconciliation.mjs';
 import {standardTypeProgress} from './standard-type-kpi.mjs';
-import {installContainersUI,containerRecordsValid,containerLegacyScrapPlan,containerArchiveInfo} from './containers.mjs?v=065';
+import {installContainersUI,containerRecordsValid,containerLegacyScrapPlan,containerArchiveInfo} from './containers.mjs?v=067';
 import {analyzeContainerFiles,analyzeContainerCategoryFiles} from './container-import.mjs';
 import {installBulkEquipmentOwners} from './bulk-equipment-owners.mjs';
 import {processTeamForSector,assignMissingProcessTeams} from './process-team-assignment.mjs';
@@ -31,7 +31,7 @@ import {installSearchableSelects} from './searchable-select.mjs';
 import {parseTrackingCsv,analyzeTrackingRows,applyTrackingImport} from './tracking-import.mjs';
 import {applyImportedNamingRule,historicalEquipmentName,equipmentNamingSearch,ownerNeedsNamingReview,suggestEquipmentNaming,technicalVariantIssue,renameEquipmentLabel,initialEquipmentTypes,standardizedLabel,addEquipmentType,addEquipmentVariant,applyEquipmentNaming,namingGroups,nomenclatureValid} from './nomenclature.mjs';
 import {equipmentName,addMonths,due,latest,status,indicators,generatePdf,dashboard,reminders,monthlyProgress,annualCompletion,fillEmailTemplate,reportConclusion,buildReportPdf,shiftDate,weekStart,weeklySchedule,weeklyCompletion,equipmentAlerts,homeSummary,isInspection,latestInspection,calculatedDeadline,obligationEntries,freezeTracking,declareLoss,reactivateFound,migrationReview,migrateTracking,lossArchived} from './domain.mjs';
-import {CloudStore,validateConfig,canonical} from './cloud.mjs?v=065';
+import {CloudStore,validateConfig,canonical} from './cloud.mjs?v=067';
 import {analyzeRows} from './excel.mjs';
 // Ne jamais conserver les champs d’un formulaire de connexion dans l’adresse.
 {const url=new URL(location.href);let changed=false;for(const key of ['email','password','remember'])if(url.searchParams.has(key)){url.searchParams.delete(key);changed=true;}if(changed)history.replaceState(null,'',url.pathname+url.search+url.hash);}
@@ -74,11 +74,30 @@ const copyData=value=>typeof globalThis.structuredClone==='function'?globalThis.
 
 function upgrade(d){d.equipmentTypes??=initialEquipmentTypes();d.containers??=[];d.owners??=[];d.ownerContacts??=[];d.mailTemplates??=defaultMailTemplates();d.verifiers??=[];for(const e of d.equipment)for(const c of e.controls){if(c.intervenant&&!d.verifiers.some(name=>normalize(name)===normalize(c.intervenant)))d.verifiers.push(c.intervenant);c.reportId??=`VGP-${c.date.replaceAll('-','')}-${c.id.toUpperCase()}`;}let next=Math.max(0,...d.equipment.map(e=>Number.isSafeInteger(e.siteId)?e.siteId:0))+1;for(const e of d.equipment)if(!e.siteId)e.siteId=next++;d.nextVgpId=Math.max(d.nextVgpId??1,next);for(const e of d.equipment){for(const k of ['serialNumber','sector','zone','team','owner','comments'])e[k]??='';e.archived??=false;e.archiveHistory??=[];e.pendingArchive??=null;for(const owner of equipmentOwners(e))if(!d.owners.some(o=>normalize(o)===normalize(owner)))d.owners.push(owner)}upgradeControllers(d,uuid);for(const e of d.equipment)for(const a of e.archiveHistory)if(a.workflow==='loss-declaration'&&!a.reportId)a.reportId=a.originalControlId?e.controls.find(c=>c.id===a.originalControlId)?.reportId||nextReportNumber(d):nextReportNumber(d);return d}
 upgrade(data);
-const inventoryResults=$('#inventoryResults');
+const inventoryResults=$('#inventoryResults'),inventoryEntries=[];
+function renderInventoryEntries(){
+ $('#inventoryEntryCount').textContent=inventoryEntries.length;
+ $('#inventoryClear').hidden=!inventoryEntries.length;
+ $('#inventoryEntryList').innerHTML=inventoryEntries.length?inventoryEntries.map((code,index)=>`<span class="inventory-entry-chip"><strong>${esc(code)}</strong><button type="button" data-inventory-remove="${index}" aria-label="Retirer ${esc(code)}">×</button></span>`).join(''):'<p class="inventory-empty">Aucun numéro ajouté pour le moment.</p>';
+}
+function addInventoryEntries(){try{
+ const input=$('#inventoryInput'),raw=input.value.trim();if(!raw)return;
+ const entries=raw.split(/[\s,;]+/).filter(Boolean).map(value=>inventoryEntryCode(value,$('#inventoryPrefix').value));
+ const existing=new Set(inventoryEntries),added=[];for(const code of entries)if(!existing.has(code)){existing.add(code);added.push(code);}
+ inventoryEntries.push(...added);renderInventoryEntries();input.value='';
+ $('#inventoryEntryError').textContent=added.length?'':entries.length===1?'Ce numéro figure déjà dans la liste.':'Tous ces numéros figurent déjà dans la liste.';
+ inventoryResults.innerHTML='';input.focus();
+ }catch(error){$('#inventoryEntryError').textContent=error.message;}}
+$('#inventoryInput').onkeydown=event=>{if(event.key==='Enter'){event.preventDefault();addInventoryEntries();}};
+$('#inventoryAdd').onclick=addInventoryEntries;
+$('#inventoryEntryList').onclick=event=>{const button=event.target.closest('[data-inventory-remove]');if(!button)return;inventoryEntries.splice(Number(button.dataset.inventoryRemove),1);renderInventoryEntries();inventoryResults.innerHTML='';};
+$('#inventoryClear').onclick=()=>{inventoryEntries.length=0;renderInventoryEntries();inventoryResults.innerHTML='';$('#inventoryEntryError').textContent='';$('#inventoryInput').focus();};
+$('#inventoryPrefix').onchange=()=>{inventoryEntries.length=0;renderInventoryEntries();inventoryResults.innerHTML='';$('#inventoryEntryError').textContent='';};
 function inventoryRows(items){return items.length?`<ul class="inventory-result-list">${items.map(item=>`<li><div><strong>${esc(item.identifier)}</strong><span>${esc(item.designation||'Contenant')}</span></div><button type="button" class="secondary" data-inventory-container="${esc(item.id)}">Ouvrir la fiche <span aria-hidden="true">→</span></button></li>`).join('')}</ul>`:'<p class="inventory-empty">Aucun contenant dans cette catégorie.</p>';}
 $('#inventoryCompare').onclick=()=>{try{
- const prefix=$('#inventoryPrefix').value,raw=$('#inventoryInput').value;
- if(!raw.trim())throw Error('Recopiez au moins un numéro de votre inventaire.');
+ if($('#inventoryInput').value.trim()&&!addInventoryEntries())return;
+ const prefix=$('#inventoryPrefix').value,raw=inventoryEntries.join('\n');
+ if(!raw)throw Error('Ajoutez au moins un numéro à votre inventaire.');
  const result=reconcileInventory((data.containers||[]).map(container=>({id:container.id,identifier:container.number,designation:container.subtype,archived:Boolean(containerArchiveInfo(container))})),raw,prefix);
  inventoryResults.innerHTML=`<div class="inventory-card inventory-report"><div class="inventory-section-heading"><div><span class="inventory-step">02</span><h3>Résultat de la comparaison</h3><p>Fiches dont le numéro commence par <strong>${esc(result.scope)}</strong> · ${result.scoped} fiches dans le site.</p></div></div><div class="inventory-metrics"><div class="inventory-metric inventory-metric-found"><span>Retrouvés</span><strong>${result.found.length}</strong><small>Dans le relevé et le site</small></div><div class="inventory-metric inventory-metric-missing"><span>À rechercher</span><strong>${result.missing.length}</strong><small>Absents du relevé</small></div><div class="inventory-metric inventory-metric-unknown"><span>Sans fiche</span><strong>${result.unknown.length}</strong><small>Présents sur le papier</small></div><div class="inventory-metric inventory-metric-archived"><span>Déjà archivés</span><strong>${result.archived.length}</strong><small>Présents sur le papier</small></div></div><div class="inventory-review-note"><strong>À vérifier sur le terrain</strong><span>Une fiche absente du relevé ne justifie pas, à elle seule, une mise au rebut.</span></div><div class="inventory-result-section"><h4>Contenants à rechercher <span>${result.missing.length}</span></h4>${inventoryRows(result.missing)}</div><div class="inventory-result-section"><h4>Numéros relevés sans fiche <span>${result.unknown.length}</span></h4>${result.unknown.length?`<div class="inventory-code-list">${result.unknown.map(number=>`<span>${esc(number)}</span>`).join('')}</div>`:'<p class="inventory-empty">Aucun numéro inconnu.</p>'}</div><details class="inventory-more"><summary>Voir les retrouvés, les archives et les anomalies</summary><div class="inventory-result-section"><h4>Retrouvés <span>${result.found.length}</span></h4>${inventoryRows(result.found.map(entry=>entry.item))}</div><div class="inventory-result-section"><h4>Déjà archivés <span>${result.archived.length}</span></h4>${inventoryRows(result.archived.map(entry=>entry.item))}</div>${result.duplicates.length?`<p>Numéros répétés dans le relevé : <strong>${result.duplicates.map(esc).join(' · ')}</strong></p>`:''}${result.ambiguous.length?`<p>Numéros ayant plusieurs fiches : <strong>${result.ambiguous.map(entry=>esc(entry.number)).join(' · ')}</strong></p>`:''}${result.outside.length?`<p>Numéros hors du préfixe choisi : <strong>${result.outside.map(entry=>esc(entry.number)).join(' · ')}</strong></p>`:''}</details></div>`;
  }catch(error){inventoryResults.innerHTML=`<p class="inventory-error error" role="alert">${esc(error.message)}</p>`;}};

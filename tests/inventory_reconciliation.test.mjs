@@ -17,3 +17,9 @@ test('un numéro ambigu ne classe aucune des deux fiches comme retrouvée',()=>{
  const result=reconcileInventory([{id:'a',identifier:'CA-1'},{id:'b',identifier:'CA 1'}],'CA-1','CA');
  assert.equal(result.ambiguous.length,1);assert.equal(result.found.length,0);assert.equal(result.missing.length,0);
 });
+import {inventoryEntryCode} from '../inventory-reconciliation.mjs';
+test('la saisie rapide préfixe les chiffres sans modifier leurs zéros',()=>{
+ assert.equal(inventoryEntryCode('033','CA'),'CA033');
+ assert.equal(inventoryEntryCode('ca033','CA'),'CA033');
+ assert.throws(()=>inventoryEntryCode('CB033','CA'),/CA/);
+});

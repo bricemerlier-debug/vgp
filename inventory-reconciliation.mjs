@@ -1,6 +1,15 @@
 // Rapprochement local d'un inventaire terrain avec les fiches VGP, sans écriture.
 export const inventoryKey=value=>String(value??'').normalize('NFKC').trim().toLocaleUpperCase('fr').replace(/[\s\u00a0-]+/g,'');
 export function inventoryNumbers(text){return String(text??'').split(/[\s,;]+/).map(inventoryKey).filter(Boolean);}
+export function inventoryEntryCode(value,prefix='CA'){
+ const scope=inventoryKey(prefix),entry=inventoryKey(value);
+ if(!scope)throw Error('Indiquez le préfixe des contenants inventoriés.');
+ if(!entry)throw Error('Saisissez un numéro.');
+ if(!/^[A-Z0-9]+$/.test(scope)||!(/^[A-Z0-9]+$/.test(entry)))throw Error('Utilisez uniquement des lettres et des chiffres dans le numéro.');
+ if(entry.startsWith(scope))return entry;
+ if(/^\d+$/.test(entry))return scope+entry;
+ throw Error(`Ce numéro ne commence pas par ${scope}.`);
+}
 export function reconcileInventory(equipment,observedText,prefix='CA'){
  const scope=inventoryKey(prefix);if(!scope)throw Error('Indiquez le préfixe des équipements inventoriés.');
  const observations=inventoryNumbers(observedText),seen=new Set(),duplicates=[];
