@@ -20,14 +20,14 @@ export const cleanInventoryIdentifier=value=>String(value??'').replace(/\*/g,'')
 const recoveryKey=value=>inventoryKey(cleanInventoryIdentifier(value));
 export function inventoryRecoveryPlan(document,numbers){
  const cleanup=containerNumberCleanupPlan(document),merged=cleanup.ready?applyContainerNumberCleanup(document,cleanup):document;
- const containers=merged.containers||[],equipment=document.equipment||[];
+ const containers=merged.containers||[];
  const captured=[...new Set(numbers.map(recoveryKey).filter(Boolean))];
  const byNumber=new Map();for(const item of containers){const number=recoveryKey(item.number);if(!byNumber.has(number))byNumber.set(number,[]);byNumber.get(number).push(item);}
  const found=[],reactivate=[],unknown=[],ambiguous=[];
  for(const number of captured){const matches=byNumber.get(number)||[];if(matches.length>1)ambiguous.push({number,ids:matches.map(item=>item.id)});else if(!matches.length)unknown.push(number);else{found.push({number,id:matches[0].id});if(containerArchiveInfo(matches[0]))reactivate.push({number,id:matches[0].id});}}
  const scrap=containers.filter(item=>recoveryKey(item.number).startsWith('CA')&&!captured.includes(recoveryKey(item.number))&&!containerArchiveInfo(item)).map(item=>({number:item.number,id:item.id}));
  const changes=[],collisions=[],invalid=[];
- for(const [kind,items,field] of [['contenant',document.containers||[],'number'],['VGP',equipment,'identifier']]){
+ for(const [kind,items,field] of [['contenant',document.containers||[],'number']]){
   const cleaned=new Map();for(const item of items){const before=String(item[field]??''),after=cleanInventoryIdentifier(before),cleanKey=after.toLocaleLowerCase('fr');if(before!==after)changes.push({kind,id:item.id,before,after});if(!after)invalid.push({kind,id:item.id,before});if(cleaned.has(cleanKey))collisions.push({kind,number:after,ids:[cleaned.get(cleanKey),item.id]});else cleaned.set(cleanKey,item.id);}
  }
  return {captured,found,reactivate,scrap,unknown,ambiguous,changes,collisions,invalid,merges:cleanup.merges,ready:cleanup.ready&&!ambiguous.length&&!invalid.length&&!!captured.length};
@@ -47,8 +47,6 @@ export function applyInventoryRecovery(document,plan,{date='2026-10-20',by='',at
   }
   item.inventoryHistory=history;
  }
- const vgpCollisions=new Set(plan.collisions.filter(item=>item.kind==='VGP').flatMap(item=>item.ids));
- for(const item of next.equipment||[])if(!vgpCollisions.has(item.id))item.identifier=cleanInventoryIdentifier(item.identifier);
  if(!containerRecordsValid(next))throw Error('Lot invalide : aucune modification enregistrée.');
  return next;
 }

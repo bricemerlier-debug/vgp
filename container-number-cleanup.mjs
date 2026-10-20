@@ -18,7 +18,7 @@ export function containerNumberCleanupPlan(document){
 
 export function applyContainerNumberCleanup(document,plan){
  if(!plan.ready)throw Error('Numéro de contenant vide après nettoyage.');
- const next=structuredClone(document),groups=new Map(),result=[],originalNumbers=new Map((document.containers||[]).map(item=>[item.id,item.number]));
+ const next=structuredClone(document),groups=new Map(),result=[],originalSources=new Map((document.containers||[]).map(item=>[item.id,item]));
  for(const item of next.containers||[]){
   item.number=cleanContainerNumber(item.number);
   if(!item.number)throw Error('Numéro de contenant vide après nettoyage.');
@@ -29,14 +29,12 @@ export function applyContainerNumberCleanup(document,plan){
   // Une fiche active devient la fiche principale si le groupe en contient une.
   const primary=group.find(item=>!containerArchiveInfo(item))||group[0];
   primary.number=group.find(item=>item.number===key(item.number))?.number||primary.number;
-  const seenIds=new Set(primary.interventions.map(item=>item.id).filter(Boolean));
-  const signature=item=>JSON.stringify([item.number,item.date,item.type,item.controller,item.generalState,item.comment,item.parts]);
+  const signature=item=>JSON.stringify(item);
   const seenEntries=new Set(primary.interventions.map(signature));
   const usedNumbers=new Set(primary.interventions.map(item=>item.number.toLocaleLowerCase('fr')));
   for(const source of group){if(source===primary)continue;
    for(const entry of source.interventions){
-    if(entry.id&&seenIds.has(entry.id)||seenEntries.has(signature(entry)))continue;
-    if(entry.id)seenIds.add(entry.id);
+    if(seenEntries.has(signature(entry)))continue;
     seenEntries.add(signature(entry));
     const base=entry.number;let candidate=base,serial=2;
     while(usedNumbers.has(candidate.toLocaleLowerCase('fr')))candidate=`${base}-fusion-${serial++}`;
@@ -44,7 +42,7 @@ export function applyContainerNumberCleanup(document,plan){
    }
    for(const field of ['type','subtype','photoPath','categoryMonths','categoryChecks'])if(!useful(primary[field])&&useful(source[field]))primary[field]=source[field];
    for(const field of ['inventoryHistory','numberMergeHistory'])if(Array.isArray(source[field]))primary[field]=[...(primary[field]||[]),...source[field]];
-   primary.numberMergeHistory=[...(primary.numberMergeHistory||[]),{sourceId:source.id,sourceNumber:originalNumbers.get(source.id),sourceArchive:source.manualArchive||null,sourceMetadata:{type:source.type,subtype:source.subtype,photoPath:source.photoPath||null,categoryMonths:source.categoryMonths,categoryChecks:source.categoryChecks}}];
+   primary.numberMergeHistory=[...(primary.numberMergeHistory||[]),{sourceId:source.id,sourceNumber:originalSources.get(source.id).number,sourceSnapshot:originalSources.get(source.id)}];
   }
   if(group.length>1&&group.some(item=>!containerArchiveInfo(item))){
    delete primary.manualArchive;

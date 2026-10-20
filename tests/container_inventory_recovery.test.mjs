@@ -10,9 +10,9 @@ test('le relevé des captures compte 91 numéros distincts dont CA201 une fois',
 test('une fiche étoilée archivée est retrouvée, réactivée et conserve une trace',()=>{
  const original={equipment:[{id:'v',identifier:'VGP*01',controls:[]}],containers:[box('a','CA272*',{manualArchive:{date:'2025-01-01',comment:'Mise au rebut',by:'A',at:'2025-01-01T12:00:00Z'}}),box('b','CA033*',{interventions:[intervention('Mis au rebut')]})]};
  const before=structuredClone(original),plan=inventoryRecoveryPlan(original,['CA272','CA033']);
- assert.equal(plan.ready,true);assert.equal(plan.reactivate.length,2);assert.equal(plan.changes.length,3);
+ assert.equal(plan.ready,true);assert.equal(plan.reactivate.length,2);assert.equal(plan.changes.length,2);
  const next=applyInventoryRecovery(original,plan,{date:'2026-10-20',by:'test@example.test',at:'2026-10-20T12:00:00Z'});
- assert.deepEqual(original,before);assert.equal(next.containers[0].number,'CA272');assert.equal(next.containers[1].number,'CA033');assert.equal(next.equipment[0].identifier,'VGP01');
+ assert.deepEqual(original,before);assert.equal(next.containers[0].number,'CA272');assert.equal(next.containers[1].number,'CA033');assert.equal(next.equipment[0].identifier,'VGP*01');
  for(const container of next.containers){assert.equal(containerArchiveInfo(container),null);assert.equal(container.inventoryHistory[0].comment,'Inventaire fait le 20/10/2026. Contenant retrouvé et remis en circulation.');assert.equal(containerPreventiveStatus(container,'2026-10-20').status,'unknown');}
  assert.deepEqual(next.containers[0].inventoryHistory[0].previousArchive,before.containers[0].manualArchive);
  assert.equal(next.containers[1].interventions[0].comment,'Mis au rebut');
