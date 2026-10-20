@@ -12,7 +12,7 @@ import {equipmentOwnerPresences} from './owner-availability.mjs';
 import {sectorZones,sectorLabel,sectorChoices} from './sectors.mjs';
 import {ownerMergeSearch,ownerServiceOptions} from './personnel.mjs';
 import {installPersonnelOperations} from './personnel-ui.mjs';
-import {installWorkspaceNavigation} from './workspace-navigation.mjs';
+import {installWorkspaceNavigation} from './workspace-navigation.mjs?v=041';
 import {installReminderSimulation} from './reminder-ui.mjs';
 import {reminderCivilDate} from './reminder-dates.mjs';
 import {installMaintenanceKpi} from './maintenance-kpi-ui.mjs';
@@ -30,7 +30,7 @@ import {installSearchableSelects} from './searchable-select.mjs';
 import {parseTrackingCsv,analyzeTrackingRows,applyTrackingImport} from './tracking-import.mjs';
 import {applyImportedNamingRule,historicalEquipmentName,equipmentNamingSearch,ownerNeedsNamingReview,suggestEquipmentNaming,technicalVariantIssue,renameEquipmentLabel,initialEquipmentTypes,standardizedLabel,addEquipmentType,addEquipmentVariant,applyEquipmentNaming,namingGroups,nomenclatureValid} from './nomenclature.mjs';
 import {equipmentName,addMonths,due,latest,status,indicators,generatePdf,dashboard,reminders,monthlyProgress,annualCompletion,fillEmailTemplate,reportConclusion,buildReportPdf,shiftDate,weekStart,weeklySchedule,weeklyCompletion,equipmentAlerts,homeSummary,isInspection,latestInspection,calculatedDeadline,obligationEntries,freezeTracking,declareLoss,reactivateFound,migrationReview,migrateTracking,lossArchived} from './domain.mjs';
-import {CloudStore,validateConfig,canonical} from './cloud.mjs';
+import {CloudStore,validateConfig,canonical} from './cloud.mjs?v=041';
 import {analyzeRows} from './excel.mjs';
 // Ne jamais conserver les champs d’un formulaire de connexion dans l’adresse.
 {const url=new URL(location.href);let changed=false;for(const key of ['email','password','remember'])if(url.searchParams.has(key)){url.searchParams.delete(key);changed=true;}if(changed)history.replaceState(null,'',url.pathname+url.search+url.hash);}
