@@ -14,6 +14,10 @@ export function containerHasNoPeriodicPreventive(container){
  const type=String(container?.type||'').trim().toLocaleUpperCase('fr');
  return containerNoPeriodTypes.has(type)||/^(TR|TP)/i.test(type)||/^(TR|TP)/i.test(String(container?.number||'').trim());
 }
+// Un réglage explicite de catégorie vaut validation du suivi, sans créer de contrôle ni d’échéance.
+export function containerManuallyCompletedWithoutPeriod(container){
+ return container?.categoryMonths===null;
+}
 export function containerCategorySettings(container){
  const noPeriod=containerHasNoPeriodicPreventive(container);
  const fallback=noPeriod?null:String(container.subtype||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes('carcasse')?18:12;
@@ -117,7 +121,7 @@ export function containerCategories(containers,today=containerCivilToday()){
   if(!groups.has(key))groups.set(key,{key,name,containers:[],interventions:0,active:0,archived:0,current:0,overdue:0,unknown:0,exempt:0});
   const group=groups.get(key),status=containerPreventiveStatus(container,today).status;
   group.containers.push(container);group.interventions+=(container.interventions||[]).length;
-  if(status==='archived')group.archived++;else{group.active++;group[status==='soon'?'current':status]++;}
+  if(status==='archived')group.archived++;else{group.active++;group[status==='soon'?'current':status]++;if(status==='exempt'&&containerManuallyCompletedWithoutPeriod(container))group.current++;}
  }
  return [...groups.values()].sort((a,b)=>a.name.localeCompare(b.name,'fr',{numeric:true}));
 }
@@ -334,7 +338,7 @@ export function containerStatusCounts(containers,today=new Date()){
   if(status==='archived')continue;
  if(status==='overdue')counts.overdue++;
   else if(status==='unknown')counts.unknown++;
-  else if(status==='exempt')counts.exempt++;
+  else if(status==='exempt'){counts.exempt++;if(containerManuallyCompletedWithoutPeriod(container))counts.current++;}
   else counts.current++;
  }
  return counts;
@@ -348,7 +352,7 @@ export function filterContainerList(containers,{query='',types=[],statuses=[]}={
   if(terms.length&&!terms.every(term=>normalize(`${container.number} ${container.subtype}`).split(' ').some(word=>word.startsWith(term))))return false;
   if(selectedTypes.size&&!selectedTypes.has(container.subtype||''))return false;
   const status=containerPreventiveStatus(container,today).status;
-  return !selectedStatuses.size||selectedStatuses.has(status==='soon'?'current':status);
+  return !selectedStatuses.size||selectedStatuses.has(status==='soon'?'current':status)||status==='exempt'&&containerManuallyCompletedWithoutPeriod(container)&&selectedStatuses.has('current');
  });
 }
 
@@ -372,7 +376,7 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,cl
  const dateFr=s=>new Date(s+'T00:00:00').toLocaleDateString('fr-FR');
  const dueLabel=c=>{const p=containerPreventiveStatus(c);return p.status==='archived'?`Mis au rebut · ${dateFr(p.archived.date)}`:p.status==='exempt'?'Sans périodicité préventive':p.due?`${dateFr(p.due)} · ${p.days<0?`${-p.days} j de retard`:p.days===0?'Aujourd’hui':`${p.days} j restants`}`:'À planifier · aucun préventif'};
  const dueClass=c=>`container-due container-due-${containerPreventiveStatus(c).status}`;
- const statusLabel=c=>({overdue:'En retard',soon:'À échéance',current:'À jour',unknown:'Sans préventif',exempt:'Sans périodicité',archived:'Mis au rebut'})[containerPreventiveStatus(c).status];
+ const statusLabel=c=>containerPreventiveStatus(c).status==='exempt'&&containerManuallyCompletedWithoutPeriod(c)?'Fait · sans périodicité':({overdue:'En retard',soon:'À échéance',current:'À jour',unknown:'Sans préventif',exempt:'Sans périodicité',archived:'Mis au rebut'})[containerPreventiveStatus(c).status];
  function list(){selected=null;$('#containerListPane').hidden=false;$('#containerDetailPane').hidden=true;$('#containerAdd').hidden=false;$('#containerImportButton').hidden=false;renderList();}
  function switchTab(tab){
   if(tab==='analysis')tab='kpi';activeTab=tab;
