@@ -617,3 +617,43 @@ header .header-engineering-logo{display:block;width:72px;height:72px;object-fit:
 #containersView .container-intervention-history .container-report-comment>small{display:block;margin-top:8px;color:#60748e}
 #containersView .container-intervention-history [data-container-pdf]{min-width:145px;font-size:12px}
 .equipment-list-panel #activeFilters{padding:0;background:transparent;border:0}
+
+/* Même structure de parc pour VGP et Contenants. */
+#vgpWorkspace>.workspace-intro{justify-content:center;text-align:center;margin:0 0 32px}
+#vgpWorkspace>.workspace-intro h1{margin:0}
+.vgp-workspace-navigation{margin-bottom:14px}
+.vgp-workspace-navigation .workspace-tabs{padding:0}
+.vgp-workspace-navigation .workspace-tabs button,.vgp-action-tabs button{padding:12px 18px;font-weight:500}
+.vgp-workspace-navigation button[aria-selected="true"],.vgp-action-tabs button[aria-pressed="true"]{font-weight:700}
+#materialView .equipment-list-header{border:0;padding:0;margin:0 0 18px;flex-wrap:wrap}
+#materialView .equipment-list-header .foot{margin:12px 0 0}
+#materialView #add{background:#0057a8;color:#fff;box-shadow:none}
+#materialView #stats{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 12px}
+#materialView #stats .stat{display:flex;align-items:center;gap:8px;min-width:0;padding:10px 14px;border:1px solid #dce5ef;border-left:4px solid #7088a2;border-radius:7px;background:#f7f9fc;box-shadow:none}
+#materialView #stats .stat strong{order:-1;font-size:23px;line-height:1;margin:0;color:inherit}
+#materialView #stats .stat small{font-size:13px;color:inherit}
+#materialView #stats .stat-caption{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#materialView #stats [data-status-filter="En retard"]{border-left-color:#bd4338;color:#a63a2e}
+#materialView #stats [data-status-filter="À faire"]{border-left-color:#d29a15;color:#986500}
+#materialView #stats [data-status-filter="Échéance à plus d’un mois"]{border-left-color:#187451;color:#187451}
+#materialView #stats [aria-pressed="true"]{background:#e6effa;box-shadow:0 0 0 2px #0057a822}
+#materialView .equipment-scope{margin:0 0 16px}
+#materialView .equipment-scope .equipment-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0}
+#materialView .equipment-scope button{font-size:13px;padding:9px 14px}
+#materialView .equipment-list-filters{grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;align-items:end;margin-bottom:18px}
+#materialView .equipment-list-filters .material-search{display:flex;flex-direction:column;align-items:stretch;gap:7px;grid-column:span 3;order:1}
+#materialView .equipment-list-filters .list-filters{display:contents}
+#materialView .material-naming-filters label{order:2}
+#materialView .equipment-deadline-filter{display:flex;flex-direction:column;align-items:stretch;gap:7px;order:3}
+#materialView .material-location-filters label{order:4}
+#materialView .material-sort-filters label,#materialView #resetFilters{order:5}
+#materialView .equipment-list-filters input,#materialView .equipment-list-filters select{width:100%;min-width:0}
+#materialView .equipment-list-filters label{min-width:0}
+#materialView #resetFilters{margin:0;min-height:43px}
+@media(max-width:1000px){#materialView .equipment-list-filters{grid-template-columns:repeat(3,minmax(0,1fr))}#materialView .equipment-list-filters .material-search{grid-column:1/-1}}
+@media(max-width:700px){#vgpWorkspace>.workspace-intro{margin-bottom:24px}#materialView .equipment-list-header{gap:16px}#materialView .equipment-list-header .actions{width:100%}#materialView .equipment-list-header .actions button{flex:1}#materialView .equipment-list-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.vgp-workspace-navigation .workspace-tabs button,.vgp-action-tabs button{padding:12px 10px}}
+@media(max-width:420px){#materialView .equipment-list-filters{grid-template-columns:1fr}#materialView #stats .stat{flex:1 1 140px}}
+#vgpWorkspace>.workspace-intro h1{max-width:none}
+#materialView .equipment-list-filters .select-trigger{height:44px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#materialView .equipment-list-filters .material-search{font-weight:400}
+#materialView .equipment-list-filters input{height:44px}
