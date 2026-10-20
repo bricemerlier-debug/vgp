@@ -669,3 +669,5 @@ header .header-engineering-logo{display:block;width:72px;height:72px;object-fit:
 #planningView .weekly-summary-header .weekly-period{display:flex;align-items:center;flex-wrap:wrap;gap:10px 14px;min-width:0}
 #planningView .weekly-period>button{flex-shrink:0;padding:10px 14px}
 #planningView .weekly-period>.foot{margin:0}
+/* Masque aussi l’ancien bloc KPI si un HTML en cache le contient encore. */
+#kpiView>.intro{display:none!important}
