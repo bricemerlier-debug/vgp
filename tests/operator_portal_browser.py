@@ -28,7 +28,11 @@ with sync_playwright() as p:
  page.goto('http://127.0.0.1:8123/operateur.html')
  page.locator('#loginForm [name=email]').fill('op@example.test');page.locator('#loginForm [name=password]').fill('test');page.locator('#loginForm button').click()
  expect(page.locator('#workspace')).to_be_visible()
- page.locator('#containerSearch').fill('CD036');page.locator('[name=type][value=curatif]').check();page.locator('#comment').fill('Roue réparée');page.locator('#saveButton').click()
+ page.locator('#containerSearch').fill('INCONNU');page.locator('[name=type][value=curatif]').check();page.locator('#comment').fill('Roue réparée');page.locator('#saveButton').click()
+ expect(page.locator('#formError')).to_contain_text('Sélectionnez un contenant existant');assert state['writes']==0
+ page.locator('#containerSearch').fill('CD036');page.locator('#saveButton').click()
+ expect(page.locator('#formError')).to_contain_text('Un numéro saisi seul ne suffit pas');assert state['writes']==0
+ page.locator('#containerSearch').fill('CD0');page.locator('#containerChoices [data-container-id=c1]').click();page.locator('#saveButton').click()
  expect(page.locator('#formError')).to_contain_text('non confirmé');assert page.locator('#comment').input_value()=='Roue réparée'
  page.locator('#saveButton').click()
  expect(page.locator('#history')).to_contain_text('Roue réparée');assert state['writes']==1

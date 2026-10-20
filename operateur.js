@@ -1,16 +1,16 @@
-import {CloudStore,validateConfig} from './cloud.mjs?v=060';
+import {CloudStore,validateConfig} from './cloud.mjs?v=061';
 const $=selector=>document.querySelector(selector);
 const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-let cloud,portal=null,editing=null,pending=null,busy=false;
+let cloud,portal=null,editing=null,pending=null,busy=false,selectedContainerId=null;
 function message(value,error=false){$('#status').textContent=value;$('#status').classList.toggle('error',error)}
-function resetForm(){editing=null;pending=null;$('#interventionForm').reset();$('#containerSearch').disabled=false;$('#formTitle').textContent='Nouvelle intervention';$('#saveButton').textContent='Enregistrer';$('#cancelEdit').hidden=true;$('#formError').textContent='';}
+function resetForm(){editing=null;pending=null;selectedContainerId=null;$('#interventionForm').reset();$('#containerSearch').disabled=false;$('#containerChoices').hidden=true;$('#containerSearch').setAttribute('aria-expanded','false');$('#containerSelection').textContent='Choisissez un résultat dans la liste.';$('#formTitle').textContent='Nouvelle intervention';$('#saveButton').textContent='Enregistrer';$('#cancelEdit').hidden=true;$('#formError').textContent='';}
 function render(){
  $('#loginPanel').hidden=true;$('#workspace').hidden=false;$('#operatorName').textContent=cloud.session?.user?.email||'Compte opérateur';
- $('#containerSuggestions').innerHTML=portal.containers.map(c=>`<option value="${escapeHtml(c.number)}"></option>`).join('');
+ renderContainerChoices();
  $('#history').innerHTML=portal.interventions.length?portal.interventions.map(item=>`<article class="historyItem"><h3>${escapeHtml(item.containerNumber)}</h3><div class="historyMeta">${escapeHtml(new Date(item.date+'T12:00:00Z').toLocaleDateString('fr-FR',{timeZone:'UTC'}))} · ${escapeHtml(item.type)} · N° ${escapeHtml(item.number)}</div><p>${escapeHtml(item.comment)}</p><button type="button" class="secondary" data-edit="${escapeHtml(item.id)}">Modifier</button></article>`).join(''):'<p>Aucune intervention enregistrée avec ce compte.</p>';
  $('#history').querySelectorAll('[data-edit]').forEach(button=>button.onclick=()=>{
   const item=portal.interventions.find(value=>value.id===button.dataset.edit);if(!item)return;
-  editing=item;pending=null;$('#containerSearch').value=item.containerNumber;$('#containerSearch').disabled=true;
+  editing=item;pending=null;selectedContainerId=item.containerId;$('#containerSearch').value=item.containerNumber;$('#containerSearch').disabled=true;$('#containerChoices').hidden=true;$('#containerSelection').textContent='Contenant sélectionné : '+item.containerNumber;
   $('#comment').value=item.comment;document.querySelectorAll('[name=type]').forEach(input=>input.checked=input.value===item.type);
   $('#formTitle').textContent='Modifier mon intervention';$('#saveButton').textContent='Enregistrer la correction';$('#cancelEdit').hidden=false;$('#formError').textContent='';
   window.scrollTo({top:0,behavior:'smooth'});$('#comment').focus();
@@ -28,14 +28,27 @@ $('#loginForm').onsubmit=async event=>{
 };
 $('#logout').onclick=async()=>{await cloud.logout();portal=null;resetForm();$('#workspace').hidden=true;$('#loginPanel').hidden=false;message('Vous êtes déconnecté.');};
 document.querySelectorAll('[name=type]').forEach(input=>input.onchange=()=>{if(input.checked)document.querySelectorAll('[name=type]').forEach(other=>{if(other!==input)other.checked=false;});pending=null;});
-$('#containerSearch').oninput=$('#comment').oninput=()=>{pending=null;};
+function availableContainers(){
+ const counts=new Map();for(const container of portal?.containers||[]){const key=String(container.number||'').trim().toLocaleLowerCase('fr');counts.set(key,(counts.get(key)||0)+1);}
+ return (portal?.containers||[]).filter(container=>counts.get(String(container.number||'').trim().toLocaleLowerCase('fr'))===1);
+}
+function renderContainerChoices(){
+ const query=$('#containerSearch').value.trim().toLocaleLowerCase('fr'),choices=$('#containerChoices');
+ if(!portal||editing||!query){choices.hidden=true;$('#containerSearch').setAttribute('aria-expanded','false');return;}
+ const matches=availableContainers().filter(c=>c.number.toLocaleLowerCase('fr').includes(query)).slice(0,8);
+ choices.innerHTML=matches.length?matches.map(c=>`<button type="button" role="option" data-container-id="${escapeHtml(c.id)}">${escapeHtml(c.number)}</button>`).join(''):'<p>Aucun contenant existant ne correspond à ce numéro.</p>';
+ choices.hidden=false;$('#containerSearch').setAttribute('aria-expanded','true');
+ choices.querySelectorAll('[data-container-id]').forEach(button=>button.onclick=()=>{const container=availableContainers().find(c=>c.id===button.dataset.containerId);if(!container)return;selectedContainerId=container.id;$('#containerSearch').value=container.number;choices.hidden=true;$('#containerSearch').setAttribute('aria-expanded','false');$('#containerSelection').textContent='Contenant sélectionné : '+container.number;$('#formError').textContent='';pending=null;});
+}
+$('#containerSearch').oninput=()=>{selectedContainerId=null;pending=null;$('#containerSelection').textContent='Choisissez un résultat dans la liste.';renderContainerChoices();};
+$('#comment').oninput=()=>{pending=null;};
 $('#cancelEdit').onclick=resetForm;
 $('#interventionForm').onsubmit=async event=>{
  event.preventDefault();if(busy)return;
- const number=$('#containerSearch').value.trim(),container=portal?.containers.find(c=>c.number.toLocaleLowerCase('fr')===number.toLocaleLowerCase('fr')),
+ const container=availableContainers().find(c=>c.id===selectedContainerId),
   type=document.querySelector('[name=type]:checked')?.value,comment=$('#comment').value.trim();
  $('#formError').textContent='';message('');
- if(!container&&!editing){$('#formError').textContent='Choisissez un contenant proposé dans la liste.';return;}
+ if(!container&&!editing){$('#formError').textContent='Sélectionnez un contenant existant dans les résultats. Un numéro saisi seul ne suffit pas.';return;}
  if(!type){$('#formError').textContent='Cochez un type d’intervention.';return;}
  if(!comment){$('#formError').textContent='Décrivez l’intervention dans le commentaire.';return;}
  const body={container_id:editing?.containerId||container.id,kind:type,comment,intervention_id:editing?.id||null};

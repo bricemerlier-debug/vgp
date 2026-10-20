@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Interventions des contenants · Portail opérateur</title><link rel="stylesheet" href="operateur.css?v=060">
+<html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Interventions des contenants · Portail opérateur</title><link rel="stylesheet" href="operateur.css?v=061">
 <main>
   <header><h1>Interventions des contenants</h1><p>Renseignez une intervention, puis cliquez sur Enregistrer.</p></header>
   <p id="status" role="status" aria-live="polite"></p>
   <section id="loginPanel" class="card"><h2>Connexion</h2><form id="loginForm"><label>Adresse e-mail<input name="email" type="email" autocomplete="username" required></label><label>Mot de passe<input name="password" type="password" autocomplete="current-password" required></label><button type="submit">Se connecter</button></form><p id="loginError" class="error" role="alert"></p></section>
   <div id="workspace" hidden><div class="account"><span id="operatorName"></span><button type="button" id="logout" class="secondary">Se déconnecter</button></div>
     <section class="card"><h2 id="formTitle">Nouvelle intervention</h2><form id="interventionForm">
-      <label>Rechercher un contenant<input id="containerSearch" name="container" type="search" list="containerSuggestions" autocomplete="off" placeholder="Numéro du contenant" required><datalist id="containerSuggestions"></datalist></label>
+      <label for="containerSearch">Rechercher un contenant existant</label><input id="containerSearch" name="container" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="containerChoices" autocomplete="off" placeholder="Tapez le numéro du contenant" required><div id="containerChoices" class="containerChoices" role="listbox" hidden></div><p id="containerSelection" class="containerSelection" role="status">Choisissez un résultat dans la liste.</p>
       <fieldset><legend>Type d’intervention</legend><label><input type="checkbox" name="type" value="préventif"> Préventif</label><label><input type="checkbox" name="type" value="curatif"> Curatif</label><label><input type="checkbox" name="type" value="sécurité"> Sécurité</label></fieldset>
       <label>Commentaire sur l’intervention<textarea id="comment" name="comment" rows="5" maxlength="5000" required placeholder="Décrivez ce que vous avez fait…"></textarea></label>
       <div class="formActions"><button type="submit" id="saveButton">Enregistrer</button><button type="button" id="cancelEdit" class="secondary" hidden>Annuler la modification</button></div>
@@ -14,4 +14,4 @@
     </form></section>
     <section class="card"><h2>Mes dernières interventions</h2><div id="history"></div></section>
   </div>
-</main><script src="cloud-config.js"></script><script type="module" src="operateur.js?v=060"></script></html>
+</main><script src="cloud-config.js"></script><script type="module" src="operateur.js?v=061"></script></html>
