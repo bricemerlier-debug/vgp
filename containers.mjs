@@ -1,4 +1,5 @@
 const containerParts=['Relâche','Élastique','Pompe','Frein','Inter','Roues','Carter','Bâti','Visserie','Rivets','Poignée','Palier','Timon','Pignon','Chaîne','Sabot','Sangle','Tambour','Verrou','Protection ressort','Ressort','Coupelle','Bâche','Bavette','Manchon','Excentrique','Bague','Galet','Enroulement / déroulement','Pédale','Amortisseur','Verrouillage','Levier','Rétroviseur','Vérin'];
+const containerInterventionTypes=['préventif','curatif','sécurité'];
 const containerNoPeriodTypes=new Set(['TR','TP','TJ','TG','SA','TF','TI','TK','TM','TN']);
 export function containerHasNoPeriodicPreventive(container){
  const type=String(container?.type||'').trim().toLocaleUpperCase('fr');
@@ -52,6 +53,17 @@ export function containerControllerRoster(document){
   row.name=[...row._nameCounts.keys()].sort((a,b)=>Number(row._profileNames.has(b))-Number(row._profileNames.has(a))||(row._nameCounts.get(b)-row._nameCounts.get(a))||containerControllerNameQuality(b)-containerControllerNameQuality(a)||a.localeCompare(b,'fr'))[0];
   delete row._nameCounts;delete row._profileNames;return row;
  }).sort((a,b)=>b.actions.length-a.actions.length||a.name.localeCompare(b.name,'fr'));
+}
+export function nextContainerInterventionNumber(containers=[]){
+ const used=new Set(),numbers=[];
+ for(const container of containers)for(const intervention of container.interventions||[]){
+  const number=String(intervention.number??'').trim();
+  if(number)used.add(number.toLocaleLowerCase('fr'));
+  if(/^\d+$/.test(number))numbers.push(BigInt(number));
+ }
+ let candidate=(numbers.length?numbers.reduce((largest,value)=>value>largest?value:largest,0n):0n)+1n;
+ while(used.has(candidate.toString().toLocaleLowerCase('fr')))candidate++;
+ return candidate.toString();
 }
 export function containerCategories(containers,today=containerCivilToday()){
  const groups=new Map();
@@ -485,16 +497,18 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,an
   const profiles=roster.filter(profile=>containerControllerKey(`${profile.name} ${profile.email}`).includes(query));
   $('#containerControllerAdd').disabled=!canEdit();
   $('#containerControllerHistory').hidden=true;
-  $('#containerControllerCards').innerHTML=profiles.length?profiles.map(profile=>`<article class="container-controller-card"><h3>${clean(profile.name)}</h3><p>${profile.email?`<a href="mailto:${clean(profile.email)}">${clean(profile.email)}</a>`:'<span class="foot">E-mail non renseigné</span>'}</p><p><strong>${profile.actions.length}</strong> intervention${profile.actions.length===1?'':'s'}</p><small>Dernière intervention : ${profile.last?dateFr(profile.last):'Aucune'}</small><div class="actions"><button type="button" class="secondary" data-container-controller-history="${clean(profile.name)}" ${profile.actions.length?'':'disabled'}>Voir les interventions</button><button type="button" class="secondary" data-container-controller-edit="${clean(profile.name)}" ${canEdit()?'':'disabled'}>Coordonnées</button></div></article>`).join(''):'<p class="empty">'+(roster.length?'Aucun contrôleur ne correspond à la recherche.':'Aucun contrôleur de contenants enregistré.')+'</p>';
+  $('#containerControllerCards').innerHTML=profiles.length?profiles.map(profile=>`<article class="container-controller-card"><h3>${clean(profile.name)}</h3><p>${profile.email?`<a href="mailto:${clean(profile.email)}">${clean(profile.email)}</a>`:'<span class="foot">E-mail non renseigné</span>'}</p><p><strong>${profile.actions.length}</strong> intervention${profile.actions.length===1?'':'s'}</p><small>Dernière intervention : ${profile.last?dateFr(profile.last):'Aucune'}</small><div class="actions"><button type="button" class="secondary" data-container-controller-history="${clean(profile.name)}">Ouvrir la fiche</button><button type="button" class="secondary" data-container-controller-edit="${clean(profile.name)}" ${canEdit()?'':'disabled'}>Coordonnées</button></div></article>`).join(''):'<p class="empty">'+(roster.length?'Aucun contrôleur ne correspond à la recherche.':'Aucun contrôleur de contenants enregistré.')+'</p>';
   $('#containerControllerCards').querySelectorAll('[data-container-controller-edit]').forEach(button=>button.onclick=()=>openControllerForm(button.dataset.containerControllerEdit));
   $('#containerControllerCards').querySelectorAll('[data-container-controller-history]').forEach(button=>button.onclick=()=>{
    const profile=roster.find(row=>row.name===button.dataset.containerControllerHistory);if(!profile)return;
    $('#containerControllerHistoryTitle').textContent=`${profile.name} · ${profile.actions.length} intervention${profile.actions.length===1?'':'s'}`;
-   $('#containerControllerHistoryRows').innerHTML=`<div class="owner-equipment-list"><table><thead><tr><th>Date</th><th>Contenant</th><th>N° intervention</th><th>Type</th><th>Commentaire</th><th>Fiche</th></tr></thead><tbody>${[...profile.actions].sort((a,b)=>b.intervention.date.localeCompare(a.intervention.date)).map(({containerId,containerNumber,intervention})=>`<tr><td>${dateFr(intervention.date)}</td><td><b>${clean(containerNumber)}</b></td><td>${clean(intervention.number)}</td><td>${clean(intervention.type)||'—'}</td><td class="container-report-comment">${clean(intervention.comment)||'—'}</td><td><button type="button" class="secondary" data-controller-container-open="${clean(containerId)}">Ouvrir</button></td></tr>`).join('')}</tbody></table></div>`;
+   $('#containerControllerHistoryEmail').innerHTML=profile.email?`Adresse e-mail : <a href="mailto:${clean(profile.email)}">${clean(profile.email)}</a>`:'Adresse e-mail non renseignée';
+   $('#containerControllerHistoryRows').innerHTML=profile.actions.length?`<div class="owner-equipment-list"><table><thead><tr><th>Date</th><th>Contenant</th><th>N° intervention</th><th>Type</th><th>Commentaire</th><th>Fiche</th></tr></thead><tbody>${[...profile.actions].sort((a,b)=>b.intervention.date.localeCompare(a.intervention.date)).map(({containerId,containerNumber,intervention})=>`<tr><td>${dateFr(intervention.date)}</td><td><b>${clean(containerNumber)}</b></td><td>${clean(intervention.number)}</td><td>${clean(intervention.type)||'—'}</td><td class="container-report-comment">${clean(intervention.comment)||'—'}</td><td><button type="button" class="secondary" data-controller-container-open="${clean(containerId)}">Ouvrir</button></td></tr>`).join('')}</tbody></table></div>`:'<p class="empty">Aucune intervention enregistrée pour cette fiche.</p>';
    $('#containerControllerHistory').hidden=false;
    $('#containerControllerHistoryRows').querySelectorAll('[data-controller-container-open]').forEach(openButton=>openButton.onclick=()=>{switchTab('list');open(openButton.dataset.controllerContainerOpen,'controllers')});
    $('#containerControllerHistory').scrollIntoView({block:'start',behavior:'smooth'});
   });
+  $('#containerControllerHistoryBack').onclick=()=>{$('#containerControllerHistory').hidden=true;$('#containerControllerCards').scrollIntoView({block:'start',behavior:'smooth'});};
  }
  function openControllerForm(name=null){
   if(!canEdit())return;
@@ -671,8 +685,7 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,an
   $('#containerFormError').textContent='';$('#containerFormStatus').textContent='';
   $('#containerDialog').showModal();
  }
- function openIntervention(c){const form=$('#containerInterventionForm');form.reset();$('#containerControllerSuggestions').innerHTML=containerControllerRoster(read()).map(profile=>`<option value="${clean(profile.name)}"></option>`).join('');form.elements.number.value='';form.elements.date.value=new Date().toISOString().slice(0,10);const types=['préventif','curatif','correctif'];const seen=new Set(types.map(type=>type.toLocaleLowerCase('fr')));for(const item of state())for(const intervention of item.interventions||[]){const type=String(intervention.type||'').trim();if(type&&!seen.has(type.toLocaleLowerCase('fr'))){types.push(type);seen.add(type.toLocaleLowerCase('fr'))}}$('#containerInterventionType').innerHTML='<option value="">Choisir un type</option>'+types.map(type=>`<option value="${clean(type)}">${clean(type)}</option>`).join('')+'<option value="__other__">Autre…</option>';form.elements.typeOther.hidden=true;form.elements.typeOther.required=false;$('#containerInterventionTitle').textContent=`Nouvelle intervention · ${c.number}`;$('#containerPartFields').innerHTML=containerCategorySettings(c).checks.map(p=>`<label>${clean(p)}<select data-native-select name="part:${clean(p)}"><option value="">Non renseigné</option><option>OK</option><option>À réparer</option><option>À remplacer</option><option>Sans objet</option></select></label>`).join('');$('#containerInterventionError').textContent='';$('#containerInterventionStatus').textContent='';$('#containerInterventionDialog').showModal();}
- $('#containerInterventionType').onchange=e=>{const other=e.target.value==='__other__',input=$('#containerInterventionForm [name="typeOther"]');input.hidden=!other;input.required=other;if(other)input.focus();else input.value=''};
+ function openIntervention(c){const form=$('#containerInterventionForm');form.reset();form.elements.controller.innerHTML='<option value="">Choisir un contrôleur</option>'+containerControllerRoster(read()).map(profile=>`<option value="${clean(profile.name)}">${clean(profile.name)}</option>`).join('');form.elements.date.value=new Date().toISOString().slice(0,10);$('#containerInterventionType').innerHTML='<option value="">Choisir un type</option>'+containerInterventionTypes.map(type=>`<option value="${clean(type)}">${clean(type[0].toLocaleUpperCase('fr')+type.slice(1))}</option>`).join('');$('#containerInterventionTitle').textContent=`Nouvelle intervention · ${c.number}`;$('#containerPartFields').innerHTML=containerCategorySettings(c).checks.map(p=>`<label>${clean(p)}<select data-native-select name="part:${clean(p)}"><option value="">Non renseigné</option><option>OK</option><option>À réparer</option><option>À remplacer</option><option>Sans objet</option></select></label>`).join('');$('#containerInterventionError').textContent='';$('#containerInterventionStatus').textContent='';$('#containerInterventionDialog').showModal();}
  $('#containerTypeFilters').onchange=e=>{if(e.target.type!=='checkbox')return;e.target.checked?selectedTypes.add(e.target.value):selectedTypes.delete(e.target.value);renderList()};
  $('#containerStatusFilters').onchange=e=>{if(e.target.type!=='checkbox')return;e.target.checked?selectedStatuses.add(e.target.value):selectedStatuses.delete(e.target.value);renderList()};
  $('#containerListPane').querySelectorAll('[data-container-summary-status]').forEach(button=>button.onclick=()=>{const status=button.dataset.containerSummaryStatus;selectedStatuses.has(status)?selectedStatuses.delete(status):selectedStatuses.add(status);$('#containerStatusFilters').querySelectorAll('input').forEach(input=>input.checked=selectedStatuses.has(input.value));renderList()});
@@ -707,15 +720,16 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,an
  $('#containerInterventionForm').onsubmit=async e=>{
   e.preventDefault();if(!canEdit())return;
   const form=e.currentTarget,button=$('#containerInterventionSubmit'),values=new FormData(form);
-  const number=String(values.get('number')).trim(),current=state().find(c=>c.id===selected);
+  const current=state().find(c=>c.id===selected),type=String(values.get('type')||'').trim(),controller=String(values.get('controller')||'').trim();
   $('#containerInterventionError').textContent='';
   if(!current){$('#containerInterventionError').textContent='Cette fiche est introuvable. Actualisez la page.';return;}
-  if(current.interventions.some(i=>i.number.trim().toLocaleLowerCase('fr')===number.toLocaleLowerCase('fr'))){$('#containerInterventionError').textContent='Ce numéro d’intervention existe déjà pour ce contenant.';return;}
+  if(!containerInterventionTypes.includes(type)){$('#containerInterventionError').textContent='Choisissez Préventif, Curatif ou Sécurité.';return;}
+  if(controller&&!containerControllerRoster(read()).some(profile=>profile.name===controller)){$('#containerInterventionError').textContent='Choisissez un contrôleur dans la liste.';return;}
   const parts=Object.fromEntries(containerCategorySettings(current).checks.map(p=>[p,String(values.get('part:'+p)||'')]).filter(([,v])=>v));
   const next=structuredClone(read()),container=next.containers.find(c=>c.id===selected);
   if(!container){$('#containerInterventionError').textContent='Cette fiche est introuvable. Actualisez la page.';return;}
-  const interventionType=String(values.get('type'))==='__other__'?String(values.get('typeOther')||'').trim():String(values.get('type')||'').trim();
-  container.interventions.push({number,date:String(values.get('date')),controller:String(values.get('controller')).trim(),type:interventionType,generalState:String(values.get('generalState')).trim(),comment:String(values.get('comment')).trim(),parts});
+  const number=nextContainerInterventionNumber(next.containers||[]);
+  container.interventions.push({number,date:String(values.get('date')),controller,type,generalState:String(values.get('generalState')).trim(),comment:String(values.get('comment')).trim(),parts});
   button.disabled=true;$('#containerInterventionStatus').textContent='Enregistrement en cours…';
   const ok=await (saveContainers?saveContainers(next):save(next,false,{timeoutMs:120000,renderAfter:false}));
   button.disabled=false;$('#containerInterventionStatus').textContent='';

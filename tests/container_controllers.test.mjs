@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {containerControllerRoster,containerControllerProfilesValid,containerRecordsValid} from '../containers.mjs';
+import {containerControllerRoster,containerControllerProfilesValid,containerRecordsValid,nextContainerInterventionNumber} from '../containers.mjs';
 
 const document={
  controllerProfiles:[{id:'vgp',name:'Contrôleur VGP',email:'vgp@example.test'}],
@@ -31,4 +31,7 @@ assert.ok(roster.find(profile=>profile.name==='Stéphane G.').actions.some(actio
 assert.ok(containerRecordsValid(document));
 assert.equal(containerControllerProfilesValid([{id:'1',name:'A',email:''},{id:'2',name:' a ',email:''}]),false);
 assert.equal(containerControllerProfilesValid([{id:'1',name:'A',email:'invalide'}]),false);
+assert.equal(nextContainerInterventionNumber(document.containers),'10');
+assert.equal(nextContainerInterventionNumber([{interventions:[{number:'I-1'},{number:'002'}]}]),'3');
+assert.equal(nextContainerInterventionNumber([]),'1');
 console.log('Contrôleurs des contenants : séparation VGP, historique et validation OK.');
