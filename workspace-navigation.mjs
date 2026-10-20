@@ -18,7 +18,7 @@ export function installWorkspaceNavigation({navigate,openNaming}){
   const effective=view==='equipment'?origin:view;const planning=document.querySelector('#planningView');planning.hidden=!['planning','shiftCalendar'].includes(view);planning.dataset.shiftView=String(view==='shiftCalendar');
   if(['administration','naming','mailSettings'].includes(effective))referenceContext=true;else if(!['owners','controllers'].includes(effective))referenceContext=false;
   references.hidden=effective==='administration'||!referenceContext;for(const button of references.querySelectorAll('[data-reference-view]')){if(button.dataset.referenceView===effective)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');}
-  for(const group of groups){const active=group.views.includes(effective),host=document.querySelector('#'+group.id+'Workspace');host.hidden=!active;host.querySelector('.workspace-intro').hidden=view==='equipment';
+  for(const group of groups){const active=group.views.includes(effective),host=document.querySelector('#'+group.id+'Workspace');host.hidden=!active;const intro=host.querySelector('.workspace-intro');if(intro)intro.hidden=view==='equipment';
    for(const tab of host.querySelectorAll('[data-workspace-view]')){const selected=tab.dataset.workspaceView===selectedView(effective);tab.setAttribute('aria-selected',String(selected));tab.tabIndex=selected?0:-1;}
    const menu=document.querySelector('[data-nav-group="'+group.id+'"]');if(active)menu.setAttribute('aria-current','page');else menu.removeAttribute('aria-current');
   }
