@@ -557,11 +557,11 @@ header .header-engineering-logo{display:block;width:72px;height:72px;object-fit:
 
 /* Navigation regroupée et accès directs aux plans d’action. */
 #vgpWorkspace>.workspace-intro{display:block;margin:0}
-.vgp-workspace-navigation{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;border-bottom:1px solid #c8d9ea;margin-bottom:24px;padding-bottom:10px}
+.vgp-workspace-navigation{display:flex;align-items:flex-end;justify-content:space-between;gap:8px 20px;flex-wrap:wrap;border-bottom:1px solid #c8d9ea;margin-bottom:24px;padding-bottom:0}
 .vgp-workspace-navigation .workspace-tabs{margin:0;border:0}
-.vgp-action-tabs{display:flex;gap:8px;margin-left:auto}
-.vgp-action-tabs button{background:transparent;color:#52739b;padding:14px 18px}
-.vgp-action-tabs button[aria-pressed="true"]{background:#004990;color:#fff}
+.vgp-workspace-navigation .workspace-tabs button,.vgp-action-tabs button{border-radius:8px 8px 0 0;background:#e8eef5;color:#174674;padding:14px 18px}
+.vgp-workspace-navigation .workspace-tabs button[aria-selected="true"],.vgp-action-tabs button[aria-pressed="true"]{background:#0057a8;color:#fff}
+.vgp-action-tabs{display:flex;align-items:flex-end;gap:8px;margin-left:auto;flex-wrap:wrap}
 .home-intro,.planning-intro{justify-content:flex-end}
 .container-mode .header-shift{display:none}
 #containersView .container-toolbar{justify-content:space-between}
@@ -570,7 +570,7 @@ header .header-engineering-logo{display:block;width:72px;height:72px;object-fit:
 #containersView .tabs{flex-wrap:wrap}
 .navigation[open]{display:flex;flex-direction:column}
 #navigationLogout{width:100%;margin-top:auto;background:#f8e9e6;color:#8c3028;flex-shrink:0}
-@media(max-width:700px){.vgp-workspace-navigation{gap:10px}.vgp-action-tabs{margin-left:0;flex-wrap:wrap}.vgp-action-tabs button{padding:12px}.container-mode header .header-left .brand{grid-row:2}.container-mode header{row-gap:12px}#containersView .container-toolbar>.actions{margin-left:0;flex-wrap:wrap}}
+@media(max-width:700px){.vgp-workspace-navigation{gap:8px 10px}.vgp-workspace-navigation .workspace-tabs button,.vgp-action-tabs button{padding:12px 10px;font-size:13px}.vgp-action-tabs{margin-left:0}.container-mode header .header-left .brand{grid-row:2}.container-mode header{row-gap:12px}#containersView .container-toolbar>.actions{margin-left:0;flex-wrap:wrap}}
 
 #containerControllersPanel>.toolbar{justify-content:space-between;align-items:flex-start}
 #containerControllersPanel .container-controller-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:16px}
