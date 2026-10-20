@@ -14,6 +14,13 @@ const exempt={...configured,categoryMonths:null};
 assert.equal(containerPreventiveStatus(exempt,'2026-07-15').status,'exempt');
 assert.equal(containerWeeklyAgenda([exempt],'2026-07-15','2026-07-15').total,0);
 assert.equal(containerAnnualActivity([exempt],2026)[6].due,0);
+for(const type of ['TR','TP','TJ','TG','SA','TF','TI','TK','TM','TN']){
+ const withoutPeriod={...configured,type,categoryMonths:6};
+ assert.equal(containerCategorySettings(withoutPeriod).months,null,`${type} must not inherit a category periodicity`);
+ assert.equal(containerPreventiveStatus(withoutPeriod,'2026-07-15').status,'exempt');
+ assert.equal(containerWeeklyAgenda([withoutPeriod],'2026-07-15','2026-07-15').total,0);
+ assert.equal(containerAnnualActivity([withoutPeriod],2026)[6].due,0);
+}
 assert.match(containerInterventionReport(configured,intervention).observations,/Éclairage : À réparer/);
 assert.ok(containerRecordsValid({containers:[configured]}));
 assert.ok(!containerCategorySettingsValid({...configured,categoryMonths:121}));
