@@ -1,10 +1,11 @@
 // Navigation entre pages existantes : aucun changement des données ou des règles métier.
 export function installWorkspaceNavigation({navigate,openNaming}){
- const groups=[{id:'vgp',views:['material','kpi','planning','shiftCalendar','actionKpi']},{id:'personnel',views:['controllers','owners']}];
+ const groups=[{id:'vgp',views:['material','kpi','planning','shiftCalendar','actionKpi','controllers','owners']}];
  let referenceContext=false;
  const references=document.querySelector('#referenceNavigation');
  document.querySelector('#administrationView .actions').addEventListener('click',event=>{if(event.target.closest('button'))referenceContext=true;},true);
  document.querySelector('#navigation').addEventListener('click',event=>{if(event.target.closest('[data-view]'))referenceContext=false;},true);
+ document.querySelector('#vgpWorkspace').addEventListener('click',event=>{if(event.target.closest('[data-workspace-view]'))referenceContext=false;},true);
  for(const button of references.querySelectorAll('[data-reference-view]'))button.onclick=()=>{referenceContext=true;if(button.dataset.referenceView==='naming')openNaming();else navigate(button.dataset.referenceView);};
  const selectedView=view=>view==='shiftCalendar'?'planning':view;
  for(const group of groups){
