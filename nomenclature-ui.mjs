@@ -30,7 +30,7 @@ export function installNamingReview({read,save,valid,author,newId,revision,refre
  }
  async function persistRules(next){busy=true;$('#namingRuleError').textContent='';try{if(!valid(next))throw Error('Règle invalide.');if(!await save(next))throw Error($('#message').textContent||'Écriture refusée.');preview=null;$('#autoNamingRows').innerHTML='';$('#autoNamingStatus').textContent='Règles enregistrées. Relancez l’analyse pour utiliser les nouvelles correspondances.';$('#namingRuleStatus').textContent='Règle enregistrée, sans modification des équipements.';rulesRender();counter();}catch(error){$('#namingRuleError').textContent=error.message;}finally{busy=false;counter();}}
  function open(){if(busy)return;$('#settingsMenu').close();navigate();rulesRender();if(!preview)analyze();}
- $('#autoNamingMaterial').onclick=open;
+ const materialNamingButton=$('#autoNamingMaterial');if(materialNamingButton)materialNamingButton.onclick=open;
  $('#autoNamingAnalyze').onclick=()=>{if(!busy)analyze();};
  for(const id of ['autoNamingSearch','autoNamingFilter','autoNamingIncludeNamed'])$('#'+id).addEventListener(id==='autoNamingSearch'?'input':'change',()=>{page=0;render();});
  $('#autoNamingPrevious').onclick=()=>{page--;render();};$('#autoNamingNext').onclick=()=>{page++;render();};
