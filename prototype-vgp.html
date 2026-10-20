@@ -2347,21 +2347,43 @@ function containerCategorySettingsValid(container){
 }
 const escContainer=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const containerControllerKey=name=>String(name||'').trim().replace(/\s+/g,' ').toLocaleLowerCase('fr');
+const containerControllerIdentityKey=name=>String(name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fr').replace(/[^\p{L}\p{N}]/gu,'');
+const containerControllerNames=value=>String(value||'').split(/\s*(?:\/|[;,+&]|\bet\b)\s*/i).map(name=>name.trim()).filter(name=>name&&!/^autre(?:\b|$)/i.test(name));
+const containerControllerDisplayName=value=>{
+ const name=String(value||'').trim().replace(/\s+/g,' ');
+ const initial=name.match(/^(.+?)(?:\s*\.|\s+)\s*([\p{L}])\.?$/u);
+ return initial?`${initial[1].trim()} ${initial[2].toLocaleUpperCase('fr')}.`:name;
+};
+const containerControllerNameQuality=name=>(/\s/.test(name)?2:0)+(/\s[\p{L}]\.$/u.test(name)?3:0)-(/[\p{L}]\.[\p{L}]/u.test(name)?4:0);
 function containerControllerProfilesValid(profiles){
  if(profiles===undefined)return true;
  return Array.isArray(profiles)&&profiles.every(p=>p&&typeof p.id==='string'&&p.id&&typeof p.name==='string'&&p.name.trim()&&p.name.length<=160&&typeof p.email==='string'&&p.email.length<=254&&(!p.email||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.email)))&&new Set(profiles.map(p=>p.id)).size===profiles.length&&new Set(profiles.map(p=>containerControllerKey(p.name))).size===profiles.length;
 }
 function containerControllerRoster(document){
  const rows=new Map();
- for(const profile of document.containerControllerProfiles||[])rows.set(containerControllerKey(profile.name),{...profile,actions:[],last:''});
+ const ensureRow=(sourceName,profile=null)=>{
+  const name=containerControllerDisplayName(sourceName),key=containerControllerIdentityKey(name);
+  if(!key)return null;
+  let row=rows.get(key);
+  if(!row){row={id:profile?.id||null,name,email:'',actions:[],last:'',_nameCounts:new Map(),_profileNames:new Set()};rows.set(key,row);}
+  if(profile){row.id??=profile.id||null;row.email||=profile.email||'';row._profileNames.add(name);}
+  row._nameCounts.set(name,(row._nameCounts.get(name)||0)+1);
+  return row;
+ };
+ for(const profile of document.containerControllerProfiles||[])for(const name of containerControllerNames(profile.name))ensureRow(name,profile);
  for(const container of document.containers||[])for(const intervention of container.interventions||[]){
-  const name=String(intervention.controller||'').trim();if(!name)continue;
-  const key=containerControllerKey(name);
-  if(!rows.has(key))rows.set(key,{id:null,name,email:'',actions:[],last:''});
-  const row=rows.get(key);row.actions.push({containerId:container.id,containerNumber:container.number,intervention});
-  if(intervention.date>row.last)row.last=intervention.date;
+  const seen=new Set();
+  for(const name of containerControllerNames(intervention.controller)){
+   const key=containerControllerIdentityKey(name);if(seen.has(key))continue;seen.add(key);
+   const row=ensureRow(name);if(!row)continue;
+   row.actions.push({containerId:container.id,containerNumber:container.number,intervention});
+   if(intervention.date>row.last)row.last=intervention.date;
+  }
  }
- return [...rows.values()].sort((a,b)=>b.actions.length-a.actions.length||a.name.localeCompare(b.name,'fr'));
+ return [...rows.values()].map(row=>{
+  row.name=[...row._nameCounts.keys()].sort((a,b)=>Number(row._profileNames.has(b))-Number(row._profileNames.has(a))||(row._nameCounts.get(b)-row._nameCounts.get(a))||containerControllerNameQuality(b)-containerControllerNameQuality(a)||a.localeCompare(b,'fr'))[0];
+  delete row._nameCounts;delete row._profileNames;return row;
+ }).sort((a,b)=>b.actions.length-a.actions.length||a.name.localeCompare(b.name,'fr'));
 }
 function containerCategories(containers,today=containerCivilToday()){
  const groups=new Map();
@@ -2819,9 +2841,9 @@ function installContainersUI({root,read,save,saveContainers,canEdit,id,analyzeFi
   const form=event.currentTarget,button=$('#containerControllerSubmit');if(button.disabled)return;
   const name=(editingControllerName||form.elements.name.value).trim().replace(/\s+/g,' '),email=form.elements.email.value.trim();
   if(!name)return;
-  if(!editingControllerName&&containerControllerRoster(read()).some(profile=>containerControllerKey(profile.name)===containerControllerKey(name))){$('#containerControllerFormError').textContent='Ce contrôleur de contenants existe déjà.';return;}
+  if(!editingControllerName&&containerControllerRoster(read()).some(profile=>containerControllerIdentityKey(profile.name)===containerControllerIdentityKey(name))){$('#containerControllerFormError').textContent='Ce contrôleur de contenants existe déjà.';return;}
   const next=structuredClone(read());next.containerControllerProfiles??=[];
-  const profile=next.containerControllerProfiles.find(row=>containerControllerKey(row.name)===containerControllerKey(name));
+  const profile=next.containerControllerProfiles.find(row=>containerControllerIdentityKey(row.name)===containerControllerIdentityKey(name));
   if(profile)profile.email=email;else next.containerControllerProfiles.push({id:id(),name,email});
   if(!containerControllerProfilesValid(next.containerControllerProfiles)){$('#containerControllerFormError').textContent='Vérifiez le nom et l’adresse e-mail.';return;}
   button.disabled=true;$('#containerControllerFormStatus').textContent='Enregistrement en cours…';
