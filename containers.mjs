@@ -812,9 +812,9 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,cl
  $('#containerForm').onsubmit=async e=>{
   e.preventDefault();if(!canEdit())return;
   const form=e.currentTarget,button=$('#containerFormSubmit'),values=new FormData(form);
-  const number=String(values.get('number')).trim(),currentId=editingContainerId;
+  const number=String(values.get('number')).replace(/\*/g,'').trim(),currentId=editingContainerId;
   $('#containerFormError').textContent='';
-  if(state().some(c=>c.id!==currentId&&c.number.trim().toLocaleLowerCase('fr')===number.toLocaleLowerCase('fr'))){$('#containerFormError').textContent='Ce numéro de contenant existe déjà.';return;}
+  if(state().some(c=>c.id!==currentId&&c.number.replace(/\*/g,'').trim().toLocaleLowerCase('fr')===number.toLocaleLowerCase('fr'))){$('#containerFormError').textContent='Ce numéro de contenant existe déjà.';return;}
   const type=String(values.get('type')||'').trim();
   const subtype=String(values.get('subtype'))==='__other__'?String(values.get('subtypeOther')).trim():String(values.get('subtype')).trim();
   if(!number||!type||!subtype){$('#containerFormError').textContent='Renseignez le numéro, la catégorie et la sous-catégorie du contenant.';return;}

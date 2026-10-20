@@ -1,7 +1,8 @@
 import {october2026Inventory,inventoryRecoveryPlan,applyInventoryRecovery} from './container-inventory-recovery.mjs';
+import {containerNumberCleanupPlan,applyContainerNumberCleanup} from './container-number-cleanup.mjs';
 import {reconcileInventory,inventoryEntryCode} from './inventory-reconciliation.mjs';
 import {standardTypeProgress} from './standard-type-kpi.mjs';
-import {installContainersUI,containerRecordsValid,containerLegacyScrapPlan,containerArchiveInfo} from './containers.mjs?v=069';
+import {installContainersUI,containerRecordsValid,containerLegacyScrapPlan,containerArchiveInfo} from './containers.mjs?v=070';
 import {analyzeContainerFiles,analyzeContainerCategoryFiles} from './container-import.mjs';
 import {installBulkEquipmentOwners} from './bulk-equipment-owners.mjs';
 import {processTeamForSector,assignMissingProcessTeams} from './process-team-assignment.mjs';
@@ -77,6 +78,29 @@ function upgrade(d){d.equipmentTypes??=initialEquipmentTypes();d.containers??=[]
 upgrade(data);
 const inventoryResults=$('#inventoryResults'),inventoryEntries=[];
 let inventoryRecoverySnapshot=null,inventoryRecoverySelection=null;
+const cleanupPanel=document.createElement('div');
+cleanupPanel.className='inventory-card';
+cleanupPanel.innerHTML='<h3>Nettoyer les numéros du parc</h3><p>Retirer les étoiles de tous les contenants et réunir les fiches portant ensuite le même numéro.</p><button type="button" id="containerCleanupPreview" class="secondary">Voir les corrections</button><div id="containerCleanupResult" role="status"></div>';
+$('#inventoryView').prepend(cleanupPanel);
+$('#containerCleanupPreview').onclick=async()=>{
+ const target=$('#containerCleanupResult');
+ try{
+  await refreshNamingData();
+  const plan=containerNumberCleanupPlan(data),snapshot=canonical(data);
+  target.innerHTML=`<p><strong>${plan.renamed.length}</strong> numéro(s) avec étoile à nettoyer · <strong>${plan.merges.length}</strong> groupe(s) de fiches à fusionner.</p>${plan.merges.length?`<ul>${plan.merges.map(group=>`<li>${esc(group.number)} : ${group.ids.length} fiches, ${group.interventions.reduce((a,b)=>a+b,0)} interventions avant rapprochement</li>`).join('')}</ul>`:''}${plan.invalid.length?'<p class="error">Numéro vide après nettoyage : correction bloquée.</p>':plan.renamed.length||plan.merges.length?'<label><input type="checkbox" id="containerCleanupConfirm"> Je confirme le nettoyage et les fusions affichées.</label><button type="button" id="containerCleanupApply">Appliquer les corrections</button>':'<p>Aucune correction nécessaire.</p>'}`;
+  if(!plan.ready||!$('#containerCleanupApply'))return;
+  $('#containerCleanupApply').onclick=async()=>{
+   if(!$('#containerCleanupConfirm').checked){target.insertAdjacentHTML('beforeend','<p class="error">Confirmez les corrections affichées.</p>');return;}
+   const button=$('#containerCleanupApply');button.disabled=true;
+   try{
+    await refreshNamingData();if(canonical(data)!==snapshot)throw Error('Les données ont changé. Recommencez l’aperçu.');
+    const next=applyContainerNumberCleanup(data,plan);
+    if(!await saveContainerRecords(next,{bulk:true}))throw Error($('#message').textContent||'Enregistrement non confirmé.');
+    render();target.innerHTML=`<p>${plan.renamed.length} numéro(s) nettoyé(s), ${plan.merges.length} groupe(s) fusionné(s). Modifications enregistrées.</p>`;
+   }catch(error){target.textContent=error.message;button.disabled=false;}
+  };
+ }catch(error){target.textContent=error.message;}
+};
 function renderInventoryEntries(){
  $('#inventoryEntryCount').textContent=inventoryEntries.length;
  $('#inventoryClear').hidden=!inventoryEntries.length;
