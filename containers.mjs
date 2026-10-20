@@ -17,7 +17,7 @@ export function containerCategorySettingsValid(container){
 const escContainer=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const containerControllerKey=name=>String(name||'').trim().replace(/\s+/g,' ').toLocaleLowerCase('fr');
 const containerControllerIdentityKey=name=>String(name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fr').replace(/[^\p{L}\p{N}]/gu,'');
-const containerControllerNames=value=>String(value||'').split(/\s*(?:\/|[;,+&]|\bet\b)\s*/i).map(name=>name.trim()).filter(name=>name&&!/^autre(?:\b|$)/i.test(name));
+const containerControllerNames=value=>String(value||'').split(/\s*(?:\/|[;,+&]|\bet\b)\s*/i).map(name=>name.trim()).filter(Boolean).flatMap(name=>/^autre$/i.test(name)?['Friedlander']:/^autre\b/i.test(name)?[]:[name]);
 const containerControllerDisplayName=value=>{
  const name=String(value||'').trim().replace(/\s+/g,' ');
  const initial=name.match(/^(.+?)(?:\s*\.|\s+)\s*([\p{L}])\.?$/u);
