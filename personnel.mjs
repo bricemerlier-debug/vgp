@@ -1,7 +1,7 @@
 import {sectorZones,serviceChoices} from './sectors.mjs';
 import {controllerForName,controlBelongsToController,activeControllers} from './controllers.mjs';
-import {equipmentOwners,equipmentHasOwner,removeEquipmentOwner} from './ownership.mjs';
-const personKey=v=>String(v??'').trim().toLocaleLowerCase('fr');
+import {equipmentOwners,equipmentHasOwner,removeEquipmentOwner,ownerIdentityKey} from './ownership.mjs?v=050';
+const personKey=ownerIdentityKey;
 export function ownerServiceOptions(){return serviceChoices().map(choice=>choice.value);}
 export function personnelChoices(state,kind){return kind==='controller'?activeControllers(state.controllerProfiles).map(p=>({id:p.id,name:p.name})): [...new Map([...(state.owners||[]),...(state.ownerContacts||[]).map(c=>c.owner),...state.equipment.flatMap(equipmentOwners)].filter(Boolean).map(name=>[personKey(name),{id:name,name}])).values()];}
 export function personnelOperationPreview(state,kind,sourceId,targetId=null){

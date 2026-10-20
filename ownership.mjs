@@ -1,5 +1,6 @@
-const ownerKey=value=>String(value??'').trim().toLocaleLowerCase('fr');
-export function equipmentOwners(e){return [...new Map([e.owner,...(e.additionalOwners||[])].filter(Boolean).map(name=>[ownerKey(name),name])).values()];}
+export function ownerIdentityKey(value){return String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toLocaleLowerCase('fr');}
+const ownerKey=ownerIdentityKey;
+export function equipmentOwners(e){const owners=new Map();for(const raw of [e.owner,...(e.additionalOwners||[])].filter(Boolean)){const key=ownerKey(raw);if(key&&!owners.has(key))owners.set(key,String(raw).trim().replace(/\s+/g,' '));}return [...owners.values()];}
 export function equipmentHasOwner(e,name){return name?equipmentOwners(e).some(n=>ownerKey(n)===ownerKey(name)):equipmentOwners(e).length===0;}
 export function addEquipmentOwner(e,name){name=String(name??'').trim();if(!name||name.length>160)throw Error('Choisissez un propriétaire valide.');if(equipmentHasOwner(e,name))throw Error('Ce propriétaire est déjà associé.');if(e.ownerReviewRequired)e.ownerReviewRequired=false;if(!e.owner)e.owner=name;else e.additionalOwners=[...(e.additionalOwners||[]),name];return e;}
 export function removeEquipmentOwner(e,name){const remaining=equipmentOwners(e).filter(n=>ownerKey(n)!==ownerKey(name));e.owner=remaining[0]||'';e.additionalOwners=remaining.slice(1);return e;}
@@ -8,7 +9,7 @@ export function equipmentMailRecipients(e,contacts){const addresses=new Set();re
 
 // Vérification à la saisie uniquement : les anciennes fiches restent consultables.
 export function ownerDetailsIssue(state,name,email,exceptOwner=null){
- const key=value=>String(value??'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').toLocaleLowerCase('fr'),except=exceptOwner===null?null:key(exceptOwner);
+ const key=ownerIdentityKey,except=exceptOwner===null?null:key(exceptOwner);
  if(!name?.trim()||name.trim().length>160||key(name)!==except&&name.trim().split(/\s+/).length<2)return 'Renseignez le prénom puis le nom du propriétaire (160 caractères maximum).';
  if(!email?.trim()||email.trim().length>254||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))return 'L’adresse e-mail du propriétaire est obligatoire et doit être valide.';
  const names=[...(state.owners||[]),...(state.ownerContacts||[]).map(c=>c.owner),...(state.equipment||[]).flatMap(equipmentOwners)];
