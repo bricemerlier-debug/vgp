@@ -9,15 +9,15 @@ def api(route):
  if path.startswith('/auth/v1/logout'):
   route.fulfill(status=204,body='');return
  if path.endswith('/operator_portal_data'):
-  route.fulfill(status=200,content_type='application/json',body=json.dumps({'containers':[{'id':'c1','number':'CD036'}],'interventions':state['interventions']}));return
- if path.endswith('/operator_save_intervention'):
+  route.fulfill(status=200,content_type='application/json',body=json.dumps({'containers':[{'id':'c1','number':'CD036','checks':['Bâti','Galet','Visserie']}],'interventions':state['interventions']}));return
+ if path.endswith('/operator_save_intervention_v2'):
   data=request.post_data_json
   if state['fail_next']:
    state['fail_next']=False;route.fulfill(status=503,content_type='application/json',body=json.dumps({'message':'Service temporairement indisponible'}));return
   state['writes']+=1
   if data.get('intervention_id'):
-   item=state['interventions'][0];item['type']=data['kind'];item['comment']=data['comment']
-  else:state['interventions'].append({'id':'entry1','containerId':'c1','containerNumber':'CD036','number':'1','date':'2026-10-20','type':data['kind'],'comment':data['comment'],'corrections':[]})
+   item=state['interventions'][0];item['type']=data['kind'];item['comment']=data['comment'];item['parts']=data['checked_parts'];item['checklistRecorded']=True
+  else:state['interventions'].append({'id':'entry1','containerId':'c1','containerNumber':'CD036','number':'1','date':'2026-10-20','type':data['kind'],'comment':data['comment'],'parts':data['checked_parts'],'checklistRecorded':True,'checks':['Bâti','Galet','Visserie'],'corrections':[]})
   route.fulfill(status=200,content_type='application/json',body=json.dumps({'id':'entry1','number':'1','revision':state['writes']}));return
  route.fulfill(status=404,content_type='application/json',body='{}')
 with sync_playwright() as p:
@@ -28,16 +28,16 @@ with sync_playwright() as p:
  page.goto('http://127.0.0.1:8123/operateur.html')
  page.locator('#loginForm [name=email]').fill('op@example.test');page.locator('#loginForm [name=password]').fill('test');page.locator('#loginForm button').click()
  expect(page.locator('#workspace')).to_be_visible()
- page.locator('#containerSearch').fill('INCONNU');page.locator('[name=type][value=curatif]').check();page.locator('#comment').fill('Roue réparée');page.locator('#saveButton').click()
+ page.locator('#containerSearch').fill('INCONNU');page.locator('[name=type][value=préventif]').check();expect(page.locator('#preventiveChecklist')).to_be_visible();page.locator('#comment').fill('Roue réparée');page.locator('#saveButton').click()
  expect(page.locator('#formError')).to_contain_text('Sélectionnez un contenant existant');assert state['writes']==0
  page.locator('#containerSearch').fill('CD036');page.locator('#saveButton').click()
  expect(page.locator('#formError')).to_contain_text('Un numéro saisi seul ne suffit pas');assert state['writes']==0
- page.locator('#containerSearch').fill('CD0');page.locator('#containerChoices [data-container-id=c1]').click();page.locator('#saveButton').click()
+ page.locator('#containerSearch').fill('CD0');page.locator('#containerChoices [data-container-id=c1]').click();expect(page.locator('#preventivePoints input:checked')).to_have_count(3);page.locator('#preventivePoints [data-check-index="1"]').uncheck();page.locator('#saveButton').click()
  expect(page.locator('#formError')).to_contain_text('non confirmé');assert page.locator('#comment').input_value()=='Roue réparée'
  page.locator('#saveButton').click()
- expect(page.locator('#history')).to_contain_text('Roue réparée');assert state['writes']==1
- page.locator('[data-edit=entry1]').click();page.locator('[name=type][value=sécurité]').check();page.locator('#comment').fill('Roue contrôlée');page.locator('#saveButton').click()
- expect(page.locator('#history')).to_contain_text('Roue contrôlée');assert state['writes']==2 and len(state['interventions'])==1
+ expect(page.locator('#history')).to_contain_text('Roue réparée');assert state['writes']==1 and state['interventions'][0]['parts']=={'Bâti':'Vérifié','Visserie':'Vérifié'}
+ page.locator('[data-edit=entry1]').click();expect(page.locator('#preventivePoints input:checked')).to_have_count(2);page.locator('[name=type][value=curatif]').check();expect(page.locator('#preventiveChecklist')).to_be_hidden();page.locator('#comment').fill('Roue réparée et contrôlée');page.locator('#saveButton').click()
+ expect(page.locator('#history')).to_contain_text('Roue réparée et contrôlée');assert state['writes']==2 and len(state['interventions'])==1 and state['interventions'][0]['parts']=={}
  assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
  assert not errors,errors
  browser.close()

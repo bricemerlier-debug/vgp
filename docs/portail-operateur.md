@@ -4,7 +4,7 @@ URL du site publié : `https://bricemerlier-debug.github.io/vgp/operateur.html`.
 
 ## Mise en service dans Supabase
 
-1. Dans le SQL Editor du projet déjà utilisé par l'application, exécuter `supabase/018_operator_portal.sql` après `supabase/015_container_fast_writes.sql`. Le script est transactionnel : il ajoute le rôle `operateur` et les deux fonctions ciblées sans déplacer les Contenants ni leurs interventions.
+1. Dans le SQL Editor du projet déjà utilisé par l'application, exécuter `supabase/018_operator_portal.sql` après `supabase/015_container_fast_writes.sql`. Le script est transactionnel : il ajoute le rôle `operateur` et les fonctions ciblées sans déplacer les Contenants ni leurs interventions.
 2. Dans **Authentication → Users**, inviter ou créer le compte personnel de l'opérateur. Relever son UUID après création. Ne pas utiliser un compte administrateur partagé.
 3. Dans le SQL Editor, ajouter l'utilisateur à l'espace de travail existant (remplacer les deux UUID) :
 
@@ -21,7 +21,7 @@ L'opérateur se connecte depuis la page dédiée, choisit un numéro de contenan
 
 La correction modifie l'intervention existante et garde les anciennes valeurs, l'auteur et l'heure dans `operatorCorrections`. Les interventions sont stockées dans `workspace_state.payload.containers[].interventions`, comme celles de l'application principale. Elles apparaissent dans la rubrique Contenants au prochain chargement ou à la prochaine actualisation. Les vues et calculs existants lisent ce même historique.
 
-Le rôle `operateur` est invisible pour les anciennes politiques RLS et fonctions d'administration via `workspace_role`. Il ne peut utiliser que `operator_portal_data` (numéros des contenants actifs et ses propres interventions) et `operator_save_intervention` (création ou correction de ses interventions). Les contrôles d'accès s'exécutent dans Supabase, y compris si les API sont appelées directement hors de l'interface.
+Le rôle `operateur` est invisible pour les anciennes politiques RLS et fonctions d'administration via `workspace_role`. Il ne peut utiliser que `operator_portal_data` (numéros des contenants actifs et ses propres interventions) et `operator_save_intervention_v2` (création ou correction de ses interventions avec la checklist du préventif). Les contrôles d'accès s'exécutent dans Supabase, y compris si les API sont appelées directement hors de l'interface.
 
 ## Vérification après activation
 
