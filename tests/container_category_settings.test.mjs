@@ -1,8 +1,16 @@
 import assert from 'node:assert/strict';
-import {containerCategorySettings,containerCategorySettingsValid,containerPreventiveStatus,containerWeeklyAgenda,containerAnnualActivity,containerRecordsValid,containerInterventionReport} from '../containers.mjs';
+import {containerCategoryDefaultChecks,containerCategorySettings,containerCategorySettingsValid,containerPreventiveStatus,containerWeeklyAgenda,containerAnnualActivity,containerRecordsValid,containerInterventionReport} from '../containers.mjs';
 
 const intervention={number:'I-1',date:'2026-01-15',type:'préventif',controller:'Marie',generalState:'Bon',comment:'RAS',parts:{Frein:'OK','Éclairage':'À réparer'}};
 const container={id:'a',number:'TA001',type:'TA',subtype:'CARCASSE - BACHE',interventions:[intervention]};
+const r2PliChecks=['Bâti','Galet','Butée','Flasque','Inter','Palier','Carter','Roue','Frein','Volant','Tambour','Enroulage','Rouleaux','Visserie'];
+const pcChecks=['Bâti','Sangle','Flasque','Inter enroulage','Rouleaux','Carter','Sabot','Volant','Tambour','Palier','Prise chariot','Visserie'];
+for(const category of ['R2/PLT2','R2 - JAUNE','Cartouches PLT2','PLI','Pli AMIENS'])assert.deepEqual(containerCategoryDefaultChecks(category),r2PliChecks);
+for(const category of ['GDC/PC','GDC','PC'])assert.deepEqual(containerCategoryDefaultChecks(category),pcChecks);
+for(const category of ['CARCASSE','CHARIOT','Catégorie inconnue'])assert.deepEqual(containerCategoryDefaultChecks(category),[]);
+assert.deepEqual(containerCategorySettings({...container,subtype:'R2 - JAUNE'}).checks,r2PliChecks);
+assert.deepEqual(containerCategorySettings({...container,subtype:'PC'}).checks,pcChecks);
+assert.deepEqual(containerCategorySettings(container).checks,[]);
 assert.equal(containerCategorySettings(container).months,18);
 assert.equal(containerPreventiveStatus(container,'2027-01-16').due,'2027-07-15');
 const configured={...container,categoryMonths:6,categoryChecks:['Frein','Éclairage']};

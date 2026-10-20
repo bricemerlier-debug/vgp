@@ -1,4 +1,13 @@
 const containerParts=['Relâche','Élastique','Pompe','Frein','Inter','Roues','Carter','Bâti','Visserie','Rivets','Poignée','Palier','Timon','Pignon','Chaîne','Sabot','Sangle','Tambour','Verrou','Protection ressort','Ressort','Coupelle','Bâche','Bavette','Manchon','Excentrique','Bague','Galet','Enroulement / déroulement','Pédale','Amortisseur','Verrouillage','Levier','Rétroviseur','Vérin'];
+// Listes relevées des rapports CB001, CA267 et SE118 ; TC016 et CH81 n'en comportent pas.
+const containerR2PliChecks=['Bâti','Galet','Butée','Flasque','Inter','Palier','Carter','Roue','Frein','Volant','Tambour','Enroulage','Rouleaux','Visserie'];
+const containerPcChecks=['Bâti','Sangle','Flasque','Inter enroulage','Rouleaux','Carter','Sabot','Volant','Tambour','Palier','Prise chariot','Visserie'];
+export function containerCategoryDefaultChecks(category){
+ const key=String(category||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim();
+ if(/(?:^| )(?:R2|PLT2)(?: |$)/.test(key)||key==='PLI'||key==='PLI AMIENS')return [...containerR2PliChecks];
+ if(key==='PC'||key==='GDC'||key==='GDC PC')return [...containerPcChecks];
+ return [];
+}
 const containerInterventionTypes=['préventif','curatif','sécurité'];
 const containerNoPeriodTypes=new Set(['TR','TP','TJ','TG','SA','TF','TI','TK','TM','TN']);
 export function containerHasNoPeriodicPreventive(container){
@@ -8,7 +17,9 @@ export function containerHasNoPeriodicPreventive(container){
 export function containerCategorySettings(container){
  const noPeriod=containerHasNoPeriodicPreventive(container);
  const fallback=noPeriod?null:String(container.subtype||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes('carcasse')?18:12;
- return {months:noPeriod?null:container.categoryMonths===undefined?fallback:container.categoryMonths,checks:container.categoryChecks===undefined?containerParts:container.categoryChecks};
+ const checks=container.categoryChecks;
+ const legacyDefault=Array.isArray(checks)&&checks.length===containerParts.length&&checks.every((part,index)=>part===containerParts[index]);
+ return {months:noPeriod?null:container.categoryMonths===undefined?fallback:container.categoryMonths,checks:checks===undefined||legacyDefault?containerCategoryDefaultChecks(container.subtype):checks};
 }
 export function containerCategorySettingsValid(container){
  return (container.categoryMonths===undefined||container.categoryMonths===null||Number.isInteger(container.categoryMonths)&&container.categoryMonths>=1&&container.categoryMonths<=120)
@@ -692,9 +703,9 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,cl
   revokeContainerPhotoUrl();selected=c.id;returnTab=origin;
   $('#containerListPane').hidden=true;$('#containerDetailPane').hidden=false;$('#containerAdd').hidden=true;$('#containerImportButton').hidden=true;
   const last=[...c.interventions].sort((a,b)=>b.date.localeCompare(a.date))[0],archive=containerArchiveInfo(c);
-  $('#containerDetail').innerHTML=`<div class="toolbar"><div><p class="eyebrow">FICHE CONTENANT</p><h2>${clean(c.number)}</h2></div><div class="container-detail-actions"><button type="button" class="secondary" id="containerEdit">Modifier la fiche</button>${!archive?'<button type="button" class="danger" id="containerScrap">Mettre au rebut</button>':''}<button type="button" class="secondary" id="containerBack">← ${origin==='archive'?'Archives':origin==='report'?'Rapport mensuel':origin==='analysis'?'Analyse interventions':origin==='controllers'?'Contrôleurs des contenants':origin==='agenda'?'Agenda':origin==='categories'?'Catégorie':'Tous les contenants'}</button></div></div>
-  <div class="container-detail-summary"><dl class="container-facts"><div><dt>Catégorie</dt><dd>${clean(c.subtype)||'Non renseignée'}</dd></div><div><dt>Sous-catégorie</dt><dd>${clean(c.type)||'Non renseignée'}</dd></div><div><dt>${archive?'Statut':containerPreventiveStatus(c).months===null?'Préventif':`Prochain préventif · tous les ${containerPreventiveStatus(c).months} mois`}</dt><dd class="${dueClass(c)}">${dueLabel(c)}</dd></div><div><dt>Dernière intervention</dt><dd>${last?new Date(last.date+'T00:00:00').toLocaleDateString('fr-FR'):'Aucune intervention'}</dd></div><div><dt>Nombre d’interventions</dt><dd>${c.interventions.length}</dd></div></dl>
-  <section class="container-photo-card" aria-label="Photo du contenant"><div class="container-photo-frame"><img id="containerPhotoImage" alt="Photo du contenant ${clean(c.number)}" hidden><div id="containerPhotoPlaceholder"><span aria-hidden="true">＋</span><small>Photo du contenant</small></div></div><input type="file" id="containerPhotoInput" accept="image/jpeg,image/png,image/webp" hidden><div class="container-photo-actions"><button type="button" class="secondary" id="containerPhotoPick">${c.photoPath?'Remplacer la photo':'Ajouter une photo'}</button><button type="button" class="secondary" id="containerPhotoRemove" ${c.photoPath?'':'hidden'}>Retirer</button></div><p class="foot" id="containerPhotoStatus" role="status">Photo facultative · 12 Mo maximum, compressée à 180 Ko avant stockage.</p><p class="error" id="containerPhotoError" role="alert"></p></section></div>
+  $('#containerDetail').innerHTML=`<div class="container-detail-summary"><div class="container-detail-main"><div class="toolbar"><div><p class="eyebrow">FICHE CONTENANT</p><h2>${clean(c.number)}</h2></div><div class="container-detail-actions"><button type="button" class="secondary" id="containerEdit">Modifier la fiche</button>${!archive?'<button type="button" class="danger" id="containerScrap">Mettre au rebut</button>':''}<button type="button" class="secondary" id="containerBack">← ${origin==='archive'?'Archives':origin==='report'?'Rapport mensuel':origin==='analysis'?'Analyse interventions':origin==='controllers'?'Contrôleurs des contenants':origin==='agenda'?'Agenda':origin==='categories'?'Catégorie':'Tous les contenants'}</button></div></div>
+  <dl class="container-facts"><div><dt>Catégorie</dt><dd>${clean(c.subtype)||'Non renseignée'}</dd></div><div><dt>Sous-catégorie</dt><dd>${clean(c.type)||'Non renseignée'}</dd></div><div><dt>${archive?'Statut':containerPreventiveStatus(c).months===null?'Préventif':`Prochain préventif · tous les ${containerPreventiveStatus(c).months} mois`}</dt><dd class="${dueClass(c)}">${dueLabel(c)}</dd></div><div><dt>Dernière intervention</dt><dd>${last?new Date(last.date+'T00:00:00').toLocaleDateString('fr-FR'):'Aucune intervention'}</dd></div><div><dt>Nombre d’interventions</dt><dd>${c.interventions.length}</dd></div></dl></div>
+  <section class="container-photo-card" aria-label="Photo du contenant"><div class="container-photo-frame"><img id="containerPhotoImage" alt="Photo du contenant ${clean(c.number)}" hidden><div id="containerPhotoPlaceholder"><span aria-hidden="true">＋</span><small>Photo du contenant</small></div></div><input type="file" id="containerPhotoInput" accept="image/jpeg,image/png,image/webp" hidden><div class="container-photo-actions"><button type="button" class="secondary" id="containerPhotoPick">${c.photoPath?'Remplacer la photo':'Ajouter une photo'}</button><button type="button" class="secondary" id="containerPhotoRemove" ${c.photoPath?'':'hidden'}>Retirer</button></div><p class="foot" id="containerPhotoStatus" role="status"></p><p class="error" id="containerPhotoError" role="alert"></p></section></div>
   ${archive?`<aside class="container-archive-note"><b>Mis au rebut le ${dateFr(archive.date)}</b> · ${archive.manual?`Décision manuelle · ${clean(archive.by)}`:`Intervention ${clean(archive.number)}`}<p>${clean(archive.comment)}</p>${archive.laterInterventions?`<p class="container-archive-warning">${archive.laterInterventions} intervention${archive.laterInterventions===1?'':'s'} enregistrée${archive.laterInterventions===1?'':'s'} après le rebut · situation à vérifier.</p>`:''}</aside>`:''}<div class="toolbar"><h3>Historique des interventions</h3><button type="button" id="containerAddIntervention">+ Ajouter une intervention</button></div>${interventionHistoryHtml(c)}`;
   $('#containerBack').onclick=()=>returnTab==='archive'?switchTab('archive'):returnTab==='report'?switchTab('report'):returnTab==='analysis'?switchTab('analysis'):returnTab==='controllers'?switchTab('controllers'):returnTab==='agenda'?switchTab('agenda'):returnTab==='categories'?switchTab('categories'):list();
   $('#containerEdit').disabled=!canEdit();$('#containerEdit').onclick=()=>openEdit(c);
@@ -763,7 +774,28 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,cl
   $('#containerFormError').textContent='';$('#containerFormStatus').textContent='';
   $('#containerDialog').showModal();
  }
- function openIntervention(c){const form=$('#containerInterventionForm'),roster=containerControllerRoster(read()).map(profile=>`<option value="${clean(profile.name)}">${clean(profile.name)}</option>`).join('');form.reset();form.elements.controller.innerHTML='<option value="">Choisir un contrôleur</option>'+roster;form.elements.controller2.innerHTML='<option value="">Aucun deuxième contrôleur</option>'+roster;form.elements.date.value=new Date().toISOString().slice(0,10);$('#containerInterventionType').innerHTML='<option value="">Choisir un type</option>'+containerInterventionTypes.map(type=>`<option value="${clean(type)}">${clean(type[0].toLocaleUpperCase('fr')+type.slice(1))}</option>`).join('');$('#containerInterventionTitle').textContent=`Nouvelle intervention · ${c.number}`;$('#containerPartFields').innerHTML=containerCategorySettings(c).checks.map(p=>`<label>${clean(p)}<select data-native-select name="part:${clean(p)}"><option value="">Non renseigné</option><option>OK</option><option>À réparer</option><option>À remplacer</option><option>Sans objet</option></select></label>`).join('');$('#containerInterventionError').textContent='';$('#containerInterventionStatus').textContent='';$('#containerInterventionDialog').showModal();}
+ function renderContainerChecklist(container){
+  const host=$('#containerPartFields'),checks=containerCategorySettings(container).checks;
+  host.replaceChildren();
+  if(!checks.length){
+   const message=document.createElement('p');message.className='foot';
+   message.textContent='Aucune checklist définie pour cette catégorie. Ajoutez-la dans l’onglet Catégories.';
+   host.append(message);return;
+  }
+  for(const part of checks){
+   const row=document.createElement('div');row.className='container-part-row';
+   const label=document.createElement('label');label.className='container-part-check';
+   const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.name='partIncluded:'+part;checkbox.checked=true;
+   label.append(checkbox,document.createTextNode(part));
+   const status=document.createElement('select');status.name='part:'+part;status.setAttribute('data-native-select','');status.setAttribute('aria-label','État de '+part);
+   for(const value of ['Vérifié','OK','À réparer','À remplacer','Sans objet']){
+    const option=document.createElement('option');option.value=value;option.textContent=value;status.append(option);
+   }
+   checkbox.onchange=()=>{status.disabled=!checkbox.checked;row.classList.toggle('container-part-skipped',!checkbox.checked);};
+   row.append(label,status);host.append(row);
+  }
+ }
+ function openIntervention(c){const form=$('#containerInterventionForm'),roster=containerControllerRoster(read()).map(profile=>`<option value="${clean(profile.name)}">${clean(profile.name)}</option>`).join('');form.reset();form.elements.controller.innerHTML='<option value="">Choisir un contrôleur</option>'+roster;form.elements.controller2.innerHTML='<option value="">Aucun deuxième contrôleur</option>'+roster;form.elements.date.value=new Date().toISOString().slice(0,10);$('#containerInterventionType').innerHTML='<option value="">Choisir un type</option>'+containerInterventionTypes.map(type=>`<option value="${clean(type)}">${clean(type[0].toLocaleUpperCase('fr')+type.slice(1))}</option>`).join('');$('#containerInterventionTitle').textContent=`Nouvelle intervention · ${c.number}`;renderContainerChecklist(c);$('#containerInterventionError').textContent='';$('#containerInterventionStatus').textContent='';$('#containerInterventionDialog').showModal();}
  $('#containerTypeFilters').onchange=e=>{if(e.target.type!=='checkbox')return;e.target.checked?selectedTypes.add(e.target.value):selectedTypes.delete(e.target.value);renderList()};
  $('#containerStatusFilters').onchange=e=>{if(e.target.type!=='checkbox')return;e.target.checked?selectedStatuses.add(e.target.value):selectedStatuses.delete(e.target.value);renderList()};
  $('#containerListPane').querySelectorAll('[data-container-summary-status]').forEach(button=>button.onclick=()=>{const status=button.dataset.containerSummaryStatus;selectedStatuses.has(status)?selectedStatuses.delete(status):selectedStatuses.add(status);$('#containerStatusFilters').querySelectorAll('input').forEach(input=>input.checked=selectedStatuses.has(input.value));renderList()});
@@ -806,7 +838,7 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,cl
   const controllerRoster=containerControllerRoster(read());
   if(!controllerRoster.some(profile=>profile.name===controller1)||controller2&&!controllerRoster.some(profile=>profile.name===controller2)){$('#containerInterventionError').textContent='Choisissez les contrôleurs dans la liste.';return;}
   const controller=containerInterventionControllerValue(controller1,controller2);
-  const parts=Object.fromEntries(containerCategorySettings(current).checks.map(p=>[p,String(values.get('part:'+p)||'')]).filter(([,v])=>v));
+  const parts=Object.fromEntries(containerCategorySettings(current).checks.filter(p=>values.has('partIncluded:'+p)).map(p=>[p,String(values.get('part:'+p)||'Vérifié')]));
   const next=structuredClone(read()),container=next.containers.find(c=>c.id===selected);
   if(!container){$('#containerInterventionError').textContent='Cette fiche est introuvable. Actualisez la page.';return;}
   const number=nextContainerInterventionNumber(next.containers||[]);
