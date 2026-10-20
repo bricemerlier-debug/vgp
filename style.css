@@ -711,3 +711,5 @@ header .header-engineering-logo{display:block;width:72px;height:72px;object-fit:
 /* Masque aussi l’ancien bloc KPI si un HTML en cache le contient encore. */
 #kpiView>.intro{display:none!important}
 #navigation .navigation-link{display:block;padding:12px 18px 12px 24px;border-radius:7px;background:#edf2f9;color:#234e7a;font-weight:600;font-size:13px;text-decoration:none}#navigation .navigation-link:hover{filter:brightness(.92)}#navigation .navigation-link:focus-visible{outline:3px solid #337ec6;outline-offset:3px}
+
+.inventory-view{margin-top:16px;padding:24px}.inventory-view h2{margin-top:0}.inventory-fields{display:grid;grid-template-columns:minmax(180px,260px) minmax(0,1fr);gap:16px;align-items:start}.inventory-fields label{display:grid;gap:8px;font-weight:600}.inventory-fields input,.inventory-fields textarea{width:100%;box-sizing:border-box}.inventory-view h3{margin-top:24px}.inventory-result-list{list-style:none;padding:0;display:grid;gap:8px}.inventory-result-list li{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.inventory-result-list button{min-width:110px}@media(max-width:700px){.inventory-fields{grid-template-columns:1fr}}
