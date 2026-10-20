@@ -1,5 +1,5 @@
-// Rapprochement local d'un inventaire terrain avec les fiches VGP, sans écriture.
-export const inventoryKey=value=>String(value??'').normalize('NFKC').trim().toLocaleUpperCase('fr').replace(/[\s\u00a0-]+/g,'');
+// Rapprochement local d'un inventaire terrain avec les fiches de contenants, sans écriture.
+export const inventoryKey=value=>String(value??'').normalize('NFKC').trim().toLocaleUpperCase('fr').replace(/[\s\u00a0* -]+/g,'');
 export function inventoryNumbers(text){return String(text??'').split(/[\s,;]+/).map(inventoryKey).filter(Boolean);}
 export function inventoryEntryCode(value,prefix='CA'){
  const scope=inventoryKey(prefix),entry=inventoryKey(value);

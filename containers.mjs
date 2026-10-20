@@ -148,7 +148,7 @@ export function containerArchiveInfo(container){
  const normalize=value=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ');
  const events=[];
  if(container.manualArchive&&containerManualArchiveValid(container.manualArchive))events.push({...container.manualArchive,manual:true,number:'',reason:'Mise au rebut manuelle',comment:container.manualArchive.comment||'Mise au rebut manuelle'});
- for(const intervention of container.interventions||[]){
+ for(const [index,intervention] of (container.interventions||[]).entries()){
   const comment=String(intervention.comment||'');
   const text=normalize(comment);
   const pattern=/\b(?:mis(?:e)? au rebu(?:t|s)|mis(?:e)? en benne|destruction)\b/g;
@@ -156,11 +156,12 @@ export function containerArchiveInfo(container){
    const before=text.slice(Math.max(0,match.index-40),match.index);
    const after=text.slice(match.index+match[0].length,match.index+match[0].length+25);
    if(/(?:\bpas|\bnon|\bsans|\baucun(?:e)?|\bannul\w*|\bprevu\w*|\bprevoir|\bpour)\s*(?:de|la|le|une|un|l)?\s*$/.test(before)||/^\s*(?:a prevoir|prevue?|annulee?)/.test(after))continue;
-   events.push({date:intervention.date,number:intervention.number,reason:match[0],comment});
+   events.push({date:intervention.date,number:intervention.number,reason:match[0],comment,index});
    break;
   }
  }
- const latest=events.sort((a,b)=>b.date.localeCompare(a.date))[0];
+ const reactivated=container.inventoryReactivatedAt;
+ const latest=events.filter(event=>!reactivated||event.manual||Number.isInteger(reactivated.interventionCount)&&event.index>=reactivated.interventionCount||!Number.isInteger(reactivated.interventionCount)&&event.date>reactivated.date).sort((a,b)=>b.date.localeCompare(a.date))[0];
  return latest?{...latest,laterInterventions:(container.interventions||[]).filter(i=>i.date>latest.date).length}:null;
 }
 
@@ -713,7 +714,7 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,cl
   $('#containerDetail').innerHTML=`<div class="container-detail-summary"><div class="container-detail-main"><div class="toolbar"><div><p class="eyebrow">FICHE CONTENANT</p><h2>${clean(c.number)}</h2></div><div class="container-detail-actions"><button type="button" class="secondary" id="containerEdit">Modifier la fiche</button>${!archive?'<button type="button" class="danger" id="containerScrap">Mettre au rebut</button>':''}<button type="button" class="secondary" id="containerBack">← ${origin==='archive'?'Archives':origin==='report'?'Rapport mensuel':origin==='analysis'?'Analyse interventions':origin==='controllers'?'Contrôleurs des contenants':origin==='agenda'?'Agenda':origin==='categories'?'Catégorie':origin==='inventory'?'Inventaire':'Tous les contenants'}</button></div></div>
   <dl class="container-facts"><div><dt>Catégorie</dt><dd>${clean(c.subtype)||'Non renseignée'}</dd></div><div><dt>Sous-catégorie</dt><dd>${clean(c.type)||'Non renseignée'}</dd></div><div><dt>${archive?'Statut':containerPreventiveStatus(c).months===null?'Préventif':`Prochain préventif · tous les ${containerPreventiveStatus(c).months} mois`}</dt><dd class="${dueClass(c)}">${dueLabel(c)}</dd></div><div><dt>Dernière intervention</dt><dd>${last?new Date(last.date+'T00:00:00').toLocaleDateString('fr-FR'):'Aucune intervention'}</dd></div><div><dt>Nombre d’interventions</dt><dd>${c.interventions.length}</dd></div></dl></div>
   <section class="container-photo-card" aria-label="Photo du contenant"><div class="container-photo-frame"><img id="containerPhotoImage" alt="Photo du contenant ${clean(c.number)}" hidden><div id="containerPhotoPlaceholder"><span aria-hidden="true">＋</span><small>Photo du contenant</small></div></div><input type="file" id="containerPhotoInput" accept="image/jpeg,image/png,image/webp" hidden><div class="container-photo-actions"><button type="button" class="secondary" id="containerPhotoPick">${c.photoPath?'Remplacer la photo':'Ajouter une photo'}</button><button type="button" class="secondary" id="containerPhotoRemove" ${c.photoPath?'':'hidden'}>Retirer</button></div><p class="foot" id="containerPhotoStatus" role="status"></p><p class="error" id="containerPhotoError" role="alert"></p></section></div>
-  ${archive?`<aside class="container-archive-note"><b>Mis au rebut le ${dateFr(archive.date)}</b> · ${archive.manual?`Décision manuelle · ${clean(archive.by)}`:`Intervention ${clean(archive.number)}`}<p>${clean(archive.comment)}</p>${archive.laterInterventions?`<p class="container-archive-warning">${archive.laterInterventions} intervention${archive.laterInterventions===1?'':'s'} enregistrée${archive.laterInterventions===1?'':'s'} après le rebut · situation à vérifier.</p>`:''}</aside>`:''}<div class="toolbar"><h3>Historique des interventions</h3><button type="button" id="containerAddIntervention">+ Ajouter une intervention</button></div>${interventionHistoryHtml(c)}`;
+  ${c.inventoryHistory?.length?`<aside class="container-inventory-note">${c.inventoryHistory.map(note=>`<p><b>${clean(note.comment)}</b> · ${clean(note.by)}</p>`).join('')}</aside>`:''}${archive?`<aside class="container-archive-note"><b>Mis au rebut le ${dateFr(archive.date)}</b> · ${archive.manual?`Décision manuelle · ${clean(archive.by)}`:`Intervention ${clean(archive.number)}`}<p>${clean(archive.comment)}</p>${archive.laterInterventions?`<p class="container-archive-warning">${archive.laterInterventions} intervention${archive.laterInterventions===1?'':'s'} enregistrée${archive.laterInterventions===1?'':'s'} après le rebut · situation à vérifier.</p>`:''}</aside>`:''}<div class="toolbar"><h3>Historique des interventions</h3><button type="button" id="containerAddIntervention">+ Ajouter une intervention</button></div>${interventionHistoryHtml(c)}`;
   $('#containerBack').onclick=()=>returnTab==='archive'?switchTab('archive'):returnTab==='report'?switchTab('report'):returnTab==='analysis'?switchTab('analysis'):returnTab==='controllers'?switchTab('controllers'):returnTab==='agenda'?switchTab('agenda'):returnTab==='categories'?switchTab('categories'):returnTab==='inventory'?switchTab('inventory'):list();
   $('#containerEdit').disabled=!canEdit();$('#containerEdit').onclick=()=>openEdit(c);
   if($('#containerScrap')){$('#containerScrap').disabled=!canEdit();$('#containerScrap').onclick=()=>openScrap(c);}
