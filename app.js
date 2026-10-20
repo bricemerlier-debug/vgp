@@ -1,5 +1,5 @@
 import {standardTypeProgress} from './standard-type-kpi.mjs';
-import {installContainersUI,containerRecordsValid,containerLegacyScrapPlan} from './containers.mjs?v=053';
+import {installContainersUI,containerRecordsValid,containerLegacyScrapPlan} from './containers.mjs?v=054';
 import {analyzeContainerFiles,analyzeContainerCategoryFiles} from './container-import.mjs';
 import {installBulkEquipmentOwners} from './bulk-equipment-owners.mjs';
 import {processTeamForSector,assignMissingProcessTeams} from './process-team-assignment.mjs';
@@ -30,7 +30,7 @@ import {installSearchableSelects} from './searchable-select.mjs';
 import {parseTrackingCsv,analyzeTrackingRows,applyTrackingImport} from './tracking-import.mjs';
 import {applyImportedNamingRule,historicalEquipmentName,equipmentNamingSearch,ownerNeedsNamingReview,suggestEquipmentNaming,technicalVariantIssue,renameEquipmentLabel,initialEquipmentTypes,standardizedLabel,addEquipmentType,addEquipmentVariant,applyEquipmentNaming,namingGroups,nomenclatureValid} from './nomenclature.mjs';
 import {equipmentName,addMonths,due,latest,status,indicators,generatePdf,dashboard,reminders,monthlyProgress,annualCompletion,fillEmailTemplate,reportConclusion,buildReportPdf,shiftDate,weekStart,weeklySchedule,weeklyCompletion,equipmentAlerts,homeSummary,isInspection,latestInspection,calculatedDeadline,obligationEntries,freezeTracking,declareLoss,reactivateFound,migrationReview,migrateTracking,lossArchived} from './domain.mjs';
-import {CloudStore,validateConfig,canonical} from './cloud.mjs?v=042';
+import {CloudStore,validateConfig,canonical} from './cloud.mjs?v=054';
 import {analyzeRows} from './excel.mjs';
 // Ne jamais conserver les champs d’un formulaire de connexion dans l’adresse.
 {const url=new URL(location.href);let changed=false;for(const key of ['email','password','remember'])if(url.searchParams.has(key)){url.searchParams.delete(key);changed=true;}if(changed)history.replaceState(null,'',url.pathname+url.search+url.hash);}
@@ -73,7 +73,7 @@ const copyData=value=>typeof globalThis.structuredClone==='function'?globalThis.
 
 function upgrade(d){d.equipmentTypes??=initialEquipmentTypes();d.containers??=[];d.owners??=[];d.ownerContacts??=[];d.mailTemplates??=defaultMailTemplates();d.verifiers??=[];for(const e of d.equipment)for(const c of e.controls){if(c.intervenant&&!d.verifiers.some(name=>normalize(name)===normalize(c.intervenant)))d.verifiers.push(c.intervenant);c.reportId??=`VGP-${c.date.replaceAll('-','')}-${c.id.toUpperCase()}`;}let next=Math.max(0,...d.equipment.map(e=>Number.isSafeInteger(e.siteId)?e.siteId:0))+1;for(const e of d.equipment)if(!e.siteId)e.siteId=next++;d.nextVgpId=Math.max(d.nextVgpId??1,next);for(const e of d.equipment){for(const k of ['serialNumber','sector','zone','team','owner','comments'])e[k]??='';e.archived??=false;e.archiveHistory??=[];e.pendingArchive??=null;for(const owner of equipmentOwners(e))if(!d.owners.some(o=>normalize(o)===normalize(owner)))d.owners.push(owner)}upgradeControllers(d,uuid);for(const e of d.equipment)for(const a of e.archiveHistory)if(a.workflow==='loss-declaration'&&!a.reportId)a.reportId=a.originalControlId?e.controls.find(c=>c.id===a.originalControlId)?.reportId||nextReportNumber(d):nextReportNumber(d);return d}
 upgrade(data);
-const containersUI=installContainersUI({root:$('#containersView'),read:()=>data,save,saveContainers:saveContainerRecords,canEdit:()=>cloud?.role!=='reader',id:uuid,analyzeFiles:analyzeContainerFiles,analyzeCategoryFiles:analyzeContainerCategoryFiles,actor:accountName,makeReportPdf:buildReportPdf});
+const containersUI=installContainersUI({root:$('#containersView'),read:()=>data,save,saveContainers:saveContainerRecords,canEdit:()=>cloud?.role!=='reader',id:uuid,cloud,analyzeFiles:analyzeContainerFiles,analyzeCategoryFiles:analyzeContainerCategoryFiles,actor:accountName,makeReportPdf:buildReportPdf});
 const ownerReturnMailUI=installOwnerReturnMail({getState:()=>data,getDate:today,refreshState:async()=>{if(hasUnsavedForm())throw Error('Enregistrez les modifications de la fiche avant de préparer le mail.');await refreshNamingData();},onClose:()=>$('#prepareOwnerReturnMail')?.focus()});
 const reminderSimulationUI=installReminderSimulation({read:()=>data,namespace:cloud?cloud.config.workspaceId+':'+(cloud.session?.user?.id||'session'): 'local-isole'});
 const workspaceNavigation=installWorkspaceNavigation({navigate:setView,openNaming:()=>namingReviewUI.open()});

@@ -16,6 +16,10 @@ Analyse locale du PDF original, aperçu modifiable, stockage privé unique et li
 
 Le correctif SQL 004 optimise les grands enregistrements sans supprimer les données ni désactiver les protections : [étapes](docs/CORRECTIF-DELAI-SUPABASE.md). Pour les imports de contenants encore bloqués alors que 004 est installé, `supabase/015_container_fast_writes.sql` ajoute une écriture ciblée des contenants. Appliquer ce script dans le SQL Editor du projet existant avant de confirmer un nouvel import. Si la fonction dédiée dépasse encore le délai serveur, `supabase/016_container_import_timeout.sql` lui accorde 90 secondes et distingue les attentes sur verrou (5 secondes) ; ce correctif n’altère ni les données ni les droits. Le site ne lance aucun SQL automatiquement et conserve les écritures manuelles existantes si cette fonction n’est pas encore installée.
 
+## Photos des contenants
+
+La fiche propose une photo carrée facultative. Les images JPEG, PNG et WebP sont converties en JPEG de 180 Ko maximum dans le navigateur ; seule la référence de stockage est conservée dans la fiche. Le fichier reste dans le bucket privé des photos de maintenance. Après les scripts `009_equipment_maintenance.sql` et `015_container_fast_writes.sql`, appliquer une fois `supabase/017_container_photos.sql` dans le SQL Editor Supabase pour activer l’affichage privé et le nettoyage des photos remplacées/retirées. La photo ne modifie ni les interventions ni les contrôles VGP. Tests : `node tests/container_photos.test.mjs`, `node tests/maintenance_database.mjs`, `python tests/container_photo_browser.py` et `python tests/container_photo_cloud_browser.py`.
+
 ## Reprise des dernières dates MemoryFlow
 
 Le CSV des contrôles peut désormais être associé aux fiches existantes depuis ⚙ > Données, avec aperçu, confirmation des dates/périodicités, contrôle des identifiants et signalement des anomalies. Les dernières dates déclarées restent séparées des contrôles avec résultat/vérificateur. Voir [le guide](docs/REPRISE-DATES-MEMORYFLOW.md).

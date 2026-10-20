@@ -419,6 +419,19 @@ button.material-sort-header{display:inline-flex;align-items:center;justify-conte
 #containersView .container-facts dd.container-due-current,#containersView .container-due-current{color:#187451}
 #containersView .container-facts dd.container-due-unknown,#containersView .container-due-unknown{color:#546b82}
 @media(max-width:700px){#containersView .container-facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+#containersView .container-detail-summary{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:16px;align-items:start;margin:18px 0 28px}
+#containersView .container-detail-summary .container-facts{grid-template-columns:repeat(3,minmax(0,1fr));margin:0}
+#containersView .container-photo-card{display:grid;justify-items:center;gap:8px;padding:10px;border:1px solid #d5e1ee;border-radius:8px;background:#fff;text-align:center}
+#containersView .container-photo-frame{position:relative;width:190px;max-width:100%;aspect-ratio:1;overflow:hidden;display:grid;place-items:center;border:1px dashed #b9cce0;border-radius:6px;background:#f4f7fa;color:#6a8096}
+#containersView .container-photo-frame img{width:100%;height:100%;object-fit:cover}
+#containersView .container-photo-frame>div{display:grid;justify-items:center;gap:5px}
+#containersView .container-photo-frame>div span{font-size:32px;line-height:1;color:#0057a8}
+#containersView .container-photo-frame>div small{font-size:12px}
+#containersView .container-photo-actions{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
+#containersView .container-photo-actions button{padding:8px 10px;font-size:12px}
+#containersView .container-photo-card .foot,#containersView .container-photo-card .error{margin:0;font-size:11px}
+@media(max-width:900px){#containersView .container-detail-summary{grid-template-columns:minmax(0,1fr) 190px}#containersView .container-detail-summary .container-facts{grid-template-columns:repeat(2,minmax(0,1fr))}#containersView .container-photo-frame{width:160px}}
+@media(max-width:600px){#containersView .container-detail-summary{grid-template-columns:1fr}#containersView .container-photo-card{justify-self:end;width:190px}#containersView .container-detail-summary .container-facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
 #containersView .tabs{display:flex;gap:8px;margin:18px 0 14px;border-bottom:1px solid #c8d9ea}
 #containersView .tabs button{border-radius:8px 8px 0 0;background:#e8eef5;color:#174674}
 #containersView .tabs button[aria-selected="true"]{background:#0057a8;color:#fff}

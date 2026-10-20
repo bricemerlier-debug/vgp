@@ -100,5 +100,15 @@ export class CloudStore{
   const url=new URL(raw.startsWith('/object/')?'/storage/v1'+raw:raw,this.config.url);
   if(url.origin!==new URL(this.config.url).origin||url.pathname!=='/storage/v1/object/sign/equipment-maintenance/'+path)throw Error('Adresse photo refusée.');return url.href;
  }
+ async removeContainerPhoto(path){
+  if(typeof path!=='string'||!path.startsWith(this.config.workspaceId+'/')||!(/^[a-f0-9-]{36}\/[a-f0-9-]{36}_[a-f0-9]{64}\.jpg$/).test(path))throw Error('Référence photo invalide.');
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),60000);
+  try{
+   const response=await this.fetcher(this.config.url+'/storage/v1/object/equipment-maintenance/'+path,{method:'DELETE',headers:{apikey:this.config.publicKey,Authorization:'Bearer '+await this.token()},cache:'no-store',signal:controller.signal});
+   const result=await response.json().catch(()=>({}));
+   if(!response.ok)throw Error(result.message||'Suppression de la photo du stockage privé refusée.');
+  }catch(error){if(error?.name==='AbortError')throw Error('Délai dépassé pendant le nettoyage de l’ancienne photo.');throw error;}
+  finally{clearTimeout(timer);}
+ }
  async logout(){try{await this.request('/auth/v1/logout?scope=local',{},await this.token())}finally{this.session=null;this.remember=false;for(const place of [this.storage,this.persistentStorage]){try{place?.removeItem(this.key)}catch{}}}}
 }
