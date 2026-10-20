@@ -1,4 +1,4 @@
-import {CloudStore,validateConfig} from './cloud.mjs?v=062';
+import {CloudStore,validateConfig} from './cloud.mjs?v=066';
 const $=selector=>document.querySelector(selector);
 const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 let cloud,portal=null,editing=null,pending=null,busy=false,selectedContainerId=null;
