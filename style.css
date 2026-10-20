@@ -183,6 +183,26 @@ main{max-width:1240px;padding-top:40px}.intro{margin-bottom:32px}h1{color:var(--
 
 /* Parcours locaux : les listes gardent leurs filtres en changeant de vue. */
 .active-filters{padding:12px 16px;background:#eaf1fa;border-left:4px solid #0055a4;overflow-wrap:anywhere;font-size:13px}
+.equipment-list-panel{padding:24px}
+.equipment-list-header{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e7edf4}
+.equipment-list-header h2{margin:0}
+.equipment-list-header .equipment-tabs{margin:0;flex-wrap:wrap}
+.equipment-list-filters{display:grid;gap:18px}
+.equipment-deadline-filter{display:grid;grid-template-columns:1fr 2fr;align-items:center;gap:14px}
+.equipment-list-filters .material-search{margin:0;display:grid;grid-template-columns:1fr 2fr;align-items:center;gap:14px}
+.equipment-list-filters .material-search input{min-width:0}
+.equipment-list-filters .list-filters{display:grid;gap:14px;margin:0;align-items:end}
+.equipment-list-filters .material-naming-filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+.equipment-list-filters .material-location-filters{grid-template-columns:repeat(3,minmax(0,1fr))}
+.equipment-list-filters .material-sort-filters{grid-template-columns:repeat(2,minmax(0,1fr)) auto;align-items:end;padding-top:14px;border-top:1px solid #e7edf4}
+.equipment-list-filters .list-filters label{min-width:0}
+.equipment-list-filters .material-sort-filters button{min-height:43px}
+.equipment-list-actions{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 0;margin-bottom:12px;border-bottom:1px solid #e7edf4}
+.equipment-list-actions .foot{margin:0}
+.administration-backup{margin-bottom:22px}
+.administration-backup p{color:#60748e}
+.administration-backup .actions{flex-wrap:wrap}
+@media(max-width:700px){.equipment-list-panel{padding:16px}.equipment-list-header{align-items:flex-start;flex-direction:column}.equipment-list-header .equipment-tabs{width:100%}.equipment-list-header .equipment-tabs button{flex:1;padding:11px 8px}.equipment-deadline-filter,.equipment-list-filters .material-search{grid-template-columns:1fr;gap:7px}.equipment-list-filters .material-naming-filters,.equipment-list-filters .material-location-filters,.equipment-list-filters .material-sort-filters{grid-template-columns:1fr}.equipment-list-actions{align-items:stretch;flex-direction:column}.equipment-list-actions button{width:100%}}
 #namingView .equipment-tabs{margin-bottom:18px;flex-wrap:wrap}#namingView .panel{margin-bottom:20px;min-width:0}#namingView [role=tab][aria-selected=true]{background:#0055a4;color:#fff}
 #namingDialog,#autoNamingDialog,#dataDialog{max-width:100%;width:auto}#namingDialog .naming-groups{margin-top:18px}#importsView .apave-import-entry{margin-bottom:28px}#administrationView>.panel{margin-bottom:22px}
 .reminder-table{overflow:auto;max-height:460px;border:1px solid #dce5ef;border-radius:8px}.reminder-table table{min-width:660px}#reminderSimulation form{margin:22px 0}#reminderSimulation details{margin:16px 0}#reminderSimulation small{display:block;overflow-wrap:anywhere}#reminderSimulation aside{border-color:#8053b0;background:#f3edfa}#reminderSimulation .list-filters{margin-top:22px}#reminderSimulation li{margin:8px 0}
@@ -596,3 +616,4 @@ header .header-engineering-logo{display:block;width:72px;height:72px;object-fit:
 #containersView .container-intervention-history .container-report-comment{white-space:normal}
 #containersView .container-intervention-history .container-report-comment>small{display:block;margin-top:8px;color:#60748e}
 #containersView .container-intervention-history [data-container-pdf]{min-width:145px;font-size:12px}
+.equipment-list-panel #activeFilters{padding:0;background:transparent;border:0}
