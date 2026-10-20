@@ -19,9 +19,17 @@ test('une fiche étoilée archivée est retrouvée, réactivée et conserve une 
  next.containers[1].interventions.push(intervention('Mis au rebut de nouveau','2026-10-20'));
  assert.equal(containerArchiveInfo(next.containers[1]).comment,'Mis au rebut de nouveau');
 });
-test('une collision après suppression des étoiles bloque tout le lot',()=>{
+test('une collision après suppression des étoiles fusionne les fiches',()=>{
  const original={equipment:[],containers:[box('a','CA272*'),box('b','CA272')]};const plan=inventoryRecoveryPlan(original,['CA272']);
- assert.equal(plan.ready,false);assert.equal(plan.ambiguous.length,1);assert.equal(plan.collisions.length,1);
- assert.throws(()=>applyInventoryRecovery(original,plan,{by:'A'}));
+ assert.equal(plan.ready,true);assert.equal(plan.ambiguous.length,0);assert.equal(plan.merges.length,1);
+ const next=applyInventoryRecovery(original,plan,{by:'A'});assert.equal(next.containers.length,1);assert.equal(next.containers[0].number,'CA272');
  assert.equal(inventoryRecoveryPlan({equipment:[],containers:[box('only','***')]},['CA001']).ready,false);
+});
+test('le relevé CA réactive les présents et met au rebut les absents actifs',()=>{
+ const original={equipment:[],containers:[box('found','CA025*',{manualArchive:{date:'2025-01-01',comment:'Rebut',by:'A',at:'2025-01-01T00:00:00Z'}}),box('missing','CA026'),box('outside','CB001')]};
+ const plan=inventoryRecoveryPlan(original,['CA025']);assert.deepEqual(plan.scrap.map(item=>item.number),['CA026']);
+ const next=applyInventoryRecovery(original,plan,{by:'A'});
+ assert.equal(containerArchiveInfo(next.containers[0]),null);
+ assert.match(next.containers[1].manualArchive.comment,/Absent de l’inventaire CA/);
+ assert.equal(next.containers[2].manualArchive,undefined);
 });

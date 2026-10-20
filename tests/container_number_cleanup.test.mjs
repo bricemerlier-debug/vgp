@@ -12,5 +12,12 @@ test('nettoie tout le parc et fusionne sans perdre les interventions',()=>{
  assert.deepEqual(next.containers[0].interventions.map(item=>item.number),['1','1-fusion-2']);
  assert.equal(next.containers[0].manualArchive,undefined);
  assert.equal(next.containers[0].numberMergeHistory[0].sourceId,'old');
+ assert.equal(next.containers[0].numberMergeHistory[0].sourceNumber,'CA025*');
  assert.equal(next.containers[1].number,'CA033');assert.equal(data.containers.length,3);
+});
+test('une intervention strictement identique ne compte pas deux fois après fusion',()=>{
+ const shared=entry('same','7');
+ const data={containers:[box('a','CA007*',[shared]),box('b','CA007',[structuredClone(shared)])]};
+ const next=applyContainerNumberCleanup(data,containerNumberCleanupPlan(data));
+ assert.equal(next.containers.length,1);assert.equal(next.containers[0].interventions.length,1);
 });
