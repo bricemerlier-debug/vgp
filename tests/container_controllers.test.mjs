@@ -55,4 +55,7 @@ assert.equal(mergedRoster[0].id,'target');
 assert.equal(mergedRoster[0].email,'christophe@example.test');
 assert.equal(mergedRoster[0].actions.length,5);
 assert.equal(mergedNames.containers[0].interventions[0].controller,'FRAIN Didier');
+const excludedNames={containerControllerProfiles:[...['c','SB053','Sb080','SE257'].map((name,index)=>({id:String(index),name,email:''})),{id:'valid',name:'Laurent B.',email:''}],containers:[{id:'box',number:'CA001',interventions:[{number:'1',date:'2026-01-01',controller:'SB053'},{number:'2',date:'2026-01-02',controller:'Laurent B.'}]}]};
+assert.deepEqual(containerControllerRoster(excludedNames).map(profile=>profile.name),['Laurent B.']);
+assert.equal(excludedNames.containers[0].interventions[0].controller,'SB053');
 console.log('Contrôleurs des contenants : séparation VGP, historique et validation OK.');

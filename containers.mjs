@@ -67,6 +67,7 @@ const containerControllerMergedNames=new Map([
  ['didierf','CHRISTOPHE B.'],
  ['berquer','CHRISTOPHE B.']
 ]);
+const containerControllerExcludedNames=new Set(['c','sb053','sb080','se257']);
 const containerControllerCanonicalName=name=>containerControllerMergedNames.get(containerControllerIdentityKey(name))||name;
 const containerControllerNames=value=>String(value||'').split(/\s*(?:\/|[;,+&]|\bet\b)\s*/i).map(name=>name.trim()).filter(Boolean).flatMap(name=>/^autre$/i.test(name)?['Friedlander']:/^autre\b/i.test(name)?[]:[name]);
 export function containerInterventionControllerValue(primary,secondary=''){
@@ -87,7 +88,7 @@ export function containerControllerRoster(document){
  const rows=new Map();
  const ensureRow=(sourceName,profile=null)=>{
   const name=containerControllerDisplayName(sourceName),key=containerControllerIdentityKey(name);
-  if(!key)return null;
+  if(!key||containerControllerExcludedNames.has(key))return null;
   let row=rows.get(key);
   if(!row){row={id:profile?.id||null,name,email:'',actions:[],last:'',_nameCounts:new Map(),_profileNames:new Set()};rows.set(key,row);}
   if(profile){row.id??=profile.id||null;row.email||=profile.email||'';row._profileNames.add(name);}
