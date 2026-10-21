@@ -84,16 +84,8 @@ with sync_playwright() as p, TemporaryDirectory() as directory:
             page.locator('#mailConnectGmail').click()
             expect(page.locator('#mailGmailStatus')).to_contain_text('Compte connecté : expediteur@example.test')
             page.locator('#mailSendTest').click()
-            expect(page.locator('#mailTestStatus')).to_contain_text('Test envoyé à chef@example.test depuis expediteur@example.test')
-            assert len(sends) == 1
-            raw = sends[0]['raw']
-            sent = BytesParser(policy=policy.default).parsebytes(base64.urlsafe_b64decode(raw + '=' * (-len(raw) % 4)))
-            assert str(sent['To']) == 'chef@example.test'
-            assert sent['X-Unsent'] is None
-            assert len([part for part in sent.walk() if part.get_content_type() == 'image/jpeg']) == 2
-            page.locator('#mailSendTest').click()
-            expect(page.locator('#mailTestError')).to_contain_text('déjà été envoyé')
-            assert len(sends) == 1
+            expect(page.locator('#mailTestError')).to_contain_text('formulaire de perte nécessite Supabase')
+            assert not sends
         else:
             expect(page.locator('#mailConnectGmail')).to_be_disabled()
             expect(page.locator('#mailSendTest')).to_be_disabled()

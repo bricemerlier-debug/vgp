@@ -2,6 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {buildVgpEquipmentMail,buildVgpMailDraft,vgpMailTemplateIssue,vgpMailPhotoValid} from '../vgp-mail.mjs';
 import {createVgpGmail} from '../vgp-mail-gmail.mjs';
+import {equipmentLossFormUrl,createLossLinkClient} from '../loss-link-api.mjs';
 import {approved} from './fixtures.mjs';
 import {goodyearReportLogo} from '../assets/report-logo.mjs';
 
@@ -39,6 +40,25 @@ test('brouillon MIME : adresses, objet UTF-8, HTML et images CID',()=>{
  assert.equal(Buffer.from(htmlBase64,'base64').toString('utf8'),mail.html);
  assert.throws(()=>buildVgpMailDraft({...mail,recipient:''}),/destinataire/);
  assert.throws(()=>buildVgpMailDraft({...mail,sender:''}),/compte/);
+});
+
+test('bouton de perte : lien personnel dans le HTML et le texte, aperçu inactif sans lien',()=>{
+ const token='a'.repeat(64),url=equipmentLossFormUrl('https://site.example.test/vgp/?mailTo=test#mailSettings',token);
+ assert.equal(url,'https://site.example.test/vgp/declarer-perte.html#token='+token);
+ const mail=prepare(fixture(),{lossUrl:url,test:false});
+ assert.ok(mail.html.includes('href="'+url+'"'));assert.match(mail.html,/Déclarer ce matériel perdu/);assert.ok(mail.text.includes(url));
+ assert.match(prepare().previewHtml,/Le lien personnel sera ajouté/);assert.ok(!prepare().html.includes('href="#'));
+ assert.throws(()=>prepare(fixture(),{lossUrl:'javascript:alert(1)'}),/Lien/);
+ assert.throws(()=>equipmentLossFormUrl('https://site.example.test','bad'),/invalide/);
+});
+
+test('formulaire public : seule la capacité du lien est transmise, aucun compte administrateur',async()=>{
+ const calls=[],client=createLossLinkClient({enabled:true,url:'https://test.supabase.co',publicKey:'sb_publishable_test'},{fetcher:async(url,request)=>{calls.push({url,request});return {ok:true,json:async()=>({status:'ready'})};}});
+ await client.read('a'.repeat(64));await client.submit('a'.repeat(64),{name:'Destinataire Test',details:'Recherches fictives',signature:{},accepted:true});
+ assert.equal(calls.length,2);assert.equal(calls[0].request.headers.Authorization,undefined);
+ assert.equal(calls[0].request.headers.apikey,'sb_publishable_test');assert.deepEqual(JSON.parse(calls[0].request.body),{token:'a'.repeat(64)});
+ assert.equal(JSON.parse(calls[1].request.body).equipment_id,undefined);
+ assert.throws(()=>client.read('bad'),/incomplet/);
 });
 
 function mockedGoogle(email='expediteur@example.test'){

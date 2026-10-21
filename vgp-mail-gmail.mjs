@@ -1,4 +1,4 @@
-import {buildVgpMailDraft,vgpMailAddressValid} from './vgp-mail.mjs';
+import {buildVgpMailDraft,vgpMailAddressValid} from './vgp-mail.mjs?v=087';
 
 // Le compte est autorisé par Google ; aucun mot de passe ni jeton n'est sauvegardé.
 export function createVgpGmail({clientId='',browser=globalThis,fetcher=(...args)=>fetch(...args),now=()=>Date.now()}={}){
@@ -32,7 +32,11 @@ export function createVgpGmail({clientId='',browser=globalThis,fetcher=(...args)
   },
   async sendTest(mail){
    if(!mail.test)throw Error('Seuls les messages de test peuvent être envoyés depuis cet écran.');
-   if(!active()||session.email.toLowerCase()!==mail.sender.toLowerCase())throw Error('Connecte le compte Gmail choisi pour envoyer ce test.');
+   return this.sendMail(mail);
+  },
+  async sendMail(mail){
+   if(!mail.test&&!mail.lossUrl)throw Error('Le rappel doit comporter le lien de déclaration destiné au propriétaire.');
+   if(!active()||session.email.toLowerCase()!==mail.sender.toLowerCase())throw Error('Connecte le compte Gmail choisi pour envoyer ce message.');
    const mime=buildVgpMailDraft(mail).replace('X-Unsent: 1\r\n','');let raw='';for(const byte of new TextEncoder().encode(mime))raw+=String.fromCharCode(byte);
    const body={raw:btoa(raw).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')},controller=new AbortController();
    const timer=setTimeout(()=>controller.abort(),30000);

@@ -4,6 +4,8 @@ L’onglet Mails affiche les quatre modèles enregistrés (J−30, J−14, J−7
 
 Le destinataire du test peut être remplacé sans modifier la fiche propriétaire. Le test porte `[TEST]` dans son objet et une indication visible dans son contenu. Il n’enregistre aucun contrôle et ne prépare aucun envoi automatique.
 
+Le mode TEST reste coché par défaut. Le décocher prépare un rappel réel au propriétaire enregistré, avec son adresse verrouillée. Les nouveaux mails comportent un bouton vers un formulaire de déclaration de perte propre à ce matériel. Activer d’abord `supabase/024_recipient_loss_declaration.sql` : [fonctionnement et vérifications](declaration-perte.md). Une signature depuis un lien TEST ne change pas la fiche ; depuis un rappel réel, la déclaration signée enregistre immédiatement le matériel comme perdu.
+
 La photo ajoutée est compressée en JPEG et conservée sur l’équipement dans `mailPhoto`. Le logo et la photo sont joints au message avec des références CID pour qu’ils restent dans le mail sans URL d’image temporaire. L’aperçu affiche ces mêmes images. Les modèles personnalisés sont conservés ; les anciens modèles livrés par défaut sont remplacés par leur version simplifiée seulement s’ils n’ont pas été modifiés.
 
 ## Activer le test depuis Gmail
