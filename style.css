@@ -745,3 +745,5 @@ header .header-engineering-logo{display:block;width:72px;height:72px;object-fit:
 .container-intervention-dialog .container-part-row select{width:auto;max-width:135px;min-height:37px;padding:5px 7px;font-size:12px}
 .container-intervention-dialog #containerInterventionSubmit{margin-top:10px}
 @media(max-width:700px){.container-intervention-dialog form{padding:24px 18px}.container-intervention-dialog .container-intervention-types{grid-template-columns:1fr}.container-intervention-dialog .container-intervention-types>label{min-height:0}.container-intervention-dialog .container-part-fields,.container-intervention-dialog .container-intervention-controllers{grid-template-columns:1fr}}
+
+#containersView .container-agenda-heading .calendar-controls{flex-wrap:wrap;justify-content:flex-end}#containerAgendaExportStatus:empty{display:none}@media(max-width:550px){#containersView .container-agenda-heading{flex-wrap:wrap}#containersView .container-agenda-heading .calendar-controls{justify-content:flex-start}}

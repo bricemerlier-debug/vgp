@@ -1,3 +1,4 @@
+import {buildContainerAgendaPdf} from './container-agenda-pdf.mjs';
 const containerParts=['Relâche','Élastique','Pompe','Frein','Inter','Roues','Carter','Bâti','Visserie','Rivets','Poignée','Palier','Timon','Pignon','Chaîne','Sabot','Sangle','Tambour','Verrou','Protection ressort','Ressort','Coupelle','Bâche','Bavette','Manchon','Excentrique','Bague','Galet','Enroulement / déroulement','Pédale','Amortisseur','Verrouillage','Levier','Rétroviseur','Vérin'];
 // Listes relevées des rapports CB001, CA267 et SE118 ; TC016 et CH81 n'en comportent pas.
 const containerR2PliChecks=['Bâti','Galet','Butée','Flasque','Inter','Palier','Carter','Roue','Frein','Volant','Tambour','Enroulage','Rouleaux','Visserie'];
@@ -416,6 +417,17 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,cl
  $('#containerAgendaPrevious').onclick=()=>{agendaWeek=containerShiftDate(agendaWeek,-7);renderAgenda()};
  $('#containerAgendaNext').onclick=()=>{agendaWeek=containerShiftDate(agendaWeek,7);renderAgenda()};
  $('#containerAgendaCurrent').onclick=()=>{agendaWeek=containerCivilToday();renderAgenda()};
+ $('#containerAgendaPdf').onclick=()=>{
+  const button=$('#containerAgendaPdf');button.disabled=true;$('#containerAgendaExportStatus').textContent='';
+  try{
+   const today=containerCivilToday(),agenda=containerWeeklyAgenda(state(),agendaWeek,today);
+   const bytes=buildContainerAgendaPdf(agenda,{today,logo:read().reportLogo||undefined});
+   const url=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'})),link=document.createElement('a');
+   link.href=url;link.download=`preventifs-contenants-${agenda.start}-au-${agenda.end}.pdf`;link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
+   $('#containerAgendaExportStatus').textContent=`PDF préparé : ${agenda.pending} contenant${agenda.pending===1?'':'s'} restant à contrôler.`;
+  }catch(error){$('#containerAgendaExportStatus').textContent='Export PDF impossible : '+error.message;}
+  finally{button.disabled=false;}
+ };
  $('#containerControllersTab').onclick=()=>switchTab('controllers');
  $('#containerCategoriesTab').onclick=()=>switchTab('categories');
  $('#containerInventoryTab').onclick=()=>switchTab('inventory');
@@ -539,6 +551,7 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,cl
  }
  function renderAgenda(){
   const current=containerCivilToday(),agenda=containerWeeklyAgenda(state(),agendaWeek,current);
+  $('#containerAgendaExportStatus').textContent='';
   $('#containerAgendaRange').textContent=`Du ${dateFr(agenda.start)} au ${dateFr(agenda.end)}`;
   $('#containerAgendaSummary').innerHTML=`<strong>${agenda.pending} à faire</strong><span>${agenda.completed} fait${agenda.completed===1?'':'s'} · ${agenda.total} échéance${agenda.total===1?'':'s'} dans la semaine</span>`;
   $('#containerAgendaDays').innerHTML=agenda.days.map(day=>`<section class="calendar-day ${day.date===current?'calendar-today':''}"><h3>${new Date(day.date+'T00:00:00Z').toLocaleDateString('fr-FR',{weekday:'short',timeZone:'UTC'})}<span>${dateFr(day.date).slice(0,5)}</span></h3>${day.entries.length?day.entries.map(entry=>`<button type="button" class="calendar-task ${entry.done?'calendar-done':day.date<current?'calendar-late':'calendar-pending'}" data-container-agenda-open="${clean(entry.containerId)}"><b>${clean(entry.number)}</b><small>${clean(entry.subtype)||'Type non renseigné'}</small><span>${entry.done?`Fait le ${dateFr(entry.completedAt)}`:day.date<current?'En retard':'À faire'}</span></button>`).join(''):'<p class="calendar-empty">Aucun préventif prévu</p>'}</section>`).join('');
