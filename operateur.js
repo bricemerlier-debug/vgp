@@ -4,7 +4,8 @@ const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;'
 let cloud,portal=null,editing=null,pending=null,busy=false,selectedContainerId=null;
 function message(value,error=false){$('#status').textContent=value;$('#status').classList.toggle('error',error)}
 function renderControllers(){
- const names=Array.isArray(portal?.controllers)?portal.controllers:[];
+ const allowed=['Stéphane G.','Laurent B.','Friedlander'];
+ const names=Array.isArray(portal?.controllers)?allowed.filter(name=>portal.controllers.includes(name)):[];
  const options=names.map(name=>`<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('');
  const primary=$('#controllerPrimary'),secondary=$('#controllerSecondary'),oldPrimary=primary.value,oldSecondary=secondary.value;
  primary.innerHTML='<option value="">Choisir un contrôleur</option>'+options;

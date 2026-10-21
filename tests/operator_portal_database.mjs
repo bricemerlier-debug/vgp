@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 import {PGlite} from '@electric-sql/pglite';
 const db=new PGlite();
 await db.exec(`create role anon;create role authenticated;create schema auth;create table auth.users(id uuid primary key,email text);create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;grant usage on schema public,auth to authenticated,anon;grant execute on function auth.uid() to authenticated;`);
-for(const file of ['001_schema.sql','003_tracking_guard.sql','004_fast_writes.sql','015_container_fast_writes.sql','018_operator_portal.sql','019_operator_preventive_checklist.sql','020_container_inventory_reactivation.sql','022_operator_controllers.sql'])await db.exec(readFileSync('supabase/'+file,'utf8'));
+for(const file of ['001_schema.sql','003_tracking_guard.sql','004_fast_writes.sql','015_container_fast_writes.sql','018_operator_portal.sql','019_operator_preventive_checklist.sql','020_container_inventory_reactivation.sql','022_operator_controllers.sql','023_operator_active_controllers.sql'])await db.exec(readFileSync('supabase/'+file,'utf8'));
 const w='10000000-0000-0000-0000-000000000001',admin='20000000-0000-0000-0000-000000000001',op='20000000-0000-0000-0000-000000000002',other='20000000-0000-0000-0000-000000000003';
 for(const [id,email] of [[admin,'admin@example.test'],[op,'operateur@example.test'],[other,'autre@example.test']])await db.query('insert into auth.users values($1,$2)',[id,email]);
 await db.query('insert into public.workspaces values($1,$2)',[w,'Test']);
@@ -18,7 +18,7 @@ assert.equal((await db.query('select public.workspace_role($1) as role',[w])).ro
 await assert.rejects(()=>db.query('select public.read_state($1)',[w]),/Accès refusé/);
 assert.equal((await db.query('select count(*) as n from public.workspace_state')).rows[0].n,0);
 assert.equal((await portal()).rows[0].data.containers.length,3);
-assert.deepEqual((await portal()).rows[0].data.controllers,['Laurent B.','Stéphane G.']);
+assert.deepEqual((await portal()).rows[0].data.controllers,['Stéphane G.','Laurent B.','Friedlander']);
 assert.deepEqual((await portal()).rows[0].data.containers[0].checks.slice(0,3),['Bâti','Galet','Butée']);
 assert.deepEqual((await portal()).rows[0].data.containers[1].checks.slice(0,3),['Bâti','Sangle','Flasque']);
 assert.deepEqual((await portal()).rows[0].data.containers[2].checks,['Pivot','Fixation']);
