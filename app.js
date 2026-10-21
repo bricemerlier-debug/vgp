@@ -26,7 +26,7 @@ import {extractApavePdf,apaveSuggestedResult,apaveStates,matchApaveRecords,apave
 import {goodyearReportLogo} from './assets/report-logo.mjs';
 import {buildDigest} from './digest.mjs';
 import {lifecycleCandidates,applyLifecycleImport} from './lifecycle-import.mjs';
-import {resolvedControllerId,activeControllers,controllerForName,controlBelongsToController,controllerReportEntries,upgradeControllers,controllersValid} from './controllers.mjs?v=075';
+import {resolvedControllerId,activeControllers,controllerForName,controlBelongsToController,controllerReportEntries,upgradeControllers,controllersValid} from './controllers.mjs?v=076';
 import {ownerDetailsIssue,equipmentOwners,equipmentHasOwner,addEquipmentOwner,removeEquipmentOwner,equipmentOwnershipValid,equipmentMailRecipients,ownerIdentityKey} from './ownership.mjs?v=050';
 import {installSearchableSelects} from './searchable-select.mjs';
 import {parseTrackingCsv,analyzeTrackingRows,applyTrackingImport} from './tracking-import.mjs';
@@ -542,7 +542,7 @@ function renderControllerProfile(){
  const entries=profile?controllerReportEntries(data,profile):[];
  $('#controllerControls').innerHTML=`<h3>Contrôles associés (${entries.length})</h3><p class="foot">Contrôles, destructions et déclarations avec rapport · du plus récent au plus ancien, heures de Paris.</p>`+
   (entries.length?entries.map(({equipment,record,label})=>{
-   const reference=record.reportId?`Rapport ${record.reportId}`:record.apave?.reportNumber?`Rapport APAVE ${record.apave.reportNumber}`:record.signedAttachment?'Document signé':'Rapport APAVE';
+   const reference=record.reportId?`Rapport ${record.reportId}`:record.apave?.reportNumber?`Rapport APAVE ${record.apave.reportNumber}`:record.signedAttachment?'Document signé':record.apave?.reportHash?'Rapport APAVE':'Contrôle historique · rapport non numéroté';
    const stamped=record.recordedAt||(record.created>=946684800000?record.created:null);
    return `<article class="history"><b>${fmt(record.date)} · ${record.time?esc(record.time):'Heure non renseignée'}</b><p>${esc(equipmentName(equipment))} · N° interne : ${esc(equipment.identifier)}</p><small>${esc(reference)} · ${esc(label||'Résultat non renseigné')}</small><small>${stamped?'Saisie le '+new Date(stamped).toLocaleString('fr-FR',{timeZone:'Europe/Paris',dateStyle:'short',timeStyle:'short'}):'Date de saisie non renseignée'}</small><button type="button" class="secondary" data-controller-equipment="${esc(equipment.id)}">Ouvrir l’équipement</button></article>`;
   }).join(''):'<p>Aucun contrôle ni rapport enregistré pour cette fiche.</p>');
