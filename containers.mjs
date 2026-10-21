@@ -62,6 +62,12 @@ const removeContainerPhoto=path=>containerPhotoStore('readwrite',store=>store.de
 const escContainer=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const containerControllerKey=name=>String(name||'').trim().replace(/\s+/g,' ').toLocaleLowerCase('fr');
 const containerControllerIdentityKey=name=>String(name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fr').replace(/[^\p{L}\p{N}]/gu,'');
+const containerControllerMergedNames=new Map([
+ ['fraindidier','CHRISTOPHE B.'],
+ ['didierf','CHRISTOPHE B.'],
+ ['berquer','CHRISTOPHE B.']
+]);
+const containerControllerCanonicalName=name=>containerControllerMergedNames.get(containerControllerIdentityKey(name))||name;
 const containerControllerNames=value=>String(value||'').split(/\s*(?:\/|[;,+&]|\bet\b)\s*/i).map(name=>name.trim()).filter(Boolean).flatMap(name=>/^autre$/i.test(name)?['Friedlander']:/^autre\b/i.test(name)?[]:[name]);
 export function containerInterventionControllerValue(primary,secondary=''){
  const seen=new Set();
@@ -88,10 +94,14 @@ export function containerControllerRoster(document){
   row._nameCounts.set(name,(row._nameCounts.get(name)||0)+1);
   return row;
  };
- for(const profile of document.containerControllerProfiles||[])for(const name of containerControllerNames(profile.name))ensureRow(name,profile);
+ for(const profile of document.containerControllerProfiles||[])for(const name of containerControllerNames(profile.name)){
+  const canonical=containerControllerCanonicalName(name);
+  ensureRow(canonical,canonical===name?profile:null);
+ }
  for(const container of document.containers||[])for(const intervention of container.interventions||[]){
   const seen=new Set();
-  for(const name of containerControllerNames(intervention.controller)){
+  for(const original of containerControllerNames(intervention.controller)){
+   const name=containerControllerCanonicalName(original);
    const key=containerControllerIdentityKey(name);if(seen.has(key))continue;seen.add(key);
    const row=ensureRow(name);if(!row)continue;
    row.actions.push({containerId:container.id,containerNumber:container.number,intervention});
@@ -360,7 +370,7 @@ export function filterContainerList(containers,{query='',types=[],statuses=[]}={
 export function sortContainerList(containers, key='number', direction='asc'){
  const collator=new Intl.Collator('fr',{numeric:true,sensitivity:'base'});
  const lastDate=c=>(c.interventions||[]).reduce((latest,i)=>i.date>latest?i.date:latest,'');
- const value=c=>key==='subtype'?c.subtype||'':key==='due'?containerPreventiveStatus(c).due||'':key==='last'?lastDate(c):key==='count'?(c.interventions||[]).length:c.number||'';
+ const value=c=>key==='subtype'?c.subtype||'':key==='type'?c.type||'':key==='status'?containerPreventiveStatus(c).status:key==='due'?containerPreventiveStatus(c).due||'':key==='last'?lastDate(c):key==='count'?(c.interventions||[]).length:c.number||'';
  return [...containers].sort((a,b)=>{
   const av=value(a),bv=value(b);
   if(av===''||bv==='')return av===''&&bv===''?collator.compare(a.number,b.number):av===''?1:-1;
@@ -370,7 +380,7 @@ export function sortContainerList(containers, key='number', direction='asc'){
 }
 
 export function installContainersUI({root,read,save,saveContainers,canEdit,id,cloud=null,analyzeFiles,analyzeCategoryFiles,actor=()=>'',makeReportPdf}){
- let categoryQuery='',selectedCategory=null,categoryImportPlan=null,categoryImportSnapshot=null,scrappingId=null,agendaWeek=containerCivilToday(),controllerQuery='',editingControllerName=null,selected=null,editingContainerId=null,query='',selectedTypes=new Set(),selectedStatuses=new Set(),typeOptionsKey='',archiveQuery='',returnTab='list',sortKey='number',sortDirection='asc',importPlan=null,importSnapshot=null,activeTab='list',kpiYear=new Date().getFullYear(),analysisYear=new Date().getFullYear(),reportMode='month',reportDate=new Date();
+ let categoryQuery='',selectedCategory=null,categorySortKey='number',categorySortDirection='asc',categoryImportPlan=null,categoryImportSnapshot=null,scrappingId=null,agendaWeek=containerCivilToday(),controllerQuery='',editingControllerName=null,selected=null,editingContainerId=null,query='',selectedTypes=new Set(),selectedStatuses=new Set(),typeOptionsKey='',archiveQuery='',returnTab='list',sortKey='number',sortDirection='asc',importPlan=null,importSnapshot=null,activeTab='list',kpiYear=new Date().getFullYear(),analysisYear=new Date().getFullYear(),reportMode='month',reportDate=new Date();
  reportDate.setDate(1);reportDate.setMonth(reportDate.getMonth()-1);
  let reportYear=reportDate.getFullYear(),reportMonth=reportDate.getMonth()+1;
  const $=s=>document.querySelector(s), clean=s=>escContainer(s), state=()=>read().containers||[];
@@ -499,7 +509,8 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,cl
   const host=$('#containerCategoriesContent');
   if(group){
    const subcategories=[...new Set(group.containers.map(container=>container.type?.trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fr'));
-   host.innerHTML=`<div class="toolbar"><h3>${clean(group.name)}</h3><button type="button" class="secondary" id="containerCategoryBack">← Toutes les catégories</button></div><p>${group.active} en suivi · ${group.archived} archivé${group.archived===1?'':'s'} · ${group.interventions} intervention${group.interventions===1?'':'s'}</p><p>Sous-catégories : ${subcategories.map(clean).join(' · ')||'Non renseignées'}</p><form id="containerCategoryForm" class="container-category-form"><div class="fields"><label>Périodicité préventive<input name="months" type="number" min="0" max="120" step="1" required><small>0 = aucune périodicité</small></label><label class="wide">Contrôles à effectuer sur ce type de contenant<textarea name="checks" rows="7" maxlength="10000" placeholder="Un contrôle par ligne"></textarea></label></div><p class="foot">Un contrôle par ligne. La liste apparaît lors d’une nouvelle intervention. Les interventions enregistrées restent intactes.</p>${group.containers.some(containerHasNoPeriodicPreventive)?'<p class="foot">Les sous-catégories TR, TP, TJ, TG, SA, TF, TI, TK, TM et TN n’ont pas de périodicité de contrôle, quelle que soit celle de leur catégorie.</p>':''}<p id="containerCategoryError" class="error" role="alert"></p><button type="submit">Enregistrer la catégorie</button></form><div class="owner-equipment-list"><table><thead><tr><th>Contenant</th><th>Sous-catégorie</th><th>Statut</th><th>Prochain préventif</th><th>Interventions</th><th>Fiche</th></tr></thead><tbody>${sortContainerList(group.containers).map(container=>`<tr><td><b>${clean(container.number)}</b></td><td>${clean(container.type)||'—'}</td><td>${statusLabel(container)}</td><td>${dueLabel(container)}</td><td>${container.interventions.length}</td><td><button type="button" class="secondary" data-category-container-open="${clean(container.id)}">Ouvrir</button></td></tr>`).join('')}</tbody></table></div>`;
+   host.innerHTML=`<div class="toolbar"><h3>${clean(group.name)}</h3><button type="button" class="secondary" id="containerCategoryBack">← Toutes les catégories</button></div><p>${group.active} en suivi · ${group.archived} archivé${group.archived===1?'':'s'} · ${group.interventions} intervention${group.interventions===1?'':'s'}</p><p>Sous-catégories : ${subcategories.map(clean).join(' · ')||'Non renseignées'}</p><form id="containerCategoryForm" class="container-category-form"><div class="fields"><label>Périodicité préventive<input name="months" type="number" min="0" max="120" step="1" required><small>0 = aucune périodicité</small></label><label class="wide">Contrôles à effectuer sur ce type de contenant<textarea name="checks" rows="7" maxlength="10000" placeholder="Un contrôle par ligne"></textarea></label></div><p class="foot">Un contrôle par ligne. La liste apparaît lors d’une nouvelle intervention. Les interventions enregistrées restent intactes.</p>${group.containers.some(containerHasNoPeriodicPreventive)?'<p class="foot">Les sous-catégories TR, TP, TJ, TG, SA, TF, TI, TK, TM et TN n’ont pas de périodicité de contrôle, quelle que soit celle de leur catégorie.</p>':''}<p id="containerCategoryError" class="error" role="alert"></p><button type="submit">Enregistrer la catégorie</button></form><div class="owner-equipment-list"><table><thead><tr>${[['number','Contenant'],['type','Sous-catégorie'],['status','Statut'],['due','Prochain préventif'],['count','Interventions']].map(([key,label])=>`<th scope="col" aria-sort="${categorySortKey===key?categorySortDirection==='asc'?'ascending':'descending':'none'}"><button type="button" class="container-sort" data-category-sort="${key}" aria-label="Trier par ${label}, ${categorySortKey===key&&categorySortDirection==='asc'?'ordre décroissant':'ordre croissant'}">${label}<span aria-hidden="true">${categorySortKey===key?categorySortDirection==='asc'?' ↑':' ↓':' ↕'}</span></button></th>`).join('')}<th scope="col">Fiche</th></tr></thead><tbody>${sortContainerList(group.containers,categorySortKey,categorySortDirection).map(container=>`<tr class="container-row-${containerPreventiveStatus(container).status}"><td><b>${clean(container.number)}</b></td><td>${clean(container.type)||'—'}</td><td><span class="container-status-pill ${dueClass(container)}">${statusLabel(container)}</span></td><td>${dueLabel(container)}</td><td>${container.interventions.length}</td><td><button type="button" class="secondary" data-category-container-open="${clean(container.id)}">Ouvrir</button></td></tr>`).join('')}</tbody></table></div>`;
+   host.querySelectorAll('[data-category-sort]').forEach(button=>button.onclick=()=>{const key=button.dataset.categorySort;categorySortDirection=categorySortKey===key?(categorySortDirection==='asc'?'desc':'asc'):(key==='count'||key==='due'?'desc':'asc');categorySortKey=key;renderCategories();host.querySelector(`[data-category-sort="${key}"]`)?.focus()});
    const settings=containerCategorySettings(group.containers.find(container=>!containerHasNoPeriodicPreventive(container))||group.containers[0]),form=$('#containerCategoryForm');
    form.elements.months.value=settings.months===null?'0':String(settings.months);
    form.elements.checks.value=settings.checks.join('\n');

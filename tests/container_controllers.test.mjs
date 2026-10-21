@@ -41,4 +41,18 @@ assert.equal(nextContainerInterventionNumber([{interventions:[{number:'I-1'},{nu
 assert.equal(nextContainerInterventionNumber([]),'1');
 const afterControllerCleanup={...document,containerControllerProfiles:document.containerControllerProfiles.filter(profile=>profile.name!=='Autre')};
 assert.equal(containerControllerRoster(afterControllerCleanup).find(profile=>profile.name==='Friedlander').actions.length,3);
+const mergedNames={containerControllerProfiles:[{id:'target',name:'CHRISTOPHE B.',email:'christophe@example.test'},{id:'didier',name:'FRAIN Didier',email:''}],containers:[{id:'ca',number:'CA001',interventions:[
+ {number:'1',date:'2026-01-01',controller:'FRAIN Didier'},
+ {number:'2',date:'2026-01-02',controller:'DIDIER F.'},
+ {number:'3',date:'2026-01-03',controller:'berquer'},
+ {number:'4',date:'2026-01-04',controller:'CHRISTOPHE B.'},
+ {number:'5',date:'2026-01-05',controller:'FRAIN Didier / CHRISTOPHE B.'}
+ ]}]};
+const mergedRoster=containerControllerRoster(mergedNames);
+assert.equal(mergedRoster.length,1);
+assert.equal(mergedRoster[0].name,'CHRISTOPHE B.');
+assert.equal(mergedRoster[0].id,'target');
+assert.equal(mergedRoster[0].email,'christophe@example.test');
+assert.equal(mergedRoster[0].actions.length,5);
+assert.equal(mergedNames.containers[0].interventions[0].controller,'FRAIN Didier');
 console.log('Contrôleurs des contenants : séparation VGP, historique et validation OK.');
