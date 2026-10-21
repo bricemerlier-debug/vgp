@@ -110,3 +110,10 @@ test('aucun accès à la fiche interne dans les mails destinataires',()=>{
   assert.doesNotMatch(content,/Voir la fiche|interne\.example\.test|#equipment\//);
  }
 });
+
+test('verrou test : un rappel réel est refusé avant tout appel Gmail',async()=>{
+ let calls=0;
+ const gmail=createVgpGmail({clientId:'public.apps.googleusercontent.com',fetcher:async()=>{calls++;throw Error('Aucun appel attendu');}});
+ await assert.rejects(()=>gmail.sendMail({test:false,lossUrl:'https://example.test/declarer-perte.html'}),/Envoi réel désactivé/);
+ assert.equal(calls,0);
+});

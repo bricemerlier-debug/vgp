@@ -4,7 +4,7 @@ L’onglet Mails affiche les cinq modèles enregistrés (J−30, J−14, J−7, 
 
 Le destinataire du test peut être remplacé sans modifier la fiche propriétaire. Le test porte `[TEST]` dans son objet et une indication visible dans son contenu. Il n’enregistre aucun contrôle et ne prépare aucun envoi automatique.
 
-Le mode TEST reste coché par défaut. Le décocher prépare un rappel réel au propriétaire enregistré, avec son adresse verrouillée. Les nouveaux mails comportent un bouton vers un formulaire de déclaration de perte propre à ce matériel. Activer d’abord `supabase/024_recipient_loss_declaration.sql` : [fonctionnement et vérifications](declaration-perte.md). Une signature depuis un lien TEST ne change pas la fiche ; depuis un rappel réel, la déclaration signée enregistre immédiatement le matériel comme perdu.
+Le mode TEST est verrouillé : aucun rappel réel ne peut être envoyé depuis cet écran. Les nouveaux mails comportent un bouton vers un formulaire de déclaration de perte propre à ce matériel. Activer d’abord `supabase/024_recipient_loss_declaration.sql` : [fonctionnement et vérifications](declaration-perte.md). Une signature depuis un lien TEST ne change pas la fiche ; depuis un rappel réel, la déclaration signée enregistre immédiatement le matériel comme perdu.
 
 La photo ajoutée est compressée en JPEG et conservée sur l’équipement dans `mailPhoto`. Le logo et la photo sont joints au message avec des références CID pour qu’ils restent dans le mail sans URL d’image temporaire. L’aperçu affiche ces mêmes images. Les modèles personnalisés sont conservés ; les anciens modèles livrés par défaut sont remplacés par leur version simplifiée seulement s’ils n’ont pas été modifiés.
 
@@ -35,3 +35,5 @@ Le modèle « Contrôle en retard » reprend le logo, la photo et le lien de dé
 Le worker actuel reste un simulateur : aucun envoi récurrent réel ne fonctionne en arrière-plan. La connexion Gmail dans le navigateur permet des envois manuels uniquement. Le futur service de production doit exécuter quotidiennement le plan et supporter les étapes négatives (−7, −14, etc.) ; la contrainte SQL initiale des étapes ne les accepte pas encore.
 
 Les mails ne contiennent aucun bouton ni lien vers la fiche interne du matériel. Le lien personnel de déclaration de perte reste disponible.
+
+Depuis MAJ 091, le transport Gmail refuse aussi tout message dont `test` n’est pas strictement vrai. Seul un clic explicite sur « Envoyer le test » envoie un message TEST au destinataire saisi. Aucun envoi automatique activé.

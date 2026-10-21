@@ -1,4 +1,4 @@
-import {buildVgpMailDraft,vgpMailAddressValid} from './vgp-mail.mjs?v=090';
+import {buildVgpMailDraft,vgpMailAddressValid} from './vgp-mail.mjs?v=091';
 
 // Le compte est autorisé par Google ; aucun mot de passe ni jeton n'est sauvegardé.
 export function createVgpGmail({clientId='',browser=globalThis,fetcher=(...args)=>fetch(...args),now=()=>Date.now()}={}){
@@ -35,7 +35,7 @@ export function createVgpGmail({clientId='',browser=globalThis,fetcher=(...args)
    return this.sendMail(mail);
   },
   async sendMail(mail){
-   if(!mail.test&&!mail.lossUrl)throw Error('Le rappel doit comporter le lien de déclaration destiné au propriétaire.');
+   if(mail.test!==true)throw Error('Envoi réel désactivé : seuls les messages de test sont autorisés.');
    if(!active()||session.email.toLowerCase()!==mail.sender.toLowerCase())throw Error('Connecte le compte Gmail choisi pour envoyer ce message.');
    const mime=buildVgpMailDraft(mail).replace('X-Unsent: 1\r\n','');let raw='';for(const byte of new TextEncoder().encode(mime))raw+=String.fromCharCode(byte);
    const body={raw:btoa(raw).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')},controller=new AbortController();
