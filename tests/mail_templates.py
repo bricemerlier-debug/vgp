@@ -17,7 +17,8 @@ draw = ImageDraw.Draw(image)
 draw.rounded_rectangle((270, 70, 530, 480), radius=45, fill='#0057a8')
 draw.rectangle((350, 110, 450, 420), fill='#ffda00')
 photo = io.BytesIO()
-image.save(photo, format='PNG')
+image.save(photo, format='JPEG')
+seed['equipment'][0]['mailPhoto'] = {'width': 800, 'height': 550, 'data': base64.b64encode(photo.getvalue()).decode()}
 base = 'http://127.0.0.1:' + os.environ.get('VGP_TEST_PORT', '8125')
 
 with sync_playwright() as p, TemporaryDirectory() as directory:
@@ -49,8 +50,7 @@ with sync_playwright() as p, TemporaryDirectory() as directory:
         expect(preview.get_by_role('heading', name='Votre matériel à contrôler')).to_be_visible()
         expect(preview.locator('body')).to_contain_text('TEST-VGP-001')
         expect(preview.locator('body')).to_contain_text('21/11/2026')
-        page.locator('#mailPhotoFile').set_input_files({'name': 'test-photo.png', 'mimeType': 'image/png', 'buffer': photo.getvalue()})
-        expect(page.locator('#mailPhotoStatus')).to_contain_text('Photo du matériel intégrée')
+        assert page.locator('#mailPhotoFile').count() == 0
         expect(preview.get_by_alt_text('Photo du matériel TEST-VGP-001')).to_be_visible()
         state = page.evaluate("JSON.parse(localStorage.getItem('vgp-prototype-v1'))")
         assert state['equipment'][0]['mailPhoto']['data'].startswith('/9j/')
@@ -87,7 +87,7 @@ with sync_playwright() as p, TemporaryDirectory() as directory:
             expect(page.locator('#mailTestError')).to_contain_text('formulaire de perte nécessite Supabase')
             assert not sends
         else:
-            expect(page.locator('#mailConnectGmail')).to_be_disabled()
+            expect(page.locator('#mailConnectGmail')).to_be_enabled()
             expect(page.locator('#mailSendTest')).to_be_disabled()
             assert not sends
         page.locator('#mailSettingsView').screenshot(path='/tmp/mails-vgp-desktop.png')

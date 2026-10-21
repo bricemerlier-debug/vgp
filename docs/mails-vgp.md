@@ -6,7 +6,7 @@ Le destinataire du test peut être remplacé sans modifier la fiche propriétair
 
 Le mode TEST est verrouillé : aucun rappel réel ne peut être envoyé depuis cet écran. Les nouveaux mails comportent un bouton vers un formulaire de déclaration de perte propre à ce matériel. Activer d’abord `supabase/024_recipient_loss_declaration.sql` : [fonctionnement et vérifications](declaration-perte.md). Une signature depuis un lien TEST ne change pas la fiche ; depuis un rappel réel, la déclaration signée enregistre immédiatement le matériel comme perdu.
 
-La photo ajoutée est compressée en JPEG et conservée sur l’équipement dans `mailPhoto`. Le logo et la photo sont joints au message avec des références CID pour qu’ils restent dans le mail sans URL d’image temporaire. L’aperçu affiche ces mêmes images. Les modèles personnalisés sont conservés ; les anciens modèles livrés par défaut sont remplacés par leur version simplifiée seulement s’ils n’ont pas été modifiés.
+La photo déjà enregistrée sur l’équipement dans `mailPhoto` est automatiquement intégrée ; aucun ajout de photo n’est demandé dans Mails. Le logo et la photo sont joints au message avec des références CID pour qu’ils restent dans le mail sans URL d’image temporaire. L’aperçu affiche ces mêmes images. Les modèles personnalisés sont conservés ; les anciens modèles livrés par défaut sont remplacés par leur version simplifiée seulement s’ils n’ont pas été modifiés.
 
 ## Activer le test depuis Gmail
 
