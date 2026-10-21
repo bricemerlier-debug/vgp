@@ -94,3 +94,12 @@ test('Gmail : réponse inconnue signalée sans réessai automatique',async()=>{
  const gmail=createVgpGmail({clientId:'fictif.apps.googleusercontent.com',browser:mock.browser,fetcher:async(url,options)=>{if(url.includes('userinfo'))return mock.fetcher(url,options);sends++;throw new TypeError('Network failed');}});
  await gmail.connect('expediteur@example.test');await assert.rejects(()=>gmail.sendTest(prepare()),error=>error.uncertain===true&&/Vérifie les messages envoyés/.test(error.message));assert.equal(sends,1);
 });
+
+test('modèle retard personnalisé avec échéance, photo et déclaration de perte',async()=>{
+ const {vgpMailDefaultTemplates,vgpMailKinds}=await import('../vgp-mail.mjs');
+ const state=fixture();state.mailTemplates=vgpMailDefaultTemplates();
+ assert.equal(vgpMailKinds.length,5);
+ const mail=buildVgpEquipmentMail(state,{equipmentId:'equipment-1',kind:'overdue'});
+ assert.match(mail.subject,/en retard/);assert.match(mail.text,/21\/11\/2026/);
+ assert.match(mail.previewHtml,/Tous les 7 jours/);assert.equal(mail.hasPhoto,true);
+});

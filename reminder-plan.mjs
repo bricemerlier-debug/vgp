@@ -1,16 +1,17 @@
 // Contrat commun aperçu/file/worker. Aucun accès réseau et aucun envoi.
 import {due,calculatedDeadline,latestInspection,equipmentName,fillEmailTemplate} from './domain.mjs';
-import {reminderDates} from './reminder-dates.mjs';
+import {reminderDates,overdueReminderDate} from './reminder-dates.mjs';
 import {resolveReminderRecipients,reminderContactsValid} from './reminder-contacts.mjs';
 export function reminderCycle(e){const c=latestInspection(e);return JSON.stringify([due(e),c?.id||null,c?.date||null,e.controls.filter(x=>x.result!=='Introuvable').map(c=>[c.id,c.date,c.result]).sort()]);}
-export function reminderPlan(document,workspaceId){
+export function reminderPlan(document,workspaceId,onDate=null){
  if(!reminderContactsValid(document))throw Error('Référentiel de contacts invalide : aucune mise en file.');
  const jobs=[],issues=[];
  for(const e of document.equipment){if(e.archived)continue;const deadline=due(e);const resolved=resolveReminderRecipients(document,e);issues.push(...resolved.issues);
  if(!deadline){issues.push({equipmentId:e.id,identifier:e.identifier,reason:'Échéance inconnue : aucun rappel calculable.'});continue;}
  if(latestInspection(e)&&deadline!==calculatedDeadline(e)){issues.push({equipmentId:e.id,identifier:e.identifier,reason:'Contrôle enregistré avec une ancienne échéance encore ouverte : cycle à vérifier avant rappel.'});continue;}
  const cycle=reminderCycle(e);
- for(const r of resolved.recipients)for(const step of reminderDates(deadline)){
+ const overdue=onDate?overdueReminderDate(deadline,onDate):null;
+ for(const r of resolved.recipients)for(const step of [...reminderDates(deadline),...(overdue?[overdue]:[])]){
   // L'escalade est explicite et réservée à J0.
   if(r.role==='escalation'&&step.stage!==0)continue;
   const key=JSON.stringify([workspaceId,e.id,cycle,r.email.toLowerCase(),step.stage]);

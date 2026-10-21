@@ -39,7 +39,7 @@ with sync_playwright() as p, TemporaryDirectory() as directory:
         page.goto(base + path + '?mailFrom=expediteur%40example.test&mailTo=chef%40example.test#mailSettings')
         expect(page.locator('#mailSettingsView')).to_be_visible()
         assert 'mailFrom=' not in page.url and 'mailTo=' not in page.url
-        expect(page.locator('#mailModelCards button')).to_have_count(4)
+        expect(page.locator('#mailModelCards button')).to_have_count(5)
         assert page.locator('#reminderSimulation').count() == 0
         assert page.locator('#digestForm').count() == 0
         page.locator('#mailSampleEquipment').select_option(seed['equipment'][0]['id'])

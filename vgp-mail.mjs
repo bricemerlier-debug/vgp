@@ -6,15 +6,16 @@ export const vgpMailKinds=[
  {kind:'month',title:'Un mois avant',label:'J−30',description:'Prévoir le prochain contrôle.'},
  {kind:'twoWeeks',title:'Deux semaines avant',label:'J−14',description:'Organiser le retour du matériel.'},
  {kind:'week',title:'Une semaine avant',label:'J−7',description:'Rappeler le contrôle à venir.'},
- {kind:'deadline',title:'Le jour de l’échéance',label:'Jour J',description:'Signaler que le contrôle arrive à échéance.'}
+ {kind:'deadline',title:'Le jour de l’échéance',label:'Jour J',description:'Signaler que le contrôle arrive à échéance.'},
+ {kind:'overdue',title:'Contrôle en retard',label:'Tous les 7 jours',description:'Relancer après l’échéance jusqu’au contrôle ou à la sortie du parc.'}
 ];
 const mailHtmlEscape=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 export function vgpMailAddressValid(value){return typeof value==='string'&&value.length<=254&&/^[^\s@<>;,]+@[^\s@<>;,]+\.[^\s@<>;,]+$/.test(value);}
 export function vgpMailPhotoValid(photo){return photo===undefined||photo===null||Number.isInteger(photo.width)&&photo.width>0&&photo.width<=1200&&Number.isInteger(photo.height)&&photo.height>0&&photo.height<=1200&&typeof photo.data==='string'&&photo.data.length<=450000&&/^\/9j\/[A-Za-z0-9+/=]+$/.test(photo.data);}
 export function vgpMailDefaultTemplates(){
  return vgpMailKinds.map(({kind})=>({kind,
-  subject:(kind==='deadline'?'Échéance du contrôle VGP atteinte':kind==='month'?'Contrôle VGP à prévoir':'Rappel de contrôle VGP')+' — {{numero_interne}}',
-  body:'Bonjour {{nom_proprietaire}},\n\n'+(kind==='deadline'?'L’échéance du contrôle VGP de votre matériel {{nom_equipement}} (n° {{numero_interne}}) est atteinte le {{date_controle}}.':'Le prochain contrôle VGP de votre matériel {{nom_equipement}} (n° {{numero_interne}}) est prévu pour le {{date_controle}}.')+'\n\n'+(kind==='month'?'Merci d’organiser son retour au service Métrologie avant cette date.':'Merci de présenter le matériel au service Métrologie pour réaliser son contrôle.')+'\n\nMerci de votre collaboration.\nService Métrologie — Goodyear Amiens'
+  subject:(kind==='overdue'?'Contrôle VGP en retard':kind==='deadline'?'Échéance du contrôle VGP atteinte':kind==='month'?'Contrôle VGP à prévoir':'Rappel de contrôle VGP')+' — {{numero_interne}}',
+  body:'Bonjour {{nom_proprietaire}},\n\n'+(kind==='overdue'?'Le contrôle VGP de votre matériel {{nom_equipement}} (n° {{numero_interne}}), prévu le {{date_controle}}, est en retard.':kind==='deadline'?'L’échéance du contrôle VGP de votre matériel {{nom_equipement}} (n° {{numero_interne}}) est atteinte le {{date_controle}}.':'Le prochain contrôle VGP de votre matériel {{nom_equipement}} (n° {{numero_interne}}) est prévu pour le {{date_controle}}.')+'\n\n'+(kind==='month'?'Merci d’organiser son retour au service Métrologie avant cette date.':'Merci de présenter le matériel au service Métrologie pour réaliser son contrôle.')+'\n\nMerci de votre collaboration.\nService Métrologie — Goodyear Amiens'
  }));
 }
 export function vgpMailTemplateIssue(template){

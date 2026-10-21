@@ -3,7 +3,7 @@ import {reminderCivilDate} from './reminder-dates.mjs';
 const pendingReminderStates=new Set(['queued','failed','processing','uncertain']);
 const reminderEvent=(job,status,at,detail='')=>{job.status=status;job.updatedAt=at;job.history.push({at,status,mode:'simulation',detail});};
 export function reconcileReminderQueue(state,document,workspaceId,at){
- const plan=reminderPlan(document,workspaceId),current=new Map(plan.jobs.map(j=>[j.key,j]));state.jobs??=[];state.issues=plan.issues;
+ const plan=reminderPlan(document,workspaceId,reminderCivilDate(at)),current=new Map(plan.jobs.map(j=>[j.key,j]));state.jobs??=[];state.issues=plan.issues;
  for(const job of state.jobs.filter(j=>j.workspace_id===workspaceId)){const next=current.get(job.key);if(pendingReminderStates.has(job.status)&&(!next||next.fingerprint!==job.fingerprint))reminderEvent(job,'cancelled',at,'Contrôle, archivage, échéance ou destinataire modifié.');}
  for(const job of plan.jobs){const existing=state.jobs.find(j=>j.key===job.key);if(!existing)state.jobs.push({...job,attempts:0,createdAt:at,updatedAt:at,history:[{at,status:'queued',mode:'simulation',detail:'File locale de simulation ; aucune file de production activée.'}]});
   else if(existing.status==='cancelled'&&existing.attempts===0&&existing.fingerprint!==job.fingerprint&&job.run_on>=reminderCivilDate(at)){Object.assign(existing,job);reminderEvent(existing,'queued',at,'Nouvelle affectation explicitement confirmée ; ancien rappel annulé conservé dans l’historique.');}
@@ -22,7 +22,7 @@ export async function runReminderWorker({store,readDocument,workspaceId,now=()=>
    for(const old of state.jobs)if(old.workspace_id===workspaceId&&['queued','failed'].includes(old.status)&&old.run_on<date)reminderEvent(old,'cancelled',at,'Étape passée : pas d’envoi tardif automatique.');
    if(!j)return null;j.attempts++;j.leaseUntil=new Date(new Date(now()).getTime()+timeoutMs+60000).toISOString();reminderEvent(j,'processing',at,'Tentative simulée '+j.attempts);return structuredClone(j);});if(!job)break;
   // Relire après réservation, juste avant le transport ; jamais le document de l'aperçu.
-  const fresh=await readDocument();const valid=reminderPlan(fresh,workspaceId).jobs.find(j=>j.key===job.key&&j.fingerprint===job.fingerprint);
+  const fresh=await readDocument();const valid=reminderPlan(fresh,workspaceId,date).jobs.find(j=>j.key===job.key&&j.fingerprint===job.fingerprint);
   if(!valid){await store.transaction(state=>{const j=state.jobs.find(j=>j.key===job.key);if(j.status==='processing')reminderEvent(j,'cancelled',new Date(now()).toISOString(),'Situation devenue obsolète avant envoi simulé.');});continue;}
   let result='simulated',detail='Message simulé ; aucun e-mail envoyé.',retry=false,timer;
   try{const message=reminderMessage(fresh,job);const controller=new AbortController();await Promise.race([transport.send({job,message,signal:controller.signal}),new Promise((_,reject)=>{timer=setTimeout(()=>{controller.abort();reject(Object.assign(Error('Délai fournisseur dépassé ; résultat inconnu.'),{uncertain:true}));},timeoutMs);})]);}

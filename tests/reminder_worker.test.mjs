@@ -57,3 +57,14 @@ test('changement d’adresse, archivage, étape passée et J0',async()=>isolated
 test('aucun branchement réel possible, payload Microsoft 365 préparé sans réseau',async()=>isolated(async(store)=>{
  await assert.rejects(run(store,fixture(),undefined,{mode:'live',send(){throw Error('ne doit pas être appelé');}}),/désactivé/);assert.throws(microsoft365Transport,/non activable/);assert.equal(microsoft365Message({recipient:'test@example.invalid',subject:'test',text:'simulation',correlationId:'unique'}).saveToSentItems,true);
 }));
+
+test('retard : J+7 puis J+14 sans doublon, pas de rattrapage, arrêt à l’archivage',async()=>isolated(async store=>{
+ const d=fixture('2026-10-01');d.mailTemplates.push({kind:'overdue',subject:'Retard {{numero_interne}}',body:'Échéance dépassée le {{date_controle}}.'});
+ let calls=0;const transport={mode:'simulation',async send({message}){calls++;assert.match(message.subject,/Retard/);}};
+ await run(store,d,'2026-10-08T07:00:00Z',transport);
+ await run(store,d,'2026-10-08T08:00:00Z',transport);assert.equal(calls,1);
+ await run(store,d,'2026-10-09T07:00:00Z',transport);assert.equal(calls,1);
+ await run(store,d,'2026-10-15T07:00:00Z',transport);assert.equal(calls,2);
+ d.equipment[0].archived=true;
+ await run(store,d,'2026-10-22T07:00:00Z',transport);assert.equal(calls,2);
+}));
