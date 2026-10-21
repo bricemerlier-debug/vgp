@@ -796,6 +796,7 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,cl
  }
  function renderContainerChecklist(container){
   const host=$('#containerPartFields'),checks=containerCategorySettings(container).checks;
+  $('#containerChecklistHelp').textContent=checks.length?`Catégorie ${container.subtype||'non renseignée'} · Les points sont tous cochés au départ.`:'';
   host.replaceChildren();
   if(!checks.length){
    const message=document.createElement('p');message.className='foot';
@@ -815,7 +816,9 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,cl
    row.append(label,status);host.append(row);
   }
  }
- function openIntervention(c){const form=$('#containerInterventionForm'),roster=containerControllerRoster(read()).map(profile=>`<option value="${clean(profile.name)}">${clean(profile.name)}</option>`).join('');form.reset();form.elements.controller.innerHTML='<option value="">Choisir un contrôleur</option>'+roster;form.elements.controller2.innerHTML='<option value="">Aucun deuxième contrôleur</option>'+roster;form.elements.date.value=new Date().toISOString().slice(0,10);$('#containerInterventionType').innerHTML='<option value="">Choisir un type</option>'+containerInterventionTypes.map(type=>`<option value="${clean(type)}">${clean(type[0].toLocaleUpperCase('fr')+type.slice(1))}</option>`).join('');$('#containerInterventionTitle').textContent=`Nouvelle intervention · ${c.number}`;renderContainerChecklist(c);$('#containerInterventionError').textContent='';$('#containerInterventionStatus').textContent='';$('#containerInterventionDialog').showModal();}
+ function openIntervention(c){const form=$('#containerInterventionForm'),roster=containerControllerRoster(read()).map(profile=>`<option value="${clean(profile.name)}">${clean(profile.name)}</option>`).join('');form.reset();form.elements.controller.innerHTML='<option value="">Choisir un contrôleur</option>'+roster;form.elements.controller2.innerHTML='<option value="">Aucun deuxième contrôleur</option>'+roster;form.elements.date.value=new Date().toISOString().slice(0,10);$('#containerInterventionTitle').textContent=`Nouvelle intervention · ${c.number}`;renderContainerChecklist(c);$('#containerInterventionChecklist').hidden=true;$('#containerInterventionError').textContent='';$('#containerInterventionStatus').textContent='';$('#containerInterventionDialog').showModal();}
+ $('#containerInterventionForm').querySelectorAll('[name=type]').forEach(input=>input.onchange=()=>{$('#containerInterventionChecklist').hidden=formType()!=='préventif'});
+ function formType(){return $('#containerInterventionForm [name=type]:checked')?.value||'';}
  $('#containerTypeFilters').onchange=e=>{if(e.target.type!=='checkbox')return;e.target.checked?selectedTypes.add(e.target.value):selectedTypes.delete(e.target.value);renderList()};
  $('#containerStatusFilters').onchange=e=>{if(e.target.type!=='checkbox')return;e.target.checked?selectedStatuses.add(e.target.value):selectedStatuses.delete(e.target.value);renderList()};
  $('#containerListPane').querySelectorAll('[data-container-summary-status]').forEach(button=>button.onclick=()=>{const status=button.dataset.containerSummaryStatus;selectedStatuses.has(status)?selectedStatuses.delete(status):selectedStatuses.add(status);$('#containerStatusFilters').querySelectorAll('input').forEach(input=>input.checked=selectedStatuses.has(input.value));renderList()});
@@ -858,7 +861,7 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,cl
   const controllerRoster=containerControllerRoster(read());
   if(!controllerRoster.some(profile=>profile.name===controller1)||controller2&&!controllerRoster.some(profile=>profile.name===controller2)){$('#containerInterventionError').textContent='Choisissez les contrôleurs dans la liste.';return;}
   const controller=containerInterventionControllerValue(controller1,controller2);
-  const parts=Object.fromEntries(containerCategorySettings(current).checks.filter(p=>values.has('partIncluded:'+p)).map(p=>[p,String(values.get('part:'+p)||'Vérifié')]));
+  const parts=type==='préventif'?Object.fromEntries(containerCategorySettings(current).checks.filter(p=>values.has('partIncluded:'+p)).map(p=>[p,String(values.get('part:'+p)||'Vérifié')])):{};
   const next=structuredClone(read()),container=next.containers.find(c=>c.id===selected);
   if(!container){$('#containerInterventionError').textContent='Cette fiche est introuvable. Actualisez la page.';return;}
   const number=nextContainerInterventionNumber(next.containers||[]);
