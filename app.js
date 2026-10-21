@@ -15,7 +15,7 @@ import {sectorZones,sectorLabel,sectorChoices} from './sectors.mjs';
 import {ownerMergeSearch,ownerServiceOptions} from './personnel.mjs?v=050';
 import {installPersonnelOperations} from './personnel-ui.mjs';
 import {installWorkspaceNavigation} from './workspace-navigation.mjs?v=042';
-import {installReminderSimulation} from './reminder-ui.mjs';
+import {installReminderSimulation} from './reminder-ui.mjs?v=084';
 import {reminderCivilDate} from './reminder-dates.mjs';
 import {installMaintenanceKpi} from './maintenance-kpi-ui.mjs';
 import {installApaveActionImport} from './apave-actions-import.mjs';
