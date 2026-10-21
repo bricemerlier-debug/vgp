@@ -3,20 +3,31 @@ const $=selector=>document.querySelector(selector);
 const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 let cloud,portal=null,editing=null,pending=null,busy=false,selectedContainerId=null;
 function message(value,error=false){$('#status').textContent=value;$('#status').classList.toggle('error',error)}
+function renderControllers(){
+ const names=Array.isArray(portal?.controllers)?portal.controllers:[];
+ const options=names.map(name=>`<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('');
+ const primary=$('#controllerPrimary'),secondary=$('#controllerSecondary'),oldPrimary=primary.value,oldSecondary=secondary.value;
+ primary.innerHTML='<option value="">Choisir un contrôleur</option>'+options;
+ secondary.innerHTML='<option value="">Aucun deuxième contrôleur</option>'+options;
+ if(names.includes(oldPrimary))primary.value=oldPrimary;
+ if(names.includes(oldSecondary))secondary.value=oldSecondary;
+}
 function resetForm(){editing=null;pending=null;selectedContainerId=null;$('#interventionForm').reset();$('#containerSearch').disabled=false;$('#containerChoices').hidden=true;$('#containerSearch').setAttribute('aria-expanded','false');$('#containerSelection').textContent='Choisissez un résultat dans la liste.';$('#preventiveChecklist').hidden=true;$('#preventivePoints').innerHTML='';$('#formTitle').textContent='Nouvelle intervention';$('#saveButton').textContent='Enregistrer';$('#cancelEdit').hidden=true;$('#formError').textContent='';}
 function render(){
  $('#loginPanel').hidden=true;$('#workspace').hidden=false;$('#operatorName').textContent=cloud.session?.user?.email||'Compte opérateur';
+ renderControllers();
  renderContainerChoices();
- $('#history').innerHTML=portal.interventions.length?portal.interventions.map(item=>`<article class="historyItem"><h3>${escapeHtml(item.containerNumber)}</h3><div class="historyMeta">${escapeHtml(new Date(item.date+'T12:00:00Z').toLocaleDateString('fr-FR',{timeZone:'UTC'}))} · ${escapeHtml(item.type)} · N° ${escapeHtml(item.number)}</div><p>${escapeHtml(item.comment)}</p>${item.type==='préventif'&&Object.keys(item.parts||{}).length?`<div class="historyMeta">Points vérifiés : ${Object.keys(item.parts).map(escapeHtml).join(', ')}</div>`:''}<button type="button" class="secondary" data-edit="${escapeHtml(item.id)}">Modifier</button></article>`).join(''):'<p>Aucune intervention enregistrée avec ce compte.</p>';
+ $('#history').innerHTML=portal.interventions.length?portal.interventions.map(item=>`<article class="historyItem"><h3>${escapeHtml(item.containerNumber)}</h3><div class="historyMeta">${escapeHtml(new Date(item.date+'T12:00:00Z').toLocaleDateString('fr-FR',{timeZone:'UTC'}))} · ${escapeHtml(item.type)} · N° ${escapeHtml(item.number)}</div><div class="historyMeta">Contrôleur : ${escapeHtml(item.controller||'Non renseigné')}</div><p>${escapeHtml(item.comment)}</p>${item.type==='préventif'&&Object.keys(item.parts||{}).length?`<div class="historyMeta">Points vérifiés : ${Object.keys(item.parts).map(escapeHtml).join(', ')}</div>`:''}<button type="button" class="secondary" data-edit="${escapeHtml(item.id)}">Modifier</button></article>`).join(''):'<p>Aucune intervention enregistrée avec ce compte.</p>';
  $('#history').querySelectorAll('[data-edit]').forEach(button=>button.onclick=()=>{
   const item=portal.interventions.find(value=>value.id===button.dataset.edit);if(!item)return;
   editing=item;pending=null;selectedContainerId=item.containerId;$('#containerSearch').value=item.containerNumber;$('#containerSearch').disabled=true;$('#containerChoices').hidden=true;$('#containerSelection').textContent='Contenant sélectionné : '+item.containerNumber;
   $('#comment').value=item.comment;document.querySelectorAll('[name=type]').forEach(input=>input.checked=input.value===item.type);
+  const names=String(item.controller||'').split(' / ');$('#controllerPrimary').value=names[0]||'';$('#controllerSecondary').value=names[1]||'';
   renderChecklist(item.checklistRecorded?item.parts||{}:null);$('#formTitle').textContent='Modifier mon intervention';$('#saveButton').textContent='Enregistrer la correction';$('#cancelEdit').hidden=false;$('#formError').textContent='';
   window.scrollTo({top:0,behavior:'smooth'});$('#comment').focus();
  });
 }
-async function refresh(){portal=await cloud.rpc('operator_portal_data',{});if(!Array.isArray(portal?.containers)||!Array.isArray(portal?.interventions))throw Error('Données du portail indisponibles.');if(portal.containers.some(c=>!Array.isArray(c.checks)))throw Error('La checklist nécessite le script Supabase 019.');render();}
+async function refresh(){portal=await cloud.rpc('operator_portal_data',{});if(!Array.isArray(portal?.containers)||!Array.isArray(portal?.interventions))throw Error('Données du portail indisponibles.');if(portal.containers.some(c=>!Array.isArray(c.checks)))throw Error('La checklist nécessite le script Supabase 019.');if(!Array.isArray(portal.controllers))throw Error('Le choix des contrôleurs nécessite le script Supabase 022.');render();}
 async function start(){
  try{const config=validateConfig(window.VGP_CLOUD);if(!config)throw Error('Le portail doit être ouvert sur le site Supabase configuré.');cloud=new CloudStore(config);if(cloud.session)await refresh();}
  catch(error){if(cloud?.session){await cloud.logout().catch(()=>{});$('#loginError').textContent='Ce compte ne dispose pas du rôle opérateur, ou la session a expiré. Reconnectez-vous.';}else $('#loginError').textContent=error.message;}
@@ -50,21 +61,24 @@ function renderContainerChoices(){
 }
 $('#containerSearch').oninput=()=>{selectedContainerId=null;pending=null;$('#containerSelection').textContent='Choisissez un résultat dans la liste.';renderContainerChoices();renderChecklist();};
 $('#comment').oninput=()=>{pending=null;};
+$('#controllerPrimary').onchange=$('#controllerSecondary').onchange=()=>{pending=null;};
 $('#cancelEdit').onclick=resetForm;
 $('#interventionForm').onsubmit=async event=>{
  event.preventDefault();if(busy)return;
  const container=availableContainers().find(c=>c.id===selectedContainerId),
-  type=document.querySelector('[name=type]:checked')?.value,comment=$('#comment').value.trim();
+  type=document.querySelector('[name=type]:checked')?.value,comment=$('#comment').value.trim(),controllerPrimary=$('#controllerPrimary').value,controllerSecondary=$('#controllerSecondary').value;
  $('#formError').textContent='';message('');
  if(!container&&!editing){$('#formError').textContent='Sélectionnez un contenant existant dans les résultats. Un numéro saisi seul ne suffit pas.';return;}
  if(!type){$('#formError').textContent='Cochez un type d’intervention.';return;}
+ if(!controllerPrimary){$('#formError').textContent='Choisissez le premier contrôleur.';return;}
+ if(controllerSecondary&&controllerSecondary===controllerPrimary){$('#formError').textContent='Choisissez deux contrôleurs différents.';return;}
  if(!comment){$('#formError').textContent='Décrivez l’intervention dans le commentaire.';return;}
  const checks=editing?.checks||container?.checks||[];
  const checked_parts=type==='préventif'?Object.fromEntries([...$('#preventivePoints').querySelectorAll('input:checked')].map(input=>[checks[Number(input.dataset.checkIndex)],'Vérifié'])):{};
- const body={container_id:editing?.containerId||container.id,kind:type,comment,intervention_id:editing?.id||null,checked_parts};
+ const body={container_id:editing?.containerId||container.id,kind:type,comment,intervention_id:editing?.id||null,checked_parts,controller_primary:controllerPrimary,controller_secondary:controllerSecondary||null};
  const signature=JSON.stringify(body);if(!pending||pending.signature!==signature)pending={id:crypto.randomUUID(),signature};
  busy=true;$('#saveButton').disabled=true;
- try{await cloud.rpc('operator_save_intervention_v2',{request_id:pending.id,...body},120000);await refresh();resetForm();message('Intervention enregistrée dans les Contenants.');}
+ try{await cloud.rpc('operator_save_intervention_v3',{request_id:pending.id,...body},120000);await refresh();resetForm();message('Intervention enregistrée dans les Contenants.');}
  catch(error){$('#formError').textContent='Enregistrement non confirmé : '+error.message+' Les informations saisies sont conservées. Vous pouvez réessayer.';}
  finally{busy=false;$('#saveButton').disabled=false;}
 };

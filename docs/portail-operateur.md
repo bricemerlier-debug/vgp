@@ -26,3 +26,5 @@ Le rôle `operateur` est invisible pour les anciennes politiques RLS et fonction
 ## Vérification après activation
 
 Avec un compte opérateur réel, contrôler la connexion, la recherche d'un contenant, l'enregistrement, la correction et l'apparition dans la rubrique Contenants avec un compte administrateur. Essayer aussi `read_state` et `write_containers` avec le jeton opérateur : les appels doivent être refusés. Les tests automatisés locaux sont `node tests/operator_portal_database.mjs` et `python tests/operator_portal_browser.py` (serveur local sur le port 8123 pour le test navigateur).
+
+Pour choisir les contrôleurs depuis le portail, exécuter ensuite `supabase/022_operator_controllers.sql` dans le même projet. Le premier contrôleur est obligatoire, le second facultatif. Les noms proposés proviennent des fiches et de l’historique des contrôleurs de contenants ; la base valide les choix et conserve le contrôleur précédent dans les corrections. Après installation, le portail affiche la MAJ 080.
