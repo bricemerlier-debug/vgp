@@ -45,6 +45,23 @@ export function controlBelongsToController(control,profile,profiles=[]){
   return labels.flatMap(controllerParts).some(name=>componentController(profiles,name)?.id===targetId);
 }
 
+export function controllerReportEntries(state,profile){
+ const profiles=state.controllerProfiles||[],entries=[];
+ for(const equipment of state.equipment||[]){
+  for(const control of equipment.controls||[]){
+   if(!control.reportId||!controlBelongsToController(control,profile,profiles))continue;
+   entries.push({equipment,record:control,kind:'control',label:control.result==='Introuvable'?'Déclaration d’introuvable':control.result==='Mauvais état — à jeter'?'Contrôle · mise au rebut':control.result});
+  }
+  for(const event of equipment.archiveHistory||[]){
+   if(!event.reportId&&!event.signedAttachment&&!event.apave?.reportHash&&!event.apave?.reportNumber)continue;
+   const linked=(equipment.controls||[]).find(control=>control.id===(event.controlId||event.originalControlId));
+   if(!controlBelongsToController({verifierId:event.verifierId,intervenant:event.requester||''},profile,profiles)&&!(linked&&controlBelongsToController(linked,profile,profiles)))continue;
+   entries.push({equipment,record:event,kind:'event',label:event.reason==='Mis au rebut'?'Destruction / mise au rebut':event.reason==='Équipement perdu'?'Déclaration d’introuvable':event.reason||'Rapport d’archivage'});
+  }
+ }
+ return entries.sort((a,b)=>b.record.date.localeCompare(a.record.date)||(b.record.time||'').localeCompare(a.record.time||'')||(b.record.created||0)-(a.record.created||0));
+}
+
 export function upgradeControllers(state,newId){
   state.controllerProfiles??=[];
   const controls=(state.equipment||[]).flatMap(e=>e.controls||[]);
