@@ -865,7 +865,7 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,cl
   const next=structuredClone(read()),container=next.containers.find(c=>c.id===selected);
   if(!container){$('#containerInterventionError').textContent='Cette fiche est introuvable. Actualisez la page.';return;}
   const number=nextContainerInterventionNumber(next.containers||[]);
-  container.interventions.push({number,date:String(values.get('date')),controller,type,generalState:String(values.get('generalState')).trim(),comment:String(values.get('comment')).trim(),parts});
+  container.interventions.push({number,date:String(values.get('date')),controller,type,generalState:'',comment:String(values.get('comment')).trim(),parts});
   button.disabled=true;$('#containerInterventionStatus').textContent='Enregistrement en cours…';
   const ok=await (saveContainers?saveContainers(next):save(next,false,{timeoutMs:120000,renderAfter:false}));
   button.disabled=false;$('#containerInterventionStatus').textContent='';
