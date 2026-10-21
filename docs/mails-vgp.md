@@ -33,3 +33,5 @@ Pour préremplir un test, un lien peut contenir `?mailFrom=adresse&mailTo=adress
 Le modèle « Contrôle en retard » reprend le logo, la photo et le lien de déclaration de perte. La règle du planificateur prévoit J+7, J+14, J+21, etc., après l’échéance courante. Chaque semaine a une clé distincte : une nouvelle exécution le même jour ne double pas l’envoi. Aucun rattrapage des semaines passées. Un nouveau contrôle recalcule le cycle ; un archivage (perte ou rebut) annule les relances.
 
 Le worker actuel reste un simulateur : aucun envoi récurrent réel ne fonctionne en arrière-plan. La connexion Gmail dans le navigateur permet des envois manuels uniquement. Le futur service de production doit exécuter quotidiennement le plan et supporter les étapes négatives (−7, −14, etc.) ; la contrainte SQL initiale des étapes ne les accepte pas encore.
+
+Les mails ne contiennent aucun bouton ni lien vers la fiche interne du matériel. Le lien personnel de déclaration de perte reste disponible.

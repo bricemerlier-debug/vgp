@@ -103,3 +103,10 @@ test('modèle retard personnalisé avec échéance, photo et déclaration de per
  assert.match(mail.subject,/en retard/);assert.match(mail.text,/21\/11\/2026/);
  assert.match(mail.previewHtml,/Tous les 7 jours/);assert.equal(mail.hasPhoto,true);
 });
+
+test('aucun accès à la fiche interne dans les mails destinataires',()=>{
+ const mail=buildVgpEquipmentMail(fixture(),{equipmentId:'equipment-1',siteUrl:'https://interne.example.test/'});
+ for(const content of [mail.html,mail.previewHtml,mail.text]){
+  assert.doesNotMatch(content,/Voir la fiche|interne\.example\.test|#equipment\//);
+ }
+});

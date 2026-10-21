@@ -1,4 +1,4 @@
-import {buildVgpMailDraft,vgpMailAddressValid} from './vgp-mail.mjs?v=087';
+import {buildVgpMailDraft,vgpMailAddressValid} from './vgp-mail.mjs?v=090';
 
 // Le compte est autorisé par Google ; aucun mot de passe ni jeton n'est sauvegardé.
 export function createVgpGmail({clientId='',browser=globalThis,fetcher=(...args)=>fetch(...args),now=()=>Date.now()}={}){
