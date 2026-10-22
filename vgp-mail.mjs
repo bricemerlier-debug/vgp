@@ -24,7 +24,7 @@ export function vgpMailTemplateIssue(template){
  const unknown=[...template.subject.matchAll(/\{\{([^{}]*)\}\}/g),...template.body.matchAll(/\{\{([^{}]*)\}\}/g)].map(match=>match[1].trim()).filter(token=>!allowed.includes(token));
  return unknown.length?'Champs inconnus : '+[...new Set(unknown)].join(', '):'';
 }
-export function buildVgpEquipmentMail(state,{equipmentId,kind='month',recipient='',sender='',test=true,template=null,lossUrl='',scrapUrl=''}={}){
+export function buildVgpEquipmentMail(state,{equipmentId,kind='month',recipient='',sender='',test=true,template=null,lossUrl='',scrapUrl='',equipmentPhoto=undefined}={}){
  const equipment=(state.equipment||[]).find(e=>e.id===equipmentId&&!e.archived);
  if(!equipment)throw Error('Choisis un équipement actif pour préparer le mail.');
  const model=template||(state.mailTemplates||[]).find(row=>row.kind===kind),issue=vgpMailTemplateIssue(model);
@@ -36,7 +36,7 @@ export function buildVgpEquipmentMail(state,{equipmentId,kind='month',recipient=
  const contact=(state.ownerContacts||[]).find(row=>ownerIdentityKey(row.email)===ownerIdentityKey(email)),deadline=due(equipment),format=value=>value?value.split('-').reverse().join('/'):'À renseigner';
  const values={nom_equipement:equipmentName(equipment)||'Matériel',numero_interne:equipment.identifier,id_vgp:equipment.siteId||'—',nom_proprietaire:contact?.owner||equipment.owner||'à vous',date_controle:format(deadline),secteur:equipment.sector||'Non renseigné',zone:equipment.zone||'Non renseignée'};
  const subject=(test?'[TEST] ':'')+fillEmailTemplate(model.subject,values),body=fillEmailTemplate(model.body,values);
- const logo=state.reportLogo||goodyearReportLogo,photo=vgpMailPhotoValid(equipment.mailPhoto)?equipment.mailPhoto:null;
+ const logo=state.reportLogo||goodyearReportLogo,photo=equipmentPhoto!==undefined&&vgpMailPhotoValid(equipmentPhoto)?equipmentPhoto:vgpMailPhotoValid(equipment.mailPhoto)?equipment.mailPhoto:null;
  const attachments=[{cid:'goodyear-logo',name:'goodyear.jpg',type:'image/jpeg',data:logo.data}];
  if(photo)attachments.push({cid:'equipment-photo',name:'equipement.jpg',type:'image/jpeg',data:photo.data});
  let declarationUrl='';if(lossUrl){const url=new URL(lossUrl);if(!['https:','http:'].includes(url.protocol)||!url.pathname.endsWith('/declarer-perte.html')||!/^#token=[a-f0-9]{64}$/.test(url.hash))throw Error('Lien de déclaration invalide.');declarationUrl=url.href;}

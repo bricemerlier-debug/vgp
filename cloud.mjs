@@ -111,5 +111,37 @@ export class CloudStore{
   }catch(error){if(error?.name==='AbortError')throw Error('Délai dépassé pendant le nettoyage de l’ancienne photo.');throw error;}
   finally{clearTimeout(timer);}
  }
+ equipmentPhotoPathValid(path){return typeof path==='string'&&path.startsWith(this.config.workspaceId+'/')&&/^[a-f0-9-]{36}\/[a-f0-9-]{36}_[a-f0-9]{64}\.jpg$/.test(path);}
+ async equipmentPhotoPath(id){
+  if(typeof id!=='string'||!id||id.length>300)throw Error('Équipement invalide.');
+  const rows=await this.request(`/rest/v1/equipment_photos?workspace_id=eq.${this.config.workspaceId}&equipment_id=eq.${encodeURIComponent(id)}&select=photo_path`,undefined,await this.token(),'GET');
+  if(!Array.isArray(rows)||rows.length>1)throw Error('Réponse photo invalide.');
+  const path=rows[0]?.photo_path||null;if(path&&!this.equipmentPhotoPathValid(path))throw Error('Référence photo invalide.');return path;
+ }
+ async equipmentPhotoUpload(blob){
+  if(blob?.type!=='image/jpeg'||!blob.size||blob.size>200*1024)throw Error('Photo JPEG invalide (200 Ko maximum).');
+  const hash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer()))].map(n=>n.toString(16).padStart(2,'0')).join('');
+  const path=`${this.config.workspaceId}/${crypto.randomUUID()}_${hash}.jpg`,controller=new AbortController(),timer=setTimeout(()=>controller.abort(),60000);
+  try{const response=await this.fetcher(this.config.url+'/storage/v1/object/equipment-photos/'+path,{method:'POST',headers:{apikey:this.config.publicKey,Authorization:'Bearer '+await this.token(),'Content-Type':'image/jpeg','x-upsert':'false'},body:blob,signal:controller.signal});const result=await response.json().catch(()=>({}));if(!response.ok)throw Error(result.message||'Stockage privé des photos indisponible.');return path;}
+  catch(error){if(error?.name==='AbortError')throw Error('Délai dépassé pendant l’envoi de la photo.');throw error;}
+  finally{clearTimeout(timer);}
+ }
+ async equipmentPhotoSet(id,path){if(path!==null&&!this.equipmentPhotoPathValid(path))throw Error('Référence photo invalide.');return this.rpc('set_equipment_photo',{equipment_id:id,photo_path:path},60000);}
+ async equipmentPhotoUrl(path){
+  if(!this.equipmentPhotoPathValid(path))throw Error('Référence photo invalide.');
+  const result=await this.request('/storage/v1/object/sign/equipment-photos/'+path,{expiresIn:120},await this.token()),raw=result.signedURL||result.signedUrl;
+  if(typeof raw!=='string')throw Error('Lien photo indisponible.');
+  const url=new URL(raw.startsWith('/object/')?'/storage/v1'+raw:raw,this.config.url);
+  if(url.origin!==new URL(this.config.url).origin||url.pathname!=='/storage/v1/object/sign/equipment-photos/'+path)throw Error('Adresse photo refusée.');return url.href;
+ }
+ async equipmentPhotoBlob(path){
+  const url=await this.equipmentPhotoUrl(path),controller=new AbortController(),timer=setTimeout(()=>controller.abort(),30000);
+  try{const response=await this.fetcher(url,{cache:'no-store',signal:controller.signal});if(!response.ok)throw Error('Lecture de la photo impossible.');const blob=await response.blob();if(!blob.size||blob.size>200*1024)throw Error('Photo du matériel invalide.');return new Blob([blob],{type:'image/jpeg'});}
+  finally{clearTimeout(timer);}
+ }
+ async equipmentPhotoRemove(path){
+  if(!this.equipmentPhotoPathValid(path))throw Error('Référence photo invalide.');
+  const response=await this.fetcher(this.config.url+'/storage/v1/object/equipment-photos/'+path,{method:'DELETE',headers:{apikey:this.config.publicKey,Authorization:'Bearer '+await this.token()},cache:'no-store'});if(!response.ok){const result=await response.json().catch(()=>({}));throw Error(result.message||'Suppression de l’ancienne photo refusée.');}
+ }
  async logout(){try{await this.request('/auth/v1/logout?scope=local',{},await this.token())}finally{this.session=null;this.remember=false;for(const place of [this.storage,this.persistentStorage]){try{place?.removeItem(this.key)}catch{}}}}
 }

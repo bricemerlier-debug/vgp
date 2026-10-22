@@ -1,11 +1,11 @@
-import {vgpMailKinds,vgpMailTemplateIssue,vgpMailAddressValid,buildVgpEquipmentMail,buildVgpMailDraft} from './vgp-mail.mjs?v=098';
-import {createVgpGmail} from './vgp-mail-gmail.mjs?v=098';
+import {vgpMailKinds,vgpMailTemplateIssue,vgpMailAddressValid,buildVgpEquipmentMail,buildVgpMailDraft} from './vgp-mail.mjs?v=100';
+import {createVgpGmail} from './vgp-mail-gmail.mjs?v=100';
 import {equipmentName} from './domain.mjs';
 import {equipmentMailRecipients} from './ownership.mjs';
 
-export function installVgpMail({read,save,canEdit,accountEmail=()=>'',refresh=async()=>{},cleanForm=()=>{},gmailClientId='',defaults={},createLossLink=null}){
+export function installVgpMail({read,save,canEdit,loadEquipmentPhoto=async()=>undefined,accountEmail=()=>'',refresh=async()=>{},cleanForm=()=>{},gmailClientId='',defaults={},createLossLink=null}){
  const host=document.querySelector('#vgpMailWorkspace'),safe=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
- const gmail=createVgpGmail({clientId:gmailClientId}),drafts=new Map(),lossLinks=new Map();let kind='month',busy=false,lastSent='',uncertain=false;
+ const gmail=createVgpGmail({clientId:gmailClientId}),drafts=new Map(),lossLinks=new Map();let kind='month',busy=false,lastSent='',uncertain=false,photo=undefined,photoEquipmentId='',photoLoading=false,photoError='',previewSerial=0,previewSignature='';
  host.innerHTML=`<section class="mail-model-section"><div class="mail-section-heading"><div><span class="mail-kicker">01 · MESSAGES ENREGISTRÉS</span><h2>Choisir un modèle</h2></div><span class="mail-small-note">Le destinataire vient de la fiche propriétaire.</span></div><div id="mailModelCards" class="mail-model-cards"></div><details class="mail-edit-model"><summary>Modifier le modèle sélectionné</summary><form id="mailTemplateForm"><label>Objet<input id="mailSubject" required maxlength="300"></label><label>Message<textarea id="mailBody" rows="7" required maxlength="10000"></textarea></label><p class="foot">Champs disponibles : {{nom_proprietaire}}, {{nom_equipement}}, {{numero_interne}}, {{id_vgp}}, {{date_controle}}, {{secteur}}, {{zone}}.</p><button id="mailSaveTemplate" type="submit">Enregistrer le modèle</button><p id="mailTemplateSaved" role="status"></p><p id="mailTemplateError" class="error" role="alert"></p></form></details></section>
  <div class="mail-workspace-grid"><section class="mail-compose-card"><div class="mail-section-heading"><div><span class="mail-kicker">02 · PRÉPARER UN ENVOI</span><h2>Matériel et destinataire</h2><p>Un seul équipement, un seul destinataire.</p></div></div><form id="mailTestForm"><label>Rechercher un équipement<input id="mailEquipmentSearch" type="search" placeholder="Numéro interne ou nom du matériel…"></label><label>Équipement utilisé pour l’envoi<select id="mailSampleEquipment" data-native-select required></select></label><div id="mailEquipmentOwner" class="mail-owner-hint" role="status"></div><label>Depuis mon compte Gmail<input id="mailTestSender" type="email" required maxlength="254" autocomplete="email" placeholder="ton.adresse@gmail.com"></label><label>Destinataire<input id="mailTestRecipient" type="email" required maxlength="254" placeholder="Adresse du destinataire"></label><p class="foot">Tu peux remplacer cette adresse pour le test. La fiche propriétaire ne change pas.</p><label class="mail-mode-choice"><input id="mailIsTest" type="checkbox" checked disabled><span>Mode test uniquement · aucune fiche modifiée</span></label><p class="mail-test-notice">Le mail porte la mention <strong>TEST</strong>. Aucun contrôle ni rappel automatique n’est créé.</p><div class="mail-send-actions"><button type="button" id="mailConnectGmail" class="secondary">Connecter Gmail</button><button type="submit" id="mailSendTest">Envoyer le test</button></div><p id="mailGmailStatus" class="foot" role="status"></p><p id="mailTestStatus" role="status"></p><p id="mailTestError" class="error" role="alert"></p><details class="mail-export-options"><summary>Autres options</summary><button type="button" id="mailCopy" class="secondary">Copier le mail mis en forme</button><button type="button" id="mailDownloadDraft" class="secondary">Télécharger le message (.eml)</button><p class="foot">Le fichier .eml contient le logo et la photo. Son ouverture en brouillon dépend de ta messagerie.</p></details></form></section>
  <section class="mail-preview-card"><div class="mail-section-heading"><div><span class="mail-kicker">03 · APERÇU DU MAIL</span><h2>Ce que recevra le destinataire</h2></div><span class="mail-test-tag">TEST</span></div><div class="mail-envelope"><p><span>À</span><strong id="mailPreviewRecipient">—</strong></p><p><span>Objet</span><strong id="mailPreviewSubject">—</strong></p></div><div id="mailPreviewEmpty" class="mail-preview-empty"><span aria-hidden="true">✉</span><h3>Ton mail prend forme ici</h3><p>Choisis un équipement pour afficher son rappel avec ses informations et sa photo.</p></div><iframe id="mailSettingsPreview" title="Aperçu du mail de rappel VGP" sandbox="allow-same-origin" hidden></iframe></section></div>`;
@@ -16,12 +16,17 @@ export function installVgpMail({read,save,canEdit,accountEmail=()=>'',refresh=as
  for(const event of ['input','change'])testForm.addEventListener(event,e=>e.stopPropagation());
  function model(){return {kind,subject:q('#mailSubject').value,body:q('#mailBody').value};}
  function options(){return {equipmentId:q('#mailSampleEquipment').value,kind,recipient:q('#mailTestRecipient').value.trim(),sender:q('#mailTestSender').value.trim(),test:true,template:model(),siteUrl:location.origin+location.pathname};}
- function message(lossUrl='',scrapUrl=''){return buildVgpEquipmentMail(read(),{...options(),lossUrl,scrapUrl});}
+ function message(lossUrl='',scrapUrl=''){return buildVgpEquipmentMail(read(),{...options(),lossUrl,scrapUrl,equipmentPhoto:photoEquipmentId===q('#mailSampleEquipment').value?photo:undefined});}
+ async function preparedMessage(){
+  const id=q('#mailSampleEquipment').value;if(!id)return message();
+  const loaded=await loadEquipmentPhoto(id);if(id!==q('#mailSampleEquipment').value)throw Error('Le matériel sélectionné a changé.');
+  photo=loaded;photoEquipmentId=id;photoError='';return message();
+ }
  async function withLossLink(base,required=false){
   if(!createLossLink){if(required||!base.test)throw Error('Le formulaire de perte nécessite Supabase et le script 024.');return base;}
   const key=JSON.stringify(base);let link=lossLinks.get(key);
   if(!link||Date.parse(link.expiresAt)<=Date.now()+60000){link=await createLossLink({equipmentId:base.equipmentId,recipient:base.recipient,test:base.test});lossLinks.set(key,link);}
-  if(JSON.stringify(message())!==key)throw Error('Le message a changé. Relis le nouvel aperçu avant de continuer.');
+  if(JSON.stringify(await preparedMessage())!==key)throw Error('Le message a changé. Relis le nouvel aperçu avant de continuer.');
   return message(link.url,link.scrapUrl);
  }
  function markCards(){q('#mailModelCards').innerHTML=vgpMailKinds.map(row=>`<button type="button" class="mail-model-card" data-mail-kind="${row.kind}" aria-pressed="${row.kind===kind}"><span class="mail-model-stage">${row.label}</span><strong>${row.title}</strong><small>${row.description}</small></button>`).join('');q('#mailModelCards').querySelectorAll('button').forEach(button=>button.onclick=()=>{drafts.set(kind,model());kind=button.dataset.mailKind;loadModel();preview();});}
@@ -36,16 +41,23 @@ export function installVgpMail({read,save,canEdit,accountEmail=()=>'',refresh=as
   q('#mailGmailStatus').textContent=current?`Compte connecté : ${current.email}`:gmail.configured()?'Connecte ton compte Gmail pour envoyer le message depuis cette adresse.':'L’envoi direct nécessite de configurer la connexion Gmail du site. L’aperçu et le téléchargement du message sont disponibles.';
   q('#mailSendTest').textContent=q('#mailIsTest').checked?'Envoyer le test':'Envoyer le rappel';
   q('.mail-test-tag').textContent=q('#mailIsTest').checked?'TEST':'RAPPEL';
-  q('#mailSendTest').disabled=busy||!current||!q('#mailSampleEquipment').value||uncertain;
+  q('#mailSendTest').disabled=busy||photoLoading||!!photoError||!current||!q('#mailSampleEquipment').value||uncertain;
  }
  function preview(){
   connection();q('#mailPreviewRecipient').textContent=q('#mailTestRecipient').value.trim()||'Choisis le matériel ou saisis une adresse';
+  const id=q('#mailSampleEquipment').value;
+  if(id&&photoEquipmentId!==id&&!photoLoading){
+   const serial=++previewSerial;photoLoading=true;photoError='';previewSignature='';connection();q('#mailSettingsPreview').hidden=true;q('#mailPreviewEmpty').hidden=false;q('#mailPreviewEmpty').querySelector('p').textContent='Chargement de la photo du matériel…';
+   Promise.resolve(loadEquipmentPhoto(id)).then(loaded=>{if(serial!==previewSerial||id!==q('#mailSampleEquipment').value)return;photo=loaded;photoEquipmentId=id;photoLoading=false;preview();}).catch(error=>{if(serial!==previewSerial)return;photoLoading=false;photoError=error.message;q('#mailPreviewEmpty').querySelector('p').textContent='Photo indisponible : '+error.message;connection();});
+   return;
+  }
+  if(photoLoading||photoError)return;
   try{
-   const mail=message();q('#mailSettingsPreview').hidden=false;q('#mailPreviewEmpty').hidden=true;q('#mailSettingsPreview').style.height='1px';q('#mailSettingsPreview').srcdoc=mail.previewHtml;
+   const mail=message();previewSignature=JSON.stringify(mail);q('#mailSettingsPreview').hidden=false;q('#mailPreviewEmpty').hidden=true;q('#mailSettingsPreview').style.height='1px';q('#mailSettingsPreview').srcdoc=mail.previewHtml;
    q('#mailPreviewSubject').textContent=mail.subject;q('#mailCopy').disabled=false;q('#mailDownloadDraft').disabled=false;
    const equipment=read().equipment.find(e=>e.id===mail.equipmentId);
    if(equipment)q('#mailEquipmentOwner').textContent='Propriétaire : '+(equipment.owner||'Non renseigné');
-  }catch(error){q('#mailSettingsPreview').hidden=true;q('#mailPreviewEmpty').hidden=false;q('#mailPreviewSubject').textContent='—';q('#mailCopy').disabled=true;q('#mailDownloadDraft').disabled=true;}
+  }catch(error){previewSignature='';q('#mailSettingsPreview').hidden=true;q('#mailPreviewEmpty').hidden=false;q('#mailPreviewSubject').textContent='—';q('#mailCopy').disabled=true;q('#mailDownloadDraft').disabled=true;}
  }
  q('#mailSettingsPreview').onload=()=>{const height=q('#mailSettingsPreview').contentDocument?.documentElement.scrollHeight;if(height)q('#mailSettingsPreview').style.height=height+'px';};
  function equipmentOptions(){
@@ -56,6 +68,7 @@ export function installVgpMail({read,save,canEdit,accountEmail=()=>'',refresh=as
  }
  q('#mailEquipmentSearch').oninput=equipmentOptions;
  q('#mailSampleEquipment').onchange=()=>{
+  previewSerial++;photoLoading=false;photoError='';photoEquipmentId='';
   const equipment=read().equipment.find(e=>e.id===q('#mailSampleEquipment').value);
   if(!recipientOverridden)q('#mailTestRecipient').value=equipment?equipmentMailRecipients(equipment,read().ownerContacts||[]).find(row=>vgpMailAddressValid(row.email))?.email||'':'';
   q('#mailTestError').textContent='';q('#mailTestStatus').textContent='';preview();
@@ -78,19 +91,20 @@ export function installVgpMail({read,save,canEdit,accountEmail=()=>'',refresh=as
   event.preventDefault();if(busy||uncertain)return;
   q('#mailTestError').textContent='';q('#mailTestStatus').textContent='';
   try{
-   const initial=message();if(!initial.recipient)throw Error('Renseigne le destinataire du message.');
+   const initial=await preparedMessage();if(!initial.recipient)throw Error('Renseigne le destinataire du message.');
+   if(JSON.stringify(initial)!==previewSignature){preview();throw Error('La photo ou la fiche a changé. Relis le nouvel aperçu avant d’envoyer.');}
    const signature=JSON.stringify(initial);if(signature===lastSent)throw Error('Ce message a déjà été envoyé. Modifie le message ou le matériel pour préparer un nouvel envoi.');
    busy=true;connection();q('#mailTestStatus').textContent='Vérification du matériel avant l’envoi…';await refresh(form);
-   const current=message();if(JSON.stringify(current)!==signature){preview();throw Error('La fiche ou le destinataire a changé. L’aperçu est actualisé : relis-le avant d’envoyer.');}
+   const current=await preparedMessage();if(JSON.stringify(current)!==signature){preview();throw Error('La fiche ou le destinataire a changé. L’aperçu est actualisé : relis-le avant d’envoyer.');}
    const ready=await withLossLink(current,true);q('#mailTestStatus').textContent='Envoi du message via Gmail…';const result=await gmail.sendMail(ready);lastSent=signature;q('#mailTestStatus').textContent=`${current.test?'Test':'Rappel'} envoyé à ${result.recipient} depuis ${current.sender}.`;
   }catch(error){uncertain=!!error.uncertain;q('#mailTestStatus').textContent='';q('#mailTestError').textContent=error.message;}finally{busy=false;connection();}
  };
  q('#mailDownloadDraft').onclick=async()=>{
-  try{const mail=await withLossLink(message()),draft=buildVgpMailDraft(mail),url=URL.createObjectURL(new Blob([draft],{type:'message/rfc822'})),link=document.createElement('a');link.href=url;link.download=mail.test?'test-rappel-vgp.eml':'rappel-vgp.eml';link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);q('#mailTestStatus').textContent='Message téléchargé avec ses images. Aucun envoi effectué.';}catch(error){q('#mailTestError').textContent=error.message;}
+  try{const mail=await withLossLink(await preparedMessage()),draft=buildVgpMailDraft(mail),url=URL.createObjectURL(new Blob([draft],{type:'message/rfc822'})),link=document.createElement('a');link.href=url;link.download=mail.test?'test-rappel-vgp.eml':'rappel-vgp.eml';link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);q('#mailTestStatus').textContent='Message téléchargé avec ses images. Aucun envoi effectué.';}catch(error){q('#mailTestError').textContent=error.message;}
  };
  q('#mailCopy').onclick=async()=>{
-  try{const mail=await withLossLink(message());await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([mail.previewHtml],{type:'text/html'}),'text/plain':new Blob([mail.text],{type:'text/plain'})})]);q('#mailTestStatus').textContent='Mail copié. Colle-le dans ta messagerie et vérifie la photo avant l’envoi.';}catch{q('#mailTestError').textContent='La copie mise en forme est indisponible dans ce navigateur. Télécharge le message avec ses images.';}
+  try{const mail=await withLossLink(await preparedMessage());await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([mail.previewHtml],{type:'text/html'}),'text/plain':new Blob([mail.text],{type:'text/plain'})})]);q('#mailTestStatus').textContent='Mail copié. Colle-le dans ta messagerie et vérifie la photo avant l’envoi.';}catch{q('#mailTestError').textContent='La copie mise en forme est indisponible dans ce navigateur. Télécharge le message avec ses images.';}
  };
  loadModel();
- return {render(){equipmentOptions();q('#mailSaveTemplate').disabled=!canEdit();if(!q('#mailTestSender').value)q('#mailTestSender').value=accountEmail();preview();}};
+ return {render(){equipmentOptions();photoEquipmentId='';photoLoading=false;photoError='';previewSerial++;q('#mailSaveTemplate').disabled=!canEdit();if(!q('#mailTestSender').value)q('#mailTestSender').value=accountEmail();preview();}};
 }
