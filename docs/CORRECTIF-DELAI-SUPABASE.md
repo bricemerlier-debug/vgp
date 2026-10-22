@@ -6,7 +6,7 @@ Cette erreur indique que Supabase a interrompu une requête trop longue. Elle pe
 
 1. Ouvrir le projet concerné dans [Supabase](https://supabase.com/dashboard).
 2. Aller dans **SQL Editor > New query**.
-3. Copier **tout** le contenu de [027_equipment_fast_save.sql](../supabase/027_equipment_fast_save.sql), le coller et cliquer **Run**. Ce script reprend le correctif 004 et accélère aussi les sauvegardes d'une seule fiche. Le projet doit déjà posséder la protection 003. Ne pas rejouer 001/002 et ne pas recréer l'espace de travail.
+3. Exécuter [027_equipment_fast_save.sql](../supabase/027_equipment_fast_save.sql), puis [028_equipment_write_timeout.sql](../supabase/028_equipment_write_timeout.sql) dans **SQL Editor > New query**. Le premier accélère les sauvegardes ; le second accorde à la fonction VGP jusqu'à 45 secondes côté serveur, avec une limite de 5 secondes pour les attentes de verrou. Le projet doit déjà posséder la protection 003. Ne pas rejouer 001/002 et ne pas recréer l'espace de travail.
 4. Si SQL Editor affiche une erreur, conserver son message. Le script est transactionnel : en cas d'échec, son installation est annulée.
 5. Revenir sur le site, faire **Ctrl+F5**, vérifier que la fiche n'a pas déjà été enregistrée, puis réessayer une seule fois. Pour un import, sélectionner de nouveau le fichier et vérifier l'aperçu et les confirmations.
 
@@ -14,11 +14,11 @@ L'accès administrateur Supabase est nécessaire à cette manipulation. Le code 
 
 ## Ce qui change
 
-L'ancienne fonction rescannait le JSON de tout le parc pour chaque fiche et chaque contrôle. Même après le correctif 004, une modification locale vérifiait et reprojetait encore toutes les fiches. Pour un grand parc, ces traitements répétés peuvent dépasser le délai serveur.
+L'ancienne fonction rescannait le JSON de tout le parc pour chaque fiche et chaque contrôle. Même après le correctif 004, une modification locale vérifiait et reprojetait encore toutes les fiches. Pour un grand parc, ces traitements répétés peuvent dépasser le délai serveur. Les écritures des contenants disposaient déjà d'un délai SQL propre, mais pas celles des équipements.
 
 Le correctif indexe les équipements du document, puis concentre les vérifications métier et les écritures de projection sur les fiches modifiées. Il conserve les contrôles déjà présents ; seules les nouvelles réalisations sont insérées.
 
-La même transaction protège l'instantané, ses projections et l'historique. Les droits Auth/RLS, les contrôles de révision, la conservation des équipements, l'immuabilité des contrôles/PDF, les échéances historiques et les restrictions de migration restent actifs. Aucun tableau ou équipement n'est supprimé par le script. Il n'augmente pas globalement les droits ou les délais et n'active aucun envoi de mail.
+La même transaction protège l'instantané, ses projections et l'historique. Les droits Auth/RLS, les contrôles de révision, la conservation des équipements, l'immuabilité des contrôles/PDF, les échéances historiques et les restrictions de migration restent actifs. Aucun tableau ou équipement n'est supprimé par ces scripts. Le délai n'est augmenté que pour `write_state` ; l'attente d'un verrou échoue rapidement. Aucun envoi de mail n'est activé.
 
 ## Vérifications
 

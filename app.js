@@ -34,7 +34,7 @@ import {installSearchableSelects} from './searchable-select.mjs';
 import {parseTrackingCsv,analyzeTrackingRows,applyTrackingImport} from './tracking-import.mjs';
 import {applyImportedNamingRule,historicalEquipmentName,equipmentNamingSearch,ownerNeedsNamingReview,suggestEquipmentNaming,technicalVariantIssue,renameEquipmentLabel,initialEquipmentTypes,standardizedLabel,addEquipmentType,addEquipmentVariant,applyEquipmentNaming,namingGroups,nomenclatureValid} from './nomenclature.mjs';
 import {equipmentName,addMonths,due,latest,status,indicators,generatePdf,dashboard,reminders,monthlyProgress,annualCompletion,fillEmailTemplate,reportConclusion,buildReportPdf,shiftDate,weekStart,weeklySchedule,weeklyCompletion,equipmentAlerts,homeSummary,isInspection,latestInspection,calculatedDeadline,obligationEntries,freezeTracking,declareLoss,reactivateFound,migrationReview,migrateTracking,lossArchived} from './domain.mjs?v=088';
-import {CloudStore,validateConfig,canonical} from './cloud.mjs?v=098';
+import {CloudStore,validateConfig,canonical} from './cloud.mjs?v=099';
 import {analyzeRows} from './excel.mjs';
 // Ne jamais conserver les champs d’un formulaire de connexion dans l’adresse.
 {const url=new URL(location.href);let changed=false;for(const key of ['email','password','remember'])if(url.searchParams.has(key)){url.searchParams.delete(key);changed=true;}if(changed)history.replaceState(null,'',url.pathname+url.search+url.hash);}

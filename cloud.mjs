@@ -22,7 +22,8 @@ export class CloudStore{
   try{response=await this.fetcher(this.config.url+path,{method,headers:{apikey:this.config.publicKey,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},...(body===undefined?{}:{body:JSON.stringify(body)}),cache:'no-store',signal:controller.signal});result=await response.json().catch(()=>({}));}
   catch(error){throw Error(error?.name==='AbortError'?'Délai de réponse dépassé : enregistrement non confirmé. Actualisez et vérifiez les données avant de réessayer.':'Enregistrement non confirmé : vérifiez le réseau, puis actualisez avant de réessayer.');}
   finally{clearTimeout(timeout);}
-  if(!response.ok&&/statement timeout/i.test(result.message||''))throw Error('Supabase a interrompu l’enregistrement : délai serveur dépassé. Vérifiez que supabase/027_equipment_fast_save.sql est installé, puis actualisez la page. Si le problème persiste, vérifiez les écritures bloquées dans Supabase.');
+  if(!response.ok&&/statement timeout/i.test(result.message||''))throw Error('Supabase a interrompu l’enregistrement : délai serveur dépassé. Vérifiez que supabase/028_equipment_write_timeout.sql est installé, puis actualisez la page avant de réessayer.');
+  if(!response.ok&&/lock timeout/i.test(result.message||''))throw Error('Un autre enregistrement bloque temporairement la base. Actualisez la page et réessayez après la fin de cette écriture.');
   if(!response.ok)throw Error(response.status===401?'Session expirée : reconnectez-vous.':result.message||result.msg||result.error_description||'Opération Supabase refusée.');return result;
  }
 
