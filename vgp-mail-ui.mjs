@@ -1,5 +1,5 @@
-import {vgpMailKinds,vgpMailTemplateIssue,vgpMailAddressValid,buildVgpEquipmentMail,buildVgpMailDraft} from './vgp-mail.mjs?v=095';
-import {createVgpGmail} from './vgp-mail-gmail.mjs?v=095';
+import {vgpMailKinds,vgpMailTemplateIssue,vgpMailAddressValid,buildVgpEquipmentMail,buildVgpMailDraft} from './vgp-mail.mjs?v=098';
+import {createVgpGmail} from './vgp-mail-gmail.mjs?v=098';
 import {equipmentName} from './domain.mjs';
 import {equipmentMailRecipients} from './ownership.mjs';
 

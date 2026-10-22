@@ -22,7 +22,7 @@ export class CloudStore{
   try{response=await this.fetcher(this.config.url+path,{method,headers:{apikey:this.config.publicKey,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},...(body===undefined?{}:{body:JSON.stringify(body)}),cache:'no-store',signal:controller.signal});result=await response.json().catch(()=>({}));}
   catch(error){throw Error(error?.name==='AbortError'?'Délai de réponse dépassé : enregistrement non confirmé. Actualisez et vérifiez les données avant de réessayer.':'Enregistrement non confirmé : vérifiez le réseau, puis actualisez avant de réessayer.');}
   finally{clearTimeout(timeout);}
-  if(!response.ok&&/statement timeout/i.test(result.message||''))throw Error('Enregistrement annulé par Supabase : délai serveur dépassé. Vérifiez si supabase/004_fast_writes.sql est installé sur ce projet et si une écriture bloque la base. Actualisez la page avant tout nouvel essai.');
+  if(!response.ok&&/statement timeout/i.test(result.message||''))throw Error('Supabase a interrompu l’enregistrement : délai serveur dépassé. Vérifiez que supabase/027_equipment_fast_save.sql est installé, puis actualisez la page. Si le problème persiste, vérifiez les écritures bloquées dans Supabase.');
   if(!response.ok)throw Error(response.status===401?'Session expirée : reconnectez-vous.':result.message||result.msg||result.error_description||'Opération Supabase refusée.');return result;
  }
 

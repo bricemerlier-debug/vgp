@@ -123,5 +123,8 @@ test('mise au rebut : encart distinct et lien personnel dans le HTML et le texte
  const mail=buildVgpEquipmentMail(fixture(),{equipmentId:'equipment-1',scrapUrl});
  assert.match(mail.html,/Déclarer la mise au rebut/);assert.ok(mail.html.includes(scrapUrl));assert.ok(mail.text.includes(scrapUrl));
  assert.match(mail.previewHtml,/Vous ne retrouvez plus/);assert.match(mail.previewHtml,/Ce matériel a été mis au rebut/);
+ assert.match(mail.previewHtml,/<tr><td class="mail-action-cell" width="50%"[\s\S]*?Vous ne retrouvez plus[\s\S]*?<\/td><td class="mail-action-cell" width="50%"[\s\S]*?Ce matériel a été mis au rebut/);
+ assert.match(mail.previewHtml,/border-top:4px solid #ffda00/);assert.match(mail.previewHtml,/border-top:4px solid #0055a4/);
+ assert.doesNotMatch(mail.previewHtml,/#934538|#fff6f3/);
  assert.throws(()=>buildVgpEquipmentMail(fixture(),{equipmentId:'equipment-1',scrapUrl:'javascript:alert(1)'}),/Lien de mise au rebut invalide/);
 });

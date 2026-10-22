@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 const db=new PGlite();
 await db.exec(`create role anon;create role authenticated;create schema auth;create table auth.users(id uuid primary key);create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;grant usage on schema public,auth to authenticated,anon;grant execute on function auth.uid() to authenticated;`);
 await db.exec(readFileSync('supabase/001_schema.sql','utf8'));
-if(process.env.VGP_FAST_SQL==='1'){await db.exec(readFileSync('supabase/003_tracking_guard.sql','utf8'));await db.exec(readFileSync('supabase/004_fast_writes.sql','utf8'));}
+if(process.env.VGP_FAST_SQL==='1'){await db.exec(readFileSync('supabase/003_tracking_guard.sql','utf8'));await db.exec(readFileSync('supabase/027_equipment_fast_save.sql','utf8'));}
 const w='10000000-0000-0000-0000-000000000001',admin='20000000-0000-0000-0000-000000000001',reader='20000000-0000-0000-0000-000000000002',other='20000000-0000-0000-0000-000000000003';
 const editor='20000000-0000-0000-0000-000000000004';await db.query(`insert into auth.users values($1),($2),($3),($4)`,[admin,reader,other,editor]);
 await db.query('insert into public.workspaces values($1,$2)',[w,'Test']);await db.query('insert into public.workspace_state(workspace_id) values($1)',[w]);await db.query("insert into public.workspace_members values($1,$2,'admin'),($1,$3,'reader')",[w,admin,reader]);await db.query("insert into public.workspace_members values($1,$2,'editor')",[w,editor]);
