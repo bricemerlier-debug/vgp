@@ -139,7 +139,8 @@ export function containerCategories(containers,today=containerCivilToday()){
 }
 export function containerInterventionReport(container,intervention){
  const date=String(intervention.date||'').split('-').reverse().join('/');
- return {kind:'container',reportId:String(intervention.number),date,equipment:{designation:`Contenant ${container.number}`},fields:[['N° du contenant',container.number],['Catégorie',container.subtype]],verifier:intervention.controller||'Non renseigné',result:intervention.type||'Non renseigné',observations:intervention.comment||'Aucun commentaire renseigné.',conclusion:'Compte rendu des informations saisies pour cette intervention.',signature:null};
+ const components=Object.entries(intervention.parts||{}).filter(([part,value])=>String(part).trim()&&String(value).trim()).map(([part,value])=>({part,value:String(value).trim()}));
+ return {kind:'container',reportId:String(intervention.number),date,equipment:{designation:`Contenant ${container.number}`},fields:[['N° du contenant',container.number],['Catégorie',container.subtype]],verifier:intervention.controller||'Non renseigné',result:intervention.type||'Non renseigné',observations:intervention.comment||'Aucun commentaire renseigné.',components,conclusion:'Compte rendu des informations saisies pour cette intervention.',signature:null};
 }
 export function containerLegacyScrapPlan(containers,{today=containerCivilToday(),by='',at=new Date().toISOString()}={}){
  const targets=[];

@@ -30,6 +30,7 @@ for(const type of ['TR','TP','TJ','TG','SA','TF','TI','TK','TM','TN']){
  assert.equal(containerAnnualActivity([withoutPeriod],2026)[6].due,0);
 }
 assert.equal(containerInterventionReport(configured,intervention).observations,intervention.comment);
+assert.deepEqual(containerInterventionReport(configured,intervention).components,[{part:'Frein',value:'OK'},{part:'Éclairage',value:'À réparer'}]);
 assert.ok(!Object.hasOwn(containerInterventionReport(configured,intervention),'generalState'));
 assert.ok(containerRecordsValid({containers:[configured]}));
 assert.ok(!containerCategorySettingsValid({...configured,categoryMonths:121}));

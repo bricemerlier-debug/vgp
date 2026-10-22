@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {containerPreventiveStatus,containerAnnualActivity,containerWeeklyAgenda,containerStatusCounts,containerLegacyScrapPlan,containerArchiveInfo,containerCategories,containerInterventionReport} from '../containers.mjs';
 import {buildReportPdf} from '../domain.mjs';
-const intervention=(date,number='1')=>({date,number,controller:'Stéphane G. / Autre',type:'préventif',generalState:'OK',comment:'Un frein HS, remis en état.',parts:{Frein:'Réparé'}});
+const intervention=(date,number='1')=>({date,number,controller:'Stéphane G. / Autre',type:'préventif',generalState:'OK',comment:'Un frein HS, remis en état.',parts:{Bâti:'OK',Frein:'Réparé'}});
 const box=(number,dates,subtype='PC')=>({id:number,number,type:number.slice(0,2),subtype,interventions:dates.map((date,index)=>intervention(date,String(index+1)))});
 for(const number of ['TR001','tp042']){
  const container=box(number,['2024-01-01']);
@@ -31,8 +31,8 @@ try{
  const file=join(directory,'rapport.pdf');
  writeFileSync(file,buildReportPdf(containerInterventionReport(containers[0],containers[0].interventions[1])));
  const text=execFileSync('pdftotext',[file,'-'],{encoding:'utf8'});
- for(const term of ['RAPPORT CONTENANT','CD068','R2 - VERTE','Stéphane G. / Autre','30/09/2026','Un frein HS, remis en état.'])assert.ok(text.includes(term),term);
- assert.match(text,/Page 1 \/ 1/);assert.ok(!text.includes('N° d’intervention'));assert.ok(!text.includes('Sous-catégorie'));assert.ok(!text.includes('État général'));assert.ok(!text.includes('État des composants'));assert.ok(!text.includes('Frein : Réparé'));
+ for(const term of ['RAPPORT CONTENANT','CD068','R2 - VERTE','Stéphane G. / Autre','30/09/2026','Un frein HS, remis en état.','Points contrôlés','Bâti','Frein','Réparé'])assert.ok(text.includes(term),term);
+ assert.match(text,/Page 1 \/ 1/);assert.ok(!text.includes('N° d’intervention'));assert.ok(!text.includes('Sous-catégorie'));assert.ok(!text.includes('État général'));assert.ok(!text.includes('Bâti — OK'));assert.ok(!text.includes('Frein : Réparé'));
  assert.ok(!text.includes('RAPPORT VGP'));assert.ok(!text.includes('RÉSULTAT DE LA VÉRIFICATION'));
 }finally{rmSync(directory,{recursive:true,force:true});}
 console.log('TR/TP, rebut avant juillet 2024, catégories et rapport PDF contenant validés.');

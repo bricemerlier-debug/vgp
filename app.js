@@ -1,7 +1,7 @@
 import {inventoryRecoveryPlan,applyInventoryRecovery} from './container-inventory-recovery.mjs';
 import {reconcileInventory,inventoryEntryCode} from './inventory-reconciliation.mjs';
 import {standardTypeProgress} from './standard-type-kpi.mjs';
-import {installContainersUI,containerRecordsValid,containerLegacyScrapPlan,containerArchiveInfo} from './containers.mjs?v=086';
+import {installContainersUI,containerRecordsValid,containerLegacyScrapPlan,containerArchiveInfo} from './containers.mjs?v=087';
 import {analyzeContainerFiles,analyzeContainerCategoryFiles} from './container-import.mjs';
 import {installBulkEquipmentOwners} from './bulk-equipment-owners.mjs';
 import {processTeamForSector,assignMissingProcessTeams} from './process-team-assignment.mjs';
@@ -34,7 +34,7 @@ import {ownerDetailsIssue,equipmentOwners,equipmentHasOwner,addEquipmentOwner,re
 import {installSearchableSelects} from './searchable-select.mjs';
 import {parseTrackingCsv,analyzeTrackingRows,applyTrackingImport} from './tracking-import.mjs';
 import {applyImportedNamingRule,historicalEquipmentName,equipmentNamingSearch,ownerNeedsNamingReview,suggestEquipmentNaming,technicalVariantIssue,renameEquipmentLabel,initialEquipmentTypes,standardizedLabel,addEquipmentType,addEquipmentVariant,applyEquipmentNaming,namingGroups,nomenclatureValid} from './nomenclature.mjs';
-import {equipmentName,addMonths,due,latest,status,indicators,generatePdf,dashboard,reminders,monthlyProgress,annualCompletion,fillEmailTemplate,reportConclusion,buildReportPdf,shiftDate,weekStart,weeklySchedule,weeklyCompletion,equipmentAlerts,homeSummary,isInspection,latestInspection,calculatedDeadline,obligationEntries,freezeTracking,declareLoss,reactivateFound,migrationReview,migrateTracking,lossArchived} from './domain.mjs?v=089';
+import {equipmentName,addMonths,due,latest,status,indicators,generatePdf,dashboard,reminders,monthlyProgress,annualCompletion,fillEmailTemplate,reportConclusion,buildReportPdf,shiftDate,weekStart,weeklySchedule,weeklyCompletion,equipmentAlerts,homeSummary,isInspection,latestInspection,calculatedDeadline,obligationEntries,freezeTracking,declareLoss,reactivateFound,migrationReview,migrateTracking,lossArchived} from './domain.mjs?v=090';
 import {CloudStore,validateConfig,canonical} from './cloud.mjs?v=102';
 import {analyzeRows} from './excel.mjs';
 // Ne jamais conserver les champs d’un formulaire de connexion dans l’adresse.
