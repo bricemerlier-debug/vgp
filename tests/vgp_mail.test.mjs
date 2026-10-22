@@ -117,3 +117,11 @@ test('verrou test : un rappel réel est refusé avant tout appel Gmail',async()=
  await assert.rejects(()=>gmail.sendMail({test:false,lossUrl:'https://example.test/declarer-perte.html'}),/Envoi réel désactivé/);
  assert.equal(calls,0);
 });
+
+test('mise au rebut : encart distinct et lien personnel dans le HTML et le texte',()=>{
+ const scrapUrl='https://example.test/declarer-rebut.html#token='+'a'.repeat(64);
+ const mail=buildVgpEquipmentMail(fixture(),{equipmentId:'equipment-1',scrapUrl});
+ assert.match(mail.html,/Déclarer la mise au rebut/);assert.ok(mail.html.includes(scrapUrl));assert.ok(mail.text.includes(scrapUrl));
+ assert.match(mail.previewHtml,/Vous ne retrouvez plus/);assert.match(mail.previewHtml,/Ce matériel a été mis au rebut/);
+ assert.throws(()=>buildVgpEquipmentMail(fixture(),{equipmentId:'equipment-1',scrapUrl:'javascript:alert(1)'}),/Lien de mise au rebut invalide/);
+});

@@ -1,5 +1,5 @@
-import {vgpMailKinds,vgpMailTemplateIssue,vgpMailAddressValid,buildVgpEquipmentMail,buildVgpMailDraft} from './vgp-mail.mjs?v=093';
-import {createVgpGmail} from './vgp-mail-gmail.mjs?v=093';
+import {vgpMailKinds,vgpMailTemplateIssue,vgpMailAddressValid,buildVgpEquipmentMail,buildVgpMailDraft} from './vgp-mail.mjs?v=095';
+import {createVgpGmail} from './vgp-mail-gmail.mjs?v=095';
 import {equipmentName} from './domain.mjs';
 import {equipmentMailRecipients} from './ownership.mjs';
 
@@ -16,13 +16,13 @@ export function installVgpMail({read,save,canEdit,accountEmail=()=>'',refresh=as
  for(const event of ['input','change'])testForm.addEventListener(event,e=>e.stopPropagation());
  function model(){return {kind,subject:q('#mailSubject').value,body:q('#mailBody').value};}
  function options(){return {equipmentId:q('#mailSampleEquipment').value,kind,recipient:q('#mailTestRecipient').value.trim(),sender:q('#mailTestSender').value.trim(),test:true,template:model(),siteUrl:location.origin+location.pathname};}
- function message(lossUrl=''){return buildVgpEquipmentMail(read(),{...options(),lossUrl});}
+ function message(lossUrl='',scrapUrl=''){return buildVgpEquipmentMail(read(),{...options(),lossUrl,scrapUrl});}
  async function withLossLink(base,required=false){
   if(!createLossLink){if(required||!base.test)throw Error('Le formulaire de perte nécessite Supabase et le script 024.');return base;}
   const key=JSON.stringify(base);let link=lossLinks.get(key);
   if(!link||Date.parse(link.expiresAt)<=Date.now()+60000){link=await createLossLink({equipmentId:base.equipmentId,recipient:base.recipient,test:base.test});lossLinks.set(key,link);}
   if(JSON.stringify(message())!==key)throw Error('Le message a changé. Relis le nouvel aperçu avant de continuer.');
-  return message(link.url);
+  return message(link.url,link.scrapUrl);
  }
  function markCards(){q('#mailModelCards').innerHTML=vgpMailKinds.map(row=>`<button type="button" class="mail-model-card" data-mail-kind="${row.kind}" aria-pressed="${row.kind===kind}"><span class="mail-model-stage">${row.label}</span><strong>${row.title}</strong><small>${row.description}</small></button>`).join('');q('#mailModelCards').querySelectorAll('button').forEach(button=>button.onclick=()=>{drafts.set(kind,model());kind=button.dataset.mailKind;loadModel();preview();});}
  function loadModel(){

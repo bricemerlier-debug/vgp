@@ -15,9 +15,9 @@ import {sectorZones,sectorLabel,sectorChoices} from './sectors.mjs';
 import {ownerMergeSearch,ownerServiceOptions} from './personnel.mjs?v=050';
 import {installPersonnelOperations} from './personnel-ui.mjs';
 import {installWorkspaceNavigation} from './workspace-navigation.mjs?v=042';
-import {installVgpMail} from './vgp-mail-ui.mjs?v=093';
-import {vgpMailPhotoValid,vgpMailDefaultTemplates} from './vgp-mail.mjs?v=093';
-import {equipmentLossFormUrl} from './loss-link-api.mjs?v=088';
+import {installVgpMail} from './vgp-mail-ui.mjs?v=095';
+import {vgpMailPhotoValid,vgpMailDefaultTemplates} from './vgp-mail.mjs?v=095';
+import {equipmentLossFormUrl} from './loss-link-api.mjs?v=095';
 import {reminderCivilDate} from './reminder-dates.mjs';
 import {installMaintenanceKpi} from './maintenance-kpi-ui.mjs';
 import {installApaveActionImport} from './apave-actions-import.mjs';
@@ -136,7 +136,8 @@ const mailTestUrl=new URL(location.href),mailTestDefaults={sender:mailTestUrl.se
 if(mailTestUrl.searchParams.has('mailFrom')||mailTestUrl.searchParams.has('mailTo')){mailTestUrl.searchParams.delete('mailFrom');mailTestUrl.searchParams.delete('mailTo');history.replaceState(null,'',mailTestUrl.pathname+mailTestUrl.search+mailTestUrl.hash);}
 const vgpMailUI=installVgpMail({read:()=>data,save,canEdit:()=>cloud?.role!=='reader',accountEmail:()=>cloud?.session?.user?.email||'',refresh:form=>refreshNamingData({ignoreForm:form}),cleanForm:form=>dirtyForms.delete(form),gmailClientId:window.VGP_MAIL?.gmailClientId||'',defaults:mailTestDefaults,createLossLink:cloud?async({equipmentId,recipient,test})=>{
  let result;try{result=await cloud.rpc('create_equipment_loss_link',{equipment_id:equipmentId,recipient,for_test:test});}catch(error){if(/create_equipment_loss_link|schema cache|not find the function/i.test(error.message))throw Error('Activez le script Supabase 024 pour ajouter le formulaire de déclaration au mail.');throw error;}
- return {url:equipmentLossFormUrl(location.href,result.token),expiresAt:result.expiresAt};
+ let scrap;try{scrap=await cloud.rpc('create_equipment_scrap_link',{equipment_id:equipmentId,recipient,for_test:test});}catch(error){if(/create_equipment_scrap_link|schema cache|not find the function/i.test(error.message))throw Error('Activez le script Supabase 025 pour ajouter le formulaire de mise au rebut au mail.');throw error;}
+ return {url:equipmentLossFormUrl(location.href,result.token),scrapUrl:equipmentLossFormUrl(location.href,scrap.token,'scrap'),expiresAt:result.expiresAt<scrap.expiresAt?result.expiresAt:scrap.expiresAt};
 }:null});
 const workspaceNavigation=installWorkspaceNavigation({navigate:setView,openNaming:()=>namingReviewUI.open()});
 const shiftCalendarUI=installShiftCalendar({cloud,onChange:refreshOwnerPresences});

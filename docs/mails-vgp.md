@@ -37,3 +37,9 @@ Le worker actuel reste un simulateur : aucun envoi récurrent réel ne fonctionn
 Les mails ne contiennent aucun bouton ni lien vers la fiche interne du matériel. Le lien personnel de déclaration de perte reste disponible.
 
 Depuis MAJ 091, le transport Gmail refuse aussi tout message dont `test` n’est pas strictement vrai. Seul un clic explicite sur « Envoyer le test » envoie un message TEST au destinataire saisi. Aucun envoi automatique activé.
+
+## Déclaration de mise au rebut — MAJ 095
+
+Un second encart propose « Déclarer la mise au rebut », avec la même présentation que la perte. Son formulaire distinct demande identité, motif/circonstances, signature et attestation. Le lien est secret, limité au matériel et au destinataire, valable 35 jours et à usage unique. Il nécessite l’installation de `supabase/025_recipient_scrap_declaration.sql` dans le SQL Editor (en plus du 024 pour la perte). Les deux liens sont préparés avant l’envoi ; en absence du 025, l’écran signale l’activation manquante et n’envoie rien.
+
+Le mode TEST reste verrouillé : une validation ne modifie aucune fiche. La fonction serveur prévoit un archivage avec motif « Mis au rebut » et rapport signé pour une activation réelle ultérieure ; aucun envoi réel n’est activé par cette mise à jour.

@@ -1,9 +1,9 @@
-export function equipmentLossFormUrl(siteUrl,token){
+export function equipmentLossFormUrl(siteUrl,token,declaration='loss'){
  if(!/^[a-f0-9]{64}$/.test(token||''))throw Error('Lien de déclaration invalide.');
- const url=new URL('declarer-perte.html',siteUrl);if(!['https:','http:'].includes(url.protocol))throw Error('Adresse du formulaire invalide.');
+ const url=new URL(declaration==='scrap'?'declarer-rebut.html':'declarer-perte.html',siteUrl);if(!['https:','http:'].includes(url.protocol))throw Error('Adresse du formulaire invalide.');
  url.hash='token='+token;return url.href;
 }
-export function createLossLinkClient(config,{fetcher=(...args)=>fetch(...args)}={}){
+export function createLossLinkClient(config,{fetcher=(...args)=>fetch(...args),declaration='loss'}={}){
  if(!config?.enabled||!/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/.test(config.url||'')||!config.publicKey)throw Error('Le formulaire n’est pas activé sur ce site.');
  const endpoint=config.url.replace(/\/$/,'')+'/rest/v1/rpc/';
  async function rpc(name,body){
@@ -17,5 +17,5 @@ export function createLossLinkClient(config,{fetcher=(...args)=>fetch(...args)}=
   finally{clearTimeout(timer);}
  }
  const check=token=>{if(!/^[a-f0-9]{64}$/.test(token||''))throw Error('Ce lien est invalide ou incomplet. Ouvrez le lien reçu par mail.');};
- return {read(token){check(token);return rpc('read_equipment_loss_link',{token});},submit(token,{name,details,signature,accepted}){check(token);return rpc('submit_equipment_loss',{token,signer_name:name,search_details:details,signature,accepted});}};
+ return {read(token){check(token);return rpc(declaration==='scrap'?'read_equipment_scrap_link':'read_equipment_loss_link',{token});},submit(token,{name,details,signature,accepted}){check(token);return rpc(declaration==='scrap'?'submit_equipment_scrap':'submit_equipment_loss',{token,signer_name:name,search_details:details,signature,accepted});}};
 }
