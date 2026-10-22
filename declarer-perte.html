@@ -8,7 +8,7 @@
   <p id="lossTestNotice" class="loss-test-notice" hidden>MODE TEST · Vous pouvez essayer le formulaire. Aucun matériel ne sera marqué perdu.</p>
   <div class="loss-equipment"><div><span class="section-kicker">MATÉRIEL CONCERNÉ</span><h2 id="lossEquipmentNumber"></h2><p id="lossEquipmentName"></p><p id="lossEquipmentSerial"></p><p>Ce lien a été adressé à <strong id="lossRecipient"></strong>.</p></div><img id="lossEquipmentPhoto" hidden alt="Photo du matériel concerné"></div>
   <form id="lossForm">
-   <div class="form-step"><span>01</span><label for="lossSigner">Votre identité</label></div><label>Prénom et nom *<input id="lossSigner" name="name" autocomplete="name" required minlength="3" maxlength="160" placeholder="Votre prénom et votre nom"></label>
+   <div class="form-step"><span>01</span><label for="lossSigner">Votre identité</label></div><label>Adresse e-mail professionnelle *<input id="lossSigner" name="name" type="email" autocomplete="email" required maxlength="254" placeholder="prenom_nom@goodyear.com"><p id="declarationIdentity" class="foot" role="status"></p></label>
    <div class="form-step"><span>02</span><label for="lossDetails">Recherches effectuées</label></div><textarea id="lossDetails" name="details" rows="4" required minlength="10" maxlength="5000" placeholder="Indiquez où et quand vous avez cherché ce matériel, et les circonstances de sa perte si vous les connaissez."></textarea>
    <div class="form-step"><span>03</span><span>Votre signature *</span></div><p class="loss-signature-help">Dessinez votre signature, ou utilisez votre nom comme signature.</p><canvas id="lossSignature" width="720" height="200" tabindex="0" role="img" aria-label="Zone de signature"></canvas><div class="loss-signature-actions"><button id="lossSignWithName" type="button" class="secondary">Signer avec mon nom</button><button id="lossClearSignature" type="button" class="secondary">Effacer la signature</button></div>
    <label class="loss-attestation"><input id="lossAccepted" type="checkbox" required><span>Je certifie avoir recherché ce matériel et le déclarer perdu. Je confirme l’exactitude des informations renseignées et signe personnellement cette déclaration.</span></label>
@@ -16,4 +16,4 @@
    <button id="lossSubmit" type="submit">Signer et déclarer ce matériel perdu</button><p id="lossSubmitStatus" role="status"></p><p id="lossSubmitError" class="error" role="alert"></p>
   </form>
  </section>
-</main><script src="cloud-config.js"></script><script type="module" src="declarer-perte.js?v=087"></script></html>
+</main><script src="cloud-config.js"></script><script type="module" src="declarer-perte.js?v=096"></script></html>

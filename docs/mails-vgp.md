@@ -43,3 +43,11 @@ Depuis MAJ 091, le transport Gmail refuse aussi tout message dont `test` n’est
 Un second encart propose « Déclarer la mise au rebut », avec la même présentation que la perte. Son formulaire distinct demande identité, motif/circonstances, signature et attestation. Le lien est secret, limité au matériel et au destinataire, valable 35 jours et à usage unique. Il nécessite l’installation de `supabase/025_recipient_scrap_declaration.sql` dans le SQL Editor (en plus du 024 pour la perte). Les deux liens sont préparés avant l’envoi ; en absence du 025, l’écran signale l’activation manquante et n’envoie rien.
 
 Le mode TEST reste verrouillé : une validation ne modifie aucune fiche. La fonction serveur prévoit un archivage avec motif « Mis au rebut » et rapport signé pour une activation réelle ultérieure ; aucun envoi réel n’est activé par cette mise à jour.
+
+## Identité du déclarant et fiche contrôleur — MAJ 096
+
+Installer `supabase/026_recipient_declaration_controller.sql` après 024 et 025. Dans les deux formulaires, l’adresse personnelle professionnelle `prenom_nom@goodyear.com` remplace le nom saisi. Le nom est calculé dans le navigateur et recalculé côté serveur. L’adresse est une identité déclarée, sans vérification de possession de cette boîte : elle est enregistrée avec `emailVerified: false`, distinctement du destinataire du lien (qui peut être un groupe Process Team).
+
+Hors test, la déclaration crée ou réutilise une fiche contrôleur par adresse, ou complète une fiche du même nom sans e-mail. Un homonyme ayant une autre adresse reste distinct. Le rapport signé porte son identifiant de contrôleur et apparaît dans sa fiche ainsi que dans l’historique du matériel ; il conserve sa nature de déclaration et ne valide aucune inspection réglementaire. La signature du rapport ne remplace pas la signature permanente du profil. Les nouvelles déclarations sont concernées ; les anciens rapports ne sont pas réattribués.
+
+En mode TEST, aucune fiche contrôleur ni entrée d’historique n’est créée. Les envois restent verrouillés en mode TEST.

@@ -61,7 +61,8 @@ export function controllerReportEntries(state,profile){
   for(const event of equipment.archiveHistory||[]){
    if(!event.reportId&&!event.signedAttachment&&!event.apave?.reportHash&&!event.apave?.reportNumber)continue;
    const linked=(equipment.controls||[]).find(control=>control.id===(event.controlId||event.originalControlId));
-   if(!controlBelongsToController({verifierId:event.verifierId,intervenant:event.requester||''},profile,profiles)&&!(linked&&belongs(linked)))continue;
+   if(event.verifierId){if(resolvedControllerId(profiles,event.verifierId)!==targetId)continue;}
+   else if(!controlBelongsToController({intervenant:event.requester||''},profile,profiles)&&!(linked&&belongs(linked)))continue;
    entries.push({equipment,record:event,kind:'event',label:event.reason==='Mis au rebut'?'Destruction / mise au rebut':event.reason==='Équipement perdu'?'Déclaration d’introuvable':event.reason||'Rapport d’archivage'});
   }
  }
