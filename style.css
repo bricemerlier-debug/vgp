@@ -778,3 +778,67 @@ header .header-engineering-logo{display:block;width:72px;height:72px;object-fit:
 .mail-export-options{padding-top:16px;margin-top:20px;border-top:1px solid #e3ebf4}.mail-export-options button{display:block;margin-top:10px;font-size:12px}.inventory-entry-footer{justify-content:flex-end}
 @media(max-width:1050px){.mail-workspace-grid{grid-template-columns:1fr}.mail-model-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.mail-compose-card{max-width:none}}
 @media(max-width:600px){.mail-page-hero{padding:24px 20px;flex-direction:column;align-items:flex-start;gap:16px}.mail-page-hero h1{font-size:26px}.mail-model-section,.mail-compose-card{padding:21px 17px}.mail-section-heading{flex-direction:column;gap:5px}.mail-preview-card .mail-section-heading{padding:0 17px}.mail-envelope{padding:13px 17px}.mail-model-cards{gap:8px}.mail-model-card{padding:12px;min-height:150px}.mail-model-card[aria-pressed=true]{padding:11px}.mail-small-note{margin-top:0}.mail-send-actions{flex-direction:column}.mail-workspace-grid{gap:16px}.mail-preview-empty{padding:65px 20px}}
+
+/* Mise en forme commune des espaces VGP et Contenants, inspirée de l'inventaire. */
+.workspace-hero{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:30px 34px;margin:0 0 20px;border:0;border-bottom:5px solid #ffda00;border-radius:14px;background:linear-gradient(115deg,#00366d,#0057a8 72%,#1269b6);color:#fff;text-align:left}
+.workspace-hero>div:first-child{min-width:0}
+.workspace-hero-kicker,.workspace-panel-kicker{display:block;color:#ffda00;font-size:10px;font-weight:800;letter-spacing:1.7px}
+.workspace-hero h1{margin:8px 0 0;color:#fff;font-size:30px;line-height:1.2;letter-spacing:-.6px}
+.workspace-hero-brand{flex:none;display:flex;flex-direction:column;align-items:center;gap:3px;width:max-content;max-width:100%;padding:10px 14px;border-radius:10px;background:#fff;box-shadow:0 8px 24px #002e5c36}
+.workspace-hero-brand img{display:block;width:175px;height:53px;max-width:100%;object-fit:contain}
+.workspace-hero-brand span{color:#37618a;font-size:9px;font-weight:800;letter-spacing:1.3px}
+#vgpWorkspace>.workspace-hero{display:flex;justify-content:space-between;text-align:left;margin:0 0 20px}
+#vgpWorkspace>.workspace-hero h1{max-width:none}
+#containersView>.workspace-hero{justify-content:space-between;align-items:center;text-align:left}
+#containersView>.workspace-hero h1{margin:8px 0 0;color:#fff;font-size:30px}
+#containersView:has(#inventoryView:not([hidden]))>.workspace-hero{display:none}
+
+.workspace-panel-heading{display:flex;align-items:center;gap:14px;margin:-24px -24px 24px;padding:20px 24px;border-bottom:4px solid #ffda00;border-radius:10px 10px 0 0;background:linear-gradient(115deg,#00366d,#0057a8 72%,#1269b6);color:#fff}
+.workspace-panel-step{display:grid;place-items:center;width:38px;height:38px;flex:none;border-radius:9px;background:#ffffff20;color:#fff;font-size:13px;font-weight:800}
+.workspace-panel-heading h2{margin:4px 0 0;color:#fff;font-size:22px}
+.workspace-panel-kicker{color:#ffda00}
+
+.vgp-workspace-navigation{align-items:center;gap:10px;margin-bottom:18px;padding:0;border:0}
+.vgp-workspace-navigation .workspace-tabs,.vgp-action-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0}
+.vgp-workspace-navigation .workspace-tabs button,.vgp-action-tabs button,#containersView .tabs button{min-height:42px;padding:10px 15px;border:1px solid #d4e1ee;border-radius:9px;background:#fff;color:#174674;font-weight:650}
+.vgp-workspace-navigation .workspace-tabs button[aria-selected="true"],.vgp-action-tabs button[aria-pressed="true"],#containersView .tabs button[aria-selected="true"]{border-color:#0057a8;background:#0057a8;color:#fff;box-shadow:0 3px 9px #00356b20}
+#containersView .tabs{gap:8px;margin:0 0 16px;padding:0;border:0}
+
+#materialView .equipment-list-panel,#controllersView,#ownersView,#kpiView,#planningView,#containersView .container-list-panel,#containersView .container-agenda-panel,#containersView .container-kpi-panel,#containersView .container-analysis-panel,#containersView #containerControllersPanel,#containersView #containerCategoriesPanel,#containersView #containerReportPanel{border:1px solid #d6e3f0;border-radius:14px;box-shadow:0 10px 28px #1039610d;background:#fff}
+.vgp-tab-panel{padding:24px}
+#materialView .equipment-list-panel{padding:24px}
+.vgp-tab-panel>.intro{margin:-24px -24px 24px;padding:20px 24px;border-bottom:4px solid #ffda00;border-radius:10px 10px 0 0;background:linear-gradient(115deg,#00366d,#0057a8 72%,#1269b6);color:#fff}
+.vgp-tab-panel>.intro h2{margin:0;color:#fff}
+.vgp-tab-panel>.intro .eyebrow{color:#ffda00}
+#materialView .equipment-list-header,#containerListPanel .container-toolbar,#containerAgendaPanel>.container-agenda-heading,#containerKpiPanel>.toolbar,#containerAnalysisPanel>.toolbar,#containerControllersPanel>.toolbar,#containerCategoriesPanel>.toolbar{margin:-24px -24px 24px;padding:20px 24px;border-bottom:4px solid #ffda00;border-radius:10px 10px 0 0;background:linear-gradient(115deg,#00366d,#0057a8 72%,#1269b6);color:#fff}
+#materialView .equipment-list-header h2,#containerListPanel .container-toolbar h2,#containerAgendaPanel>.container-agenda-heading h2,#containerKpiPanel>.toolbar h2,#containerAnalysisPanel>.toolbar h2,#containerControllersPanel>.toolbar h2,#containerCategoriesPanel>.toolbar h2{margin:0;color:#fff;font-size:21px}
+#materialView .equipment-list-header .foot,#containerListPanel .container-toolbar .foot,#containerAgendaPanel>.container-agenda-heading .foot{margin:6px 0 0;color:#e1edf9}
+#materialView .equipment-list-header .actions,#containerListPanel .container-toolbar .actions{margin-left:auto}
+#materialView .equipment-list-header .secondary,#containerListPanel .container-toolbar .secondary,#containerAgendaPanel>.container-agenda-heading .secondary,#containerKpiPanel>.toolbar .secondary,#containerAnalysisPanel>.toolbar .secondary,#containerControllersPanel>.toolbar .secondary,#containerCategoriesPanel>.toolbar .secondary{border:1px solid #ffffff65;background:#ffffffed;color:#174674}
+#materialView .equipment-list-header .actions>button:not(.secondary),#containerListPanel .container-toolbar .actions>button:not(.secondary),#containerControllersPanel>.toolbar>button:not(.secondary){background:#ffda00;color:#00366d;box-shadow:none}
+#containerReportPanel .container-report-controls>h2{margin:-24px -24px 20px;padding:20px 24px;border-bottom:4px solid #ffda00;border-radius:10px 10px 0 0;background:linear-gradient(115deg,#00366d,#0057a8 72%,#1269b6);color:#fff;font-size:21px}
+#containerReportPanel .container-report-controls label{color:#173f69}
+
+#materialView .equipment-list-filters input,#materialView .equipment-list-filters select,#controllersView input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),#ownersView input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),#ownersView select,#containersView input:not([type="checkbox"]):not([type="radio"]),#containersView select,#containersView textarea{border-color:#b9cfe5;border-radius:8px;background:#f8fbff}
+#materialView .equipment-list-filters input:focus,#materialView .equipment-list-filters select:focus,#controllersView input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,#ownersView input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,#ownersView select:focus,#containersView input:focus,#containersView select:focus,#containersView textarea:focus{outline:2px solid #ffda00;outline-offset:1px;border-color:#0057a8}
+#containersView .container-facts>div,#containersView .container-parts>div,#containersView .container-kpi-card,#containerCategoriesContent .container-category-form{border-color:#d6e3f0;border-radius:9px;background:#f5f8fc}
+#containersView .container-search{font-weight:650}
+
+@media(max-width:700px){
+ .workspace-hero{padding:23px 20px;gap:16px}
+ .workspace-hero h1,#containersView>.workspace-hero h1{font-size:25px}
+ .workspace-hero-brand{padding:8px 10px}
+ .workspace-hero-brand img{width:128px;height:42px}
+ .workspace-panel-heading{margin:-16px -16px 20px;padding:17px 16px}
+ .vgp-tab-panel>.intro{margin:-16px -16px 20px;padding:17px 16px}
+ #materialView .equipment-list-panel{padding:16px}
+ #materialView .equipment-list-header,#containerListPanel .container-toolbar,#containerAgendaPanel>.container-agenda-heading,#containerKpiPanel>.toolbar,#containerAnalysisPanel>.toolbar,#containerControllersPanel>.toolbar,#containerCategoriesPanel>.toolbar{margin:-16px -16px 20px;padding:17px 16px}
+ #containerReportPanel .container-report-controls>h2{margin:-16px -16px 18px;padding:17px 16px}
+ .vgp-workspace-navigation{align-items:stretch}
+ .vgp-workspace-navigation .workspace-tabs,.vgp-action-tabs{width:100%}
+ .vgp-workspace-navigation .workspace-tabs button,.vgp-action-tabs button,#containersView .tabs button{flex:1 1 auto;padding:10px 12px}
+ #materialView .equipment-list-header .actions{width:100%;margin-left:0}
+ #materialView .equipment-list-header .actions>button{flex:1}
+ #containerListPanel .container-toolbar>.actions{width:100%;margin-left:0}
+}
+@media(max-width:520px){.workspace-hero{align-items:flex-start;flex-direction:column-reverse}.workspace-hero-brand{align-self:flex-start}.workspace-panel-heading h2{font-size:19px}#containersView .tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
