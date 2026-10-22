@@ -139,8 +139,7 @@ export function containerCategories(containers,today=containerCivilToday()){
 }
 export function containerInterventionReport(container,intervention){
  const date=String(intervention.date||'').split('-').reverse().join('/');
- const components=Object.entries(intervention.parts||{}).filter(([,value])=>value).map(([part,value])=>`${part} : ${value}`);
- return {kind:'container',reportId:String(intervention.number),date,equipment:{designation:`Contenant ${container.number}`},fields:[['N° du contenant',container.number],['Catégorie',container.subtype],['Sous-catégorie',container.type],['N° d’intervention',intervention.number]],verifier:intervention.controller||'Non renseigné',result:intervention.type||'Non renseigné',generalState:intervention.generalState||'Non renseigné',observations:[intervention.comment||'Aucun commentaire renseigné.',...(components.length?['','État des composants',...components]:[])].join('\n'),conclusion:'Ce rapport reprend les informations enregistrées pour cette intervention sur le contenant.',signature:null};
+ return {kind:'container',reportId:String(intervention.number),date,equipment:{designation:`Contenant ${container.number}`},fields:[['N° du contenant',container.number],['Catégorie',container.subtype]],verifier:intervention.controller||'Non renseigné',result:intervention.type||'Non renseigné',observations:intervention.comment||'Aucun commentaire renseigné.',conclusion:'Compte rendu des informations saisies pour cette intervention.',signature:null};
 }
 export function containerLegacyScrapPlan(containers,{today=containerCivilToday(),by='',at=new Date().toISOString()}={}){
  const targets=[];

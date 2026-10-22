@@ -1,5 +1,5 @@
 import {professionalDeclarationIdentity} from './declaration-identity.mjs?v=096';
-import {createLossLinkClient} from './loss-link-api.mjs';
+import {createLossLinkClient} from './loss-link-api.mjs?v=098';
 const $=selector=>document.querySelector(selector),token=new URLSearchParams(location.hash.slice(1)).get('token');
 let api,info,busy=false,signed=false,lastPoint=null;
 const canvas=$('#lossSignature'),context=canvas.getContext('2d');

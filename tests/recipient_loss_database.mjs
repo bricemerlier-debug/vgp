@@ -6,7 +6,9 @@ import {goodyearReportLogo} from '../assets/report-logo.mjs';
 import {lossArchived,buildReportPdf} from '../domain.mjs';
 const db=new PGlite();
 await db.exec(`create role anon;create role authenticated;create schema auth;create table auth.users(id uuid primary key,email text);create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;grant usage on schema public,auth to authenticated,anon;`);
-for(const name of ['001_schema.sql','003_tracking_guard.sql','004_fast_writes.sql','024_recipient_loss_declaration.sql','025_recipient_scrap_declaration.sql','026_recipient_declaration_controller.sql'])await db.exec(readFileSync('supabase/'+name,'utf8'));
+for(const name of ['001_schema.sql','003_tracking_guard.sql','004_fast_writes.sql','024_recipient_loss_declaration.sql','025_recipient_scrap_declaration.sql','026_recipient_declaration_controller.sql','027_equipment_fast_save.sql','028_equipment_write_timeout.sql','030_recipient_declaration_timeout.sql','031_targeted_equipment_writes.sql'])await db.exec(readFileSync('supabase/'+name,'utf8'));
+const declarationTimeouts=(await db.query("select p.proconfig from pg_proc p where p.oid in ('public.submit_recipient_declaration(text,text,text,text,jsonb,boolean)'::regprocedure,'public.submit_equipment_loss(text,text,text,jsonb,boolean)'::regprocedure,'public.submit_equipment_scrap(text,text,text,jsonb,boolean)'::regprocedure)")).rows;
+assert.equal(declarationTimeouts.length,3);for(const {proconfig} of declarationTimeouts){assert.ok(proconfig.includes('statement_timeout=90s'));assert.ok(proconfig.includes('lock_timeout=5s'));}
 assert.equal((await db.query("select public.loss_owner_key('STÉPHANE  TEST')=public.loss_owner_key('Stephane Test') as matches")).rows[0].matches,true);
 const w='10000000-0000-0000-0000-000000000001',admin='20000000-0000-0000-0000-000000000001',reader='20000000-0000-0000-0000-000000000002';
 await db.query('insert into auth.users values($1,$2),($3,$4)',[admin,'admin@example.test',reader,'reader@example.test']);

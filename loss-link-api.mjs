@@ -7,11 +7,11 @@ export function createLossLinkClient(config,{fetcher=(...args)=>fetch(...args),d
  if(!config?.enabled||!/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/.test(config.url||'')||!config.publicKey)throw Error('Le formulaire n’est pas activé sur ce site.');
  const endpoint=config.url.replace(/\/$/,'')+'/rest/v1/rpc/';
  async function rpc(name,body){
-  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),45000);
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),120000);
   try{
    const response=await fetcher(endpoint+name,{method:'POST',headers:{apikey:config.publicKey,'Content-Type':'application/json'},body:JSON.stringify(body),cache:'no-store',referrerPolicy:'no-referrer',signal:controller.signal});
    const value=await response.json().catch(()=>({}));
-   if(!response.ok){if(response.status===404)throw Error('Ce formulaire n’est pas encore activé. Contactez le service Métrologie.');throw Error(value.message||'Ce lien est invalide, expiré ou n’est plus utilisable.');}
+   if(!response.ok){if(response.status===404)throw Error('Ce formulaire n’est pas encore activé. Contactez le service Métrologie.');if(value.code==='57014'||/canceling statement due to statement timeout/i.test(value.message||''))throw Error('Supabase a dépassé le délai de traitement de cette déclaration. Exécutez le script 030_recipient_declaration_timeout.sql, puis rouvrez le même lien.');if(value.code==='55P03'||/canceling statement due to lock timeout/i.test(value.message||''))throw Error('Une autre écriture bloque temporairement la fiche. Attendez quelques secondes, puis rouvrez le même lien.');throw Error(value.message||'Ce lien est invalide, expiré ou n’est plus utilisable.');}
    return value;
   }catch(error){if(error.name==='AbortError'||error instanceof TypeError)throw Error('Enregistrement non confirmé. Rouvrez ce même lien pour vérifier avant de réessayer.');throw error;}
   finally{clearTimeout(timer);}

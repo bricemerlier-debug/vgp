@@ -29,7 +29,8 @@ for(const type of ['TR','TP','TJ','TG','SA','TF','TI','TK','TM','TN']){
  assert.equal(containerWeeklyAgenda([withoutPeriod],'2026-07-15','2026-07-15').total,0);
  assert.equal(containerAnnualActivity([withoutPeriod],2026)[6].due,0);
 }
-assert.match(containerInterventionReport(configured,intervention).observations,/Éclairage : À réparer/);
+assert.equal(containerInterventionReport(configured,intervention).observations,intervention.comment);
+assert.ok(!Object.hasOwn(containerInterventionReport(configured,intervention),'generalState'));
 assert.ok(containerRecordsValid({containers:[configured]}));
 assert.ok(!containerCategorySettingsValid({...configured,categoryMonths:121}));
 assert.ok(!containerCategorySettingsValid({...configured,categoryChecks:['Frein','frein']}));

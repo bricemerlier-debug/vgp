@@ -10,8 +10,11 @@ Deno.serve(async request=>{
  const local=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',hourCycle:'h23'}).format(new Date());
  const date=local.slice(0,10),hour=Number(local.slice(11,13));if(hour!==7)return Response.json({status:'hors horaire'});
  try{
- const response=await fetch(`${url}/rest/v1/workspace_state?workspace_id=eq.${encodeURIComponent(workspace)}&select=payload`,{headers});if(!response.ok)throw Error('Lecture des données refusée');
- const rows=await response.json(),data=rows[0]?.payload;if(!data)throw Error('Espace introuvable');const settings=data.digestSettings||{};
+ const [stateResponse,equipmentResponse]=await Promise.all([
+  fetch(`${url}/rest/v1/workspace_state?workspace_id=eq.${encodeURIComponent(workspace)}&select=payload`,{headers}),
+  fetch(`${url}/rest/v1/equipment?workspace_id=eq.${encodeURIComponent(workspace)}&select=details&order=site_id.asc`,{headers})
+ ]);if(!stateResponse.ok||!equipmentResponse.ok)throw Error('Lecture des données refusée');
+ const rows=await stateResponse.json(),equipmentRows=await equipmentResponse.json(),data=rows[0]?.payload;if(!data)throw Error('Espace introuvable');data.equipment=equipmentRows.map(row=>row.details);const settings=data.digestSettings||{};
  if(!settings.recipient||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(settings.recipient))return Response.json({status:'destinataire absent'});
  const schedule=digestSchedule(date),reports=['week','month'].filter(kind=>schedule[kind]&&settings[kind]===true).map(kind=>buildDigest(data,kind,date));
  if(Deno.env.get('DIGEST_SEND_ENABLED')!=='true')return Response.json({status:'simulation — aucun envoi',reports});
