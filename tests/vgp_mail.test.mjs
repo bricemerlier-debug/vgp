@@ -9,11 +9,11 @@ import {goodyearReportLogo} from '../assets/report-logo.mjs';
 function fixture(){return {ownerContacts:[{owner:'Responsable Test',email:'responsable@example.test'}],mailTemplates:[{kind:'month',subject:'Contrôle {{numero_interne}} — {{nom_equipement}}',body:'Bonjour {{nom_proprietaire}},\n\nPrésentez {{numero_interne}} avant le {{date_controle}}.'}],equipment:[approved({id:'equipment-1',identifier:'TEST-001',designation:'Harnais de test',category:'Harnais',location:'Atelier',assignment:'',owner:'Responsable Test',sector:'B2 - Cuisson',months:12,controls:[],firstControlDate:'2026-11-21',mailPhoto:{width:1000,height:187,data:goodyearReportLogo.data}})]};}
 const prepare=(state=fixture(),options={})=>buildVgpEquipmentMail(state,{equipmentId:'equipment-1',kind:'month',sender:'expediteur@example.test',...options});
 
-test('destinataire repris depuis le propriétaire, modèles substitués et photo intégrée',()=>{
+test('rappel réel : destinataire repris depuis le propriétaire, modèles substitués et photo intégrée',()=>{
  const state=fixture(),before=JSON.stringify(state),mail=prepare(state);
  assert.equal(mail.recipient,'responsable@example.test');assert.equal(mail.sender,'expediteur@example.test');
- assert.match(mail.subject,/^\[TEST\] Contrôle TEST-001/);assert.match(mail.text,/21\/11\/2026/);assert.ok(!mail.text.includes('{{'));
- assert.match(mail.html,/cid:goodyear-logo/);assert.match(mail.html,/cid:equipment-photo/);assert.match(mail.html,/MESSAGE DE TEST/);
+ assert.equal(mail.test,false);assert.match(mail.subject,/^Contrôle TEST-001/);assert.match(mail.text,/21\/11\/2026/);assert.ok(!mail.text.includes('{{'));
+ assert.match(mail.html,/cid:goodyear-logo/);assert.match(mail.html,/cid:equipment-photo/);assert.doesNotMatch(mail.html,/MESSAGE DE TEST/);
  assert.equal(mail.attachments.length,2);assert.match(mail.previewHtml,/src="data:image\/jpeg;base64,/);
  const override=prepare(state,{recipient:'chef@example.test'});assert.equal(override.recipient,'chef@example.test');assert.equal(JSON.stringify(state),before);
 });
@@ -70,16 +70,16 @@ function mockedGoogle(email='expediteur@example.test'){
  return {browser,calls,fetcher};
 }
 
-test('Gmail : compte autorisé vérifié, envoi explicite du test avec photo, aucun jeton persisté',async()=>{
+test('Gmail : compte autorisé vérifié, envoi réel explicite avec photo, aucun jeton persisté',async()=>{
  const mock=mockedGoogle(),gmail=createVgpGmail({clientId:'fictif.apps.googleusercontent.com',...mock});
  assert.equal(mock.calls.length,0);assert.equal(gmail.active(),null);
- await assert.rejects(()=>gmail.sendTest(prepare()),/Connecte/);
+ await assert.rejects(()=>gmail.sendMail(prepare()),/Connecte/);
  await gmail.connect('expediteur@example.test');assert.equal(mock.calls.length,1);assert.equal(gmail.active().email,'expediteur@example.test');
- const result=await gmail.sendTest(prepare());assert.equal(result.id,'message-fictif');assert.equal(mock.calls.length,2);
+ const result=await gmail.sendMail(prepare());assert.equal(result.id,'message-fictif');assert.equal(mock.calls.length,2);
  const sent=mock.calls[1];assert.match(sent.url,/gmail\/v1\/users\/me\/messages\/send/);
  const raw=JSON.parse(sent.options.body).raw,decoded=Buffer.from(raw,'base64url').toString('utf8');
  assert.match(decoded,/Content-ID: <equipment-photo>/);assert.ok(!decoded.includes('X-Unsent'));
- await assert.rejects(()=>gmail.sendTest(prepare(fixture(),{test:false})),/Seuls les messages de test/);
+ await assert.rejects(()=>gmail.sendMail(prepare(fixture(),{test:true})),/Seuls les rappels réels/);
  gmail.disconnect();assert.equal(gmail.active(),null);
 });
 
@@ -92,7 +92,7 @@ test('Gmail : configuration absente et compte différent bloquent l’envoi',asy
 test('Gmail : réponse inconnue signalée sans réessai automatique',async()=>{
  const mock=mockedGoogle();let sends=0;
  const gmail=createVgpGmail({clientId:'fictif.apps.googleusercontent.com',browser:mock.browser,fetcher:async(url,options)=>{if(url.includes('userinfo'))return mock.fetcher(url,options);sends++;throw new TypeError('Network failed');}});
- await gmail.connect('expediteur@example.test');await assert.rejects(()=>gmail.sendTest(prepare()),error=>error.uncertain===true&&/Vérifie les messages envoyés/.test(error.message));assert.equal(sends,1);
+ await gmail.connect('expediteur@example.test');await assert.rejects(()=>gmail.sendMail(prepare()),error=>error.uncertain===true&&/Vérifie les messages envoyés/.test(error.message));assert.equal(sends,1);
 });
 
 test('modèle retard personnalisé avec échéance, photo et déclaration de perte',async()=>{
@@ -111,10 +111,10 @@ test('aucun accès à la fiche interne dans les mails destinataires',()=>{
  }
 });
 
-test('verrou test : un rappel réel est refusé avant tout appel Gmail',async()=>{
+test('verrou d’envoi : un message de test ne peut pas partir depuis l’écran Mails',async()=>{
  let calls=0;
  const gmail=createVgpGmail({clientId:'public.apps.googleusercontent.com',fetcher:async()=>{calls++;throw Error('Aucun appel attendu');}});
- await assert.rejects(()=>gmail.sendMail({test:false,lossUrl:'https://example.test/declarer-perte.html'}),/Envoi réel désactivé/);
+ await assert.rejects(()=>gmail.sendMail({test:true,lossUrl:'https://example.test/declarer-perte.html'}),/Seuls les rappels réels/);
  assert.equal(calls,0);
 });
 

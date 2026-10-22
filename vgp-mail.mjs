@@ -24,7 +24,7 @@ export function vgpMailTemplateIssue(template){
  const unknown=[...template.subject.matchAll(/\{\{([^{}]*)\}\}/g),...template.body.matchAll(/\{\{([^{}]*)\}\}/g)].map(match=>match[1].trim()).filter(token=>!allowed.includes(token));
  return unknown.length?'Champs inconnus : '+[...new Set(unknown)].join(', '):'';
 }
-export function buildVgpEquipmentMail(state,{equipmentId,kind='month',recipient='',sender='',test=true,template=null,lossUrl='',scrapUrl='',equipmentPhoto=undefined}={}){
+export function buildVgpEquipmentMail(state,{equipmentId,kind='month',recipient='',sender='',test=false,template=null,lossUrl='',scrapUrl='',equipmentPhoto=undefined}={}){
  const equipment=(state.equipment||[]).find(e=>e.id===equipmentId&&!e.archived);
  if(!equipment)throw Error('Choisis un équipement actif pour préparer le mail.');
  const model=template||(state.mailTemplates||[]).find(row=>row.kind===kind),issue=vgpMailTemplateIssue(model);
@@ -61,7 +61,7 @@ export function buildVgpEquipmentMail(state,{equipmentId,kind='month',recipient=
 
 export function buildVgpMailDraft(mail,{now=new Date(),id=crypto.randomUUID()}={}){
  if(!vgpMailAddressValid(mail.recipient))throw Error('Renseigne une adresse destinataire valide.');
- if(!vgpMailAddressValid(mail.sender))throw Error('Renseigne l’adresse du compte qui enverra le test.');
+ if(!vgpMailAddressValid(mail.sender))throw Error('Renseigne l’adresse du compte qui enverra le mail.');
  const base64=value=>{let raw='';for(const byte of new TextEncoder().encode(value))raw+=String.fromCharCode(byte);return btoa(raw);};
  const folded=value=>value.match(/.{1,76}/g)?.join('\r\n')||'';
  const boundary='vgp-related-'+id,alternative='vgp-alternative-'+id;

@@ -1,4 +1,4 @@
-import {buildVgpMailDraft,vgpMailAddressValid} from './vgp-mail.mjs?v=101';
+import {buildVgpMailDraft,vgpMailAddressValid} from './vgp-mail.mjs?v=102';
 
 // Le compte est autorisé par Google ; aucun mot de passe ni jeton n'est sauvegardé.
 export function createVgpGmail({clientId='',browser=globalThis,fetcher=(...args)=>fetch(...args),now=()=>Date.now()}={}){
@@ -30,12 +30,8 @@ export function createVgpGmail({clientId='',browser=globalThis,fetcher=(...args)
    if(user.email_verified!==true||String(user.email||'').toLowerCase()!==email.toLowerCase())throw Error('Connecte le compte Gmail correspondant à l’adresse expéditrice indiquée.');
    session={email:user.email,token:token.access_token,expiresAt:now()+Number(token.expires_in||3600)*1000};return {email:session.email};
   },
-  async sendTest(mail){
-   if(!mail.test)throw Error('Seuls les messages de test peuvent être envoyés depuis cet écran.');
-   return this.sendMail(mail);
-  },
-  async sendMail(mail,{allowReal=false}={}){
-   if(mail.test!==true&&!(mail.test===false&&allowReal))throw Error('Confirme le mode d’envoi réel avant de transmettre ce message.');
+  async sendMail(mail){
+   if(mail.test!==false)throw Error('Seuls les rappels réels sont autorisés depuis cet écran.');
    if(!active()||session.email.toLowerCase()!==mail.sender.toLowerCase())throw Error('Connecte le compte Gmail choisi pour envoyer ce message.');
    const mime=buildVgpMailDraft(mail).replace('X-Unsent: 1\r\n','');let raw='';for(const byte of new TextEncoder().encode(mime))raw+=String.fromCharCode(byte);
    const body={raw:btoa(raw).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')},controller=new AbortController();

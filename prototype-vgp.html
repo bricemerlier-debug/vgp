@@ -770,16 +770,15 @@ header .header-engineering-logo{display:block;width:72px;height:72px;object-fit:
 .mail-model-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.mail-model-card{display:flex;flex-direction:column;align-items:flex-start;gap:8px;text-align:left;background:#f8fafd;color:#073467;border:1px solid #d6e3f0;padding:17px;border-radius:10px;min-height:142px;min-width:0}.mail-model-card[aria-pressed=true]{background:#eaf3ff;border:2px solid #0057a8;padding:16px}.mail-model-stage{display:inline-block;padding:4px 8px;border-radius:6px;background:#e4edf8;color:#0057a8;font-size:11px;font-weight:800}.mail-model-card[aria-pressed=true] .mail-model-stage{background:#ffda00;color:#073467}.mail-model-card strong{font-size:14px}.mail-model-card small{font-weight:400;color:#64809c;font-size:12px;line-height:1.5}
 .mail-edit-model{margin-top:18px;padding-top:15px;border-top:1px solid #e3ebf4}.mail-edit-model summary,.mail-export-options summary{color:#0057a8;font-size:13px;font-weight:650;cursor:pointer}.mail-edit-model form{margin-top:18px}.mail-edit-model form>label{margin-bottom:15px}
 .mail-workspace-grid{display:grid;grid-template-columns:minmax(285px,.85fr) minmax(0,1.4fr);gap:20px;align-items:start;margin-top:22px}.mail-compose-card{border-top:3px solid #ffda00}.mail-preview-card{padding:23px 0 0;overflow:hidden}.mail-preview-card .mail-section-heading{padding:0 24px}
-#mailTestForm>label{margin-bottom:17px}#mailTestForm label,.mail-edit-model label{font-size:13px;font-weight:650;color:#173f69;display:grid;gap:7px}#mailTestForm input:not([type=file]),#mailTestForm select,.mail-edit-model input,.mail-edit-model textarea{width:100%;min-height:46px;border:1px solid #b9cfe5;border-radius:8px;background:#f9fbfe;color:#073467;padding:11px 12px}#mailTestForm input:focus,.mail-edit-model input:focus,.mail-edit-model textarea:focus{outline:2px solid #ffda00;outline-offset:1px;border-color:#0057a8}
+#mailSendForm>label{margin-bottom:17px}#mailSendForm label,.mail-edit-model label{font-size:13px;font-weight:650;color:#173f69;display:grid;gap:7px}#mailSendForm input:not([type=file]),#mailSendForm select,.mail-edit-model input,.mail-edit-model textarea{width:100%;min-height:46px;border:1px solid #b9cfe5;border-radius:8px;background:#f9fbfe;color:#073467;padding:11px 12px}#mailSendForm input:focus,.mail-edit-model input:focus,.mail-edit-model textarea:focus{outline:2px solid #ffda00;outline-offset:1px;border-color:#0057a8}
 .mail-owner-hint{margin:-5px 0 20px;border-left:3px solid #0057a8;padding:8px 11px;color:#315d88;background:#edf4fb;font-size:12px}.mail-owner-hint:empty{display:none}.mail-photo-tools{margin:20px 0;padding:15px;background:#f6f9fc;border:1px dashed #c3d6e9;border-radius:9px}.mail-photo-tools input{width:100%;font-size:12px}.mail-photo-tools input::file-selector-button{border:0;background:#e5eef9;color:#0057a8;padding:9px;border-radius:6px;margin-right:8px;font-weight:650}.mail-photo-tools p{margin:10px 0 0;font-size:12px}
-.mail-test-notice{padding:12px 14px;background:#fff8dc;border-left:3px solid #ffda00;border-radius:7px;font-size:12px;color:#735d16;line-height:1.6}.mail-send-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}.mail-send-actions button{flex:1;min-height:44px;white-space:nowrap}#mailSendTest{background:#ffda00;color:#073467}#mailSendTest:disabled{background:#e7ebef;color:#7b8c9c;opacity:1}
-.mail-test-tag{border:1px solid #ecd98a;background:#fff7d7;border-radius:20px;color:#7b6014;font-size:10px;font-weight:800;padding:5px 10px}.mail-envelope{border-top:1px solid #e0e9f3;border-bottom:1px solid #e0e9f3;padding:13px 24px;background:#f8fafd}.mail-envelope p{display:flex;gap:15px;margin:0 0 7px;font-size:12px;overflow-wrap:anywhere}.mail-envelope p:last-child{margin-bottom:0}.mail-envelope span{color:#64809c;min-width:31px}.mail-envelope strong{color:#244e76;font-weight:600;min-width:0}
-.mail-live-notice{background:#edf4fb;border-left-color:#0057a8;color:#173f69}.mail-live-tag{border-color:#9dbbd9;background:#eaf3fc;color:#0057a8}#mailTestRecipient[readonly]{background:#edf4fb;color:#244e76;cursor:not-allowed}
+.mail-send-notice{padding:12px 14px;background:#edf4fb;border-left:3px solid #0057a8;border-radius:7px;font-size:12px;color:#173f69;line-height:1.6}.mail-send-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}.mail-send-actions button{flex:1;min-height:44px;white-space:nowrap}#mailSend{background:#ffda00;color:#073467}#mailSend:disabled{background:#e7ebef;color:#7b8c9c;opacity:1}
+.mail-live-tag{border:1px solid #9dbbd9;background:#eaf3fc;border-radius:20px;color:#0057a8;font-size:10px;font-weight:800;padding:5px 10px}.mail-envelope{border-top:1px solid #e0e9f3;border-bottom:1px solid #e0e9f3;padding:13px 24px;background:#f8fafd}.mail-envelope p{display:flex;gap:15px;margin:0 0 7px;font-size:12px;overflow-wrap:anywhere}.mail-envelope p:last-child{margin-bottom:0}.mail-envelope span{color:#64809c;min-width:31px}.mail-envelope strong{color:#244e76;font-weight:600;min-width:0}
+#mailRecipient[readonly]{background:#edf4fb;color:#244e76;cursor:not-allowed}
 #mailSettingsView #mailSettingsPreview{display:block;width:100%;min-height:950px;border:0;margin:0;padding:0;background:#eef3f9;white-space:normal;font-family:inherit}#mailSettingsView #mailSettingsPreview[hidden]{display:none}.mail-preview-empty{text-align:center;padding:100px 26px;color:#6c85a0}.mail-preview-empty>span{display:grid;place-items:center;margin:0 auto 18px;width:65px;height:65px;font-size:30px;background:#edf4fc;border-radius:14px;color:#0057a8}.mail-preview-empty h3{margin:0 0 8px;font-size:18px;color:#244e76}.mail-preview-empty p{font-size:13px;line-height:1.6}
 .mail-export-options{padding-top:16px;margin-top:20px;border-top:1px solid #e3ebf4}.mail-export-options button{display:block;margin-top:10px;font-size:12px}.inventory-entry-footer{justify-content:flex-end}
 @media(max-width:1050px){.mail-workspace-grid{grid-template-columns:1fr}.mail-model-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.mail-compose-card{max-width:none}}
 @media(max-width:600px){.mail-page-hero{padding:24px 20px;flex-direction:column;align-items:flex-start;gap:16px}.mail-page-hero h1{font-size:26px}.mail-model-section,.mail-compose-card{padding:21px 17px}.mail-section-heading{flex-direction:column;gap:5px}.mail-preview-card .mail-section-heading{padding:0 17px}.mail-envelope{padding:13px 17px}.mail-model-cards{gap:8px}.mail-model-card{padding:12px;min-height:150px}.mail-model-card[aria-pressed=true]{padding:11px}.mail-small-note{margin-top:0}.mail-send-actions{flex-direction:column}.mail-workspace-grid{gap:16px}.mail-preview-empty{padding:65px 20px}}
-.mail-mode-choice{display:flex!important;align-items:flex-start;gap:10px!important;margin:20px 0 12px!important}.mail-mode-choice input{width:19px!important;min-height:19px!important;height:19px!important;flex:none;margin:1px 0 0;accent-color:#0057a8}.mail-mode-choice span{line-height:1.5}
 </style>
 <script>window.VGP_CLOUD=Object.freeze({enabled:false,url:'',publicKey:'',workspaceId:''});</script><script>// Identifiant OAuth public Google (application Web), jamais un secret client.
 // Voir docs/mails-vgp.md pour activer l'envoi du test depuis un compte Gmail.
@@ -3641,7 +3640,7 @@ function vgpMailTemplateIssue(template){
  const unknown=[...template.subject.matchAll(/\{\{([^{}]*)\}\}/g),...template.body.matchAll(/\{\{([^{}]*)\}\}/g)].map(match=>match[1].trim()).filter(token=>!allowed.includes(token));
  return unknown.length?'Champs inconnus : '+[...new Set(unknown)].join(', '):'';
 }
-function buildVgpEquipmentMail(state,{equipmentId,kind='month',recipient='',sender='',test=true,template=null,lossUrl='',scrapUrl='',equipmentPhoto=undefined}={}){
+function buildVgpEquipmentMail(state,{equipmentId,kind='month',recipient='',sender='',test=false,template=null,lossUrl='',scrapUrl='',equipmentPhoto=undefined}={}){
  const equipment=(state.equipment||[]).find(e=>e.id===equipmentId&&!e.archived);
  if(!equipment)throw Error('Choisis un équipement actif pour préparer le mail.');
  const model=template||(state.mailTemplates||[]).find(row=>row.kind===kind),issue=vgpMailTemplateIssue(model);
@@ -3678,7 +3677,7 @@ function buildVgpEquipmentMail(state,{equipmentId,kind='month',recipient='',send
 
 function buildVgpMailDraft(mail,{now=new Date(),id=crypto.randomUUID()}={}){
  if(!vgpMailAddressValid(mail.recipient))throw Error('Renseigne une adresse destinataire valide.');
- if(!vgpMailAddressValid(mail.sender))throw Error('Renseigne l’adresse du compte qui enverra le test.');
+ if(!vgpMailAddressValid(mail.sender))throw Error('Renseigne l’adresse du compte qui enverra le mail.');
  const base64=value=>{let raw='';for(const byte of new TextEncoder().encode(value))raw+=String.fromCharCode(byte);return btoa(raw);};
  const folded=value=>value.match(/.{1,76}/g)?.join('\r\n')||'';
  const boundary='vgp-related-'+id,alternative='vgp-alternative-'+id;
@@ -3719,12 +3718,8 @@ function createVgpGmail({clientId='',browser=globalThis,fetcher=(...args)=>fetch
    if(user.email_verified!==true||String(user.email||'').toLowerCase()!==email.toLowerCase())throw Error('Connecte le compte Gmail correspondant à l’adresse expéditrice indiquée.');
    session={email:user.email,token:token.access_token,expiresAt:now()+Number(token.expires_in||3600)*1000};return {email:session.email};
   },
-  async sendTest(mail){
-   if(!mail.test)throw Error('Seuls les messages de test peuvent être envoyés depuis cet écran.');
-   return this.sendMail(mail);
-  },
-  async sendMail(mail,{allowReal=false}={}){
-   if(mail.test!==true&&!(mail.test===false&&allowReal))throw Error('Confirme le mode d’envoi réel avant de transmettre ce message.');
+  async sendMail(mail){
+   if(mail.test!==false)throw Error('Seuls les rappels réels sont autorisés depuis cet écran.');
    if(!active()||session.email.toLowerCase()!==mail.sender.toLowerCase())throw Error('Connecte le compte Gmail choisi pour envoyer ce message.');
    const mime=buildVgpMailDraft(mail).replace('X-Unsent: 1\r\n','');let raw='';for(const byte of new TextEncoder().encode(mime))raw+=String.fromCharCode(byte);
    const body={raw:btoa(raw).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')},controller=new AbortController();
@@ -3745,19 +3740,17 @@ function createVgpGmail({clientId='',browser=globalThis,fetcher=(...args)=>fetch
  };
 }
 
-function installVgpMail({read,save,canEdit,loadEquipmentPhoto=async()=>undefined,accountEmail=()=>'',refresh=async()=>{},cleanForm=()=>{},gmailClientId='',defaults={},createLossLink=null}){
+function installVgpMail({read,save,canEdit,loadEquipmentPhoto=async()=>undefined,accountEmail=()=>'',refresh=async()=>{},cleanForm=()=>{},gmailClientId='',createLossLink=null}){
  const host=document.querySelector('#vgpMailWorkspace'),safe=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
  const gmail=createVgpGmail({clientId:gmailClientId}),drafts=new Map(),lossLinks=new Map();let kind='month',busy=false,lastSent='',uncertain=false,photo=undefined,photoEquipmentId='',photoLoading=false,photoError='',previewSerial=0,previewSignature='';
  host.innerHTML=`<section class="mail-model-section"><div class="mail-section-heading"><div><span class="mail-kicker">01 · MESSAGES ENREGISTRÉS</span><h2>Choisir un modèle</h2></div><span class="mail-small-note">Le destinataire vient de la fiche propriétaire.</span></div><div id="mailModelCards" class="mail-model-cards"></div><details class="mail-edit-model"><summary>Modifier le modèle sélectionné</summary><form id="mailTemplateForm"><label>Objet<input id="mailSubject" required maxlength="300"></label><label>Message<textarea id="mailBody" rows="7" required maxlength="10000"></textarea></label><p class="foot">Champs disponibles : {{nom_proprietaire}}, {{nom_equipement}}, {{numero_interne}}, {{id_vgp}}, {{date_controle}}, {{secteur}}, {{zone}}.</p><button id="mailSaveTemplate" type="submit">Enregistrer le modèle</button><p id="mailTemplateSaved" role="status"></p><p id="mailTemplateError" class="error" role="alert"></p></form></details></section>
- <div class="mail-workspace-grid"><section class="mail-compose-card"><div class="mail-section-heading"><div><span class="mail-kicker">02 · PRÉPARER UN ENVOI</span><h2>Matériel et destinataire</h2><p>Un seul équipement, un seul destinataire.</p></div></div><form id="mailTestForm"><label>Rechercher un équipement<input id="mailEquipmentSearch" type="search" placeholder="Numéro interne ou nom du matériel…"></label><label>Équipement utilisé pour l’envoi<select id="mailSampleEquipment" data-native-select required></select></label><div id="mailEquipmentOwner" class="mail-owner-hint" role="status"></div><label>Depuis mon compte Gmail<input id="mailTestSender" type="email" required maxlength="254" autocomplete="email" placeholder="ton.adresse@gmail.com"></label><label>Destinataire<input id="mailTestRecipient" type="email" required maxlength="254" placeholder="Adresse du destinataire"></label><p id="mailRecipientNote" class="foot">Tu peux remplacer cette adresse pour le test. La fiche propriétaire ne change pas.</p><label class="mail-mode-choice"><input id="mailIsTest" type="checkbox" checked><span>Mode test · aucune fiche modifiée</span></label><p class="mail-test-notice">Le mail porte la mention <strong>TEST</strong>. Aucun contrôle ni rappel automatique n’est créé.</p><div class="mail-send-actions"><button type="button" id="mailConnectGmail" class="secondary">Connecter Gmail</button><button type="submit" id="mailSendTest">Envoyer le test</button></div><p id="mailGmailStatus" class="foot" role="status"></p><p id="mailTestStatus" role="status"></p><p id="mailTestError" class="error" role="alert"></p><details class="mail-export-options"><summary>Autres options</summary><button type="button" id="mailCopy" class="secondary">Copier le mail mis en forme</button><button type="button" id="mailDownloadDraft" class="secondary">Télécharger le message (.eml)</button><p class="foot">Le fichier .eml contient le logo et la photo. Son ouverture en brouillon dépend de ta messagerie.</p></details></form></section>
- <section class="mail-preview-card"><div class="mail-section-heading"><div><span class="mail-kicker">03 · APERÇU DU MAIL</span><h2>Ce que recevra le destinataire</h2></div><span class="mail-test-tag">TEST</span></div><div class="mail-envelope"><p><span>À</span><strong id="mailPreviewRecipient">—</strong></p><p><span>Objet</span><strong id="mailPreviewSubject">—</strong></p></div><div id="mailPreviewEmpty" class="mail-preview-empty"><span aria-hidden="true">✉</span><h3>Ton mail prend forme ici</h3><p>Choisis un équipement pour afficher son rappel avec ses informations et sa photo.</p></div><iframe id="mailSettingsPreview" title="Aperçu du mail de rappel VGP" sandbox="allow-same-origin" hidden></iframe></section></div>`;
- const q=selector=>host.querySelector(selector),form=q('#mailTemplateForm'),testForm=q('#mailTestForm');
- q('#mailTestSender').value=defaults.sender||accountEmail();q('#mailTestRecipient').value=defaults.recipient||'';
- let recipientOverridden=!!defaults.recipient;
- // Les champs du test sont temporaires, contrairement aux modèles enregistrés.
- for(const event of ['input','change'])testForm.addEventListener(event,e=>e.stopPropagation());
+ <div class="mail-workspace-grid"><section class="mail-compose-card"><div class="mail-section-heading"><div><span class="mail-kicker">02 · PRÉPARER UN ENVOI</span><h2>Matériel et destinataire</h2><p>Un seul équipement, un seul destinataire.</p></div></div><form id="mailSendForm"><label>Rechercher un équipement<input id="mailEquipmentSearch" type="search" placeholder="Numéro interne ou nom du matériel…"></label><label>Équipement concerné<select id="mailSampleEquipment" data-native-select required></select></label><div id="mailEquipmentOwner" class="mail-owner-hint" role="status"></div><label>Depuis mon compte Gmail<input id="mailSender" type="email" required maxlength="254" autocomplete="email" placeholder="ton.adresse@gmail.com"></label><label>Destinataire · adresse du propriétaire<input id="mailRecipient" type="email" required maxlength="254" readonly placeholder="Sélectionne un matériel avec une adresse associée"></label><p id="mailRecipientNote" class="foot">L’adresse est reprise de la fiche du propriétaire et ne peut pas être remplacée ici.</p><p class="mail-send-notice">Le message sera envoyé réellement. Si le destinataire signe une déclaration de perte ou de mise au rebut, la fiche sera archivée et un rapport sera créé. Aucun rappel automatique n’est activé.</p><div class="mail-send-actions"><button type="button" id="mailConnectGmail" class="secondary">Connecter Gmail</button><button type="submit" id="mailSend">Envoyer le rappel</button></div><p id="mailGmailStatus" class="foot" role="status"></p><p id="mailSendStatus" role="status"></p><p id="mailSendError" class="error" role="alert"></p><details class="mail-export-options"><summary>Autres options</summary><button type="button" id="mailCopy" class="secondary">Copier le mail mis en forme</button><button type="button" id="mailDownloadDraft" class="secondary">Télécharger le message (.eml)</button><p class="foot">Le fichier .eml contient le logo et la photo. Son ouverture en brouillon dépend de ta messagerie.</p></details></form></section>
+ <section class="mail-preview-card"><div class="mail-section-heading"><div><span class="mail-kicker">03 · APERÇU DU MAIL</span><h2>Ce que recevra le destinataire</h2></div><span class="mail-live-tag">ENVOI RÉEL</span></div><div class="mail-envelope"><p><span>À</span><strong id="mailPreviewRecipient">—</strong></p><p><span>Objet</span><strong id="mailPreviewSubject">—</strong></p></div><div id="mailPreviewEmpty" class="mail-preview-empty"><span aria-hidden="true">✉</span><h3>Ton mail prend forme ici</h3><p>Choisis un équipement pour afficher son rappel avec ses informations et sa photo.</p></div><iframe id="mailSettingsPreview" title="Aperçu du mail de rappel VGP" sandbox="allow-same-origin" hidden></iframe></section></div>`;
+ const q=selector=>host.querySelector(selector),form=q('#mailTemplateForm'),sendForm=q('#mailSendForm');
+ q('#mailSender').value=accountEmail();
+ for(const event of ['input','change'])sendForm.addEventListener(event,e=>e.stopPropagation());
  function model(){return {kind,subject:q('#mailSubject').value,body:q('#mailBody').value};}
- function options(){return {equipmentId:q('#mailSampleEquipment').value,kind,recipient:q('#mailTestRecipient').value.trim(),sender:q('#mailTestSender').value.trim(),test:q('#mailIsTest').checked,template:model(),siteUrl:location.origin+location.pathname};}
+ function options(){return {equipmentId:q('#mailSampleEquipment').value,kind,recipient:q('#mailRecipient').value.trim(),sender:q('#mailSender').value.trim(),test:false,template:model(),siteUrl:location.origin+location.pathname};}
  function message(lossUrl='',scrapUrl=''){return buildVgpEquipmentMail(read(),{...options(),lossUrl,scrapUrl,equipmentPhoto:photoEquipmentId===q('#mailSampleEquipment').value?photo:undefined});}
  async function preparedMessage(){
   const id=q('#mailSampleEquipment').value;if(!id)return message();
@@ -3765,7 +3758,7 @@ function installVgpMail({read,save,canEdit,loadEquipmentPhoto=async()=>undefined
   photo=loaded;photoEquipmentId=id;photoError='';return message();
  }
  async function withLossLink(base,required=false){
-  if(!createLossLink){if(required||!base.test)throw Error('Le formulaire de perte nécessite Supabase et le script 024.');return base;}
+  if(!createLossLink){if(required)throw Error('Le formulaire de déclaration nécessite Supabase et les scripts 024 et 025.');return base;}
   const key=JSON.stringify(base);let link=lossLinks.get(key);
   if(!link||Date.parse(link.expiresAt)<=Date.now()+60000){link=await createLossLink({equipmentId:base.equipmentId,recipient:base.recipient,test:base.test});lossLinks.set(key,link);}
   if(JSON.stringify(await preparedMessage())!==key)throw Error('Le message a changé. Relis le nouvel aperçu avant de continuer.');
@@ -3780,22 +3773,14 @@ function installVgpMail({read,save,canEdit,loadEquipmentPhoto=async()=>undefined
  function connection(){
   const current=gmail.active();q('#mailConnectGmail').disabled=busy||!gmail.configured();
   q('#mailConnectGmail').textContent=current?'Changer de compte Gmail':'Connecter Gmail';
-  q('#mailGmailStatus').textContent=current?`Compte connecté : ${current.email}`:gmail.configured()?'Connecte ton compte Gmail pour envoyer le message depuis cette adresse.':'L’envoi direct nécessite de configurer la connexion Gmail du site. L’aperçu et le téléchargement du message sont disponibles.';
-  const isTest=q('#mailIsTest').checked;
-  q('#mailSendTest').textContent=isTest?'Envoyer le test':'Envoyer le rappel réel';
-  q('.mail-test-tag').textContent=isTest?'TEST':'RÉEL';
-  q('.mail-test-tag').classList.toggle('mail-live-tag',!isTest);
-  q('.mail-test-notice').classList.toggle('mail-live-notice',!isTest);
-  q('.mail-test-notice').innerHTML=isTest?'Le mail porte la mention <strong>TEST</strong>. Les déclarations signées ne modifieront aucune fiche. Aucun rappel automatique n’est activé.':'<strong>ENVOI RÉEL</strong> · Le message partira au propriétaire associé. S’il signe l’une des déclarations, la fiche sera archivée et un rapport sera créé. Aucun rappel automatique n’est activé.';
-  q('.mail-mode-choice span').textContent=isTest?'Mode test · aucune fiche modifiée':'Envoi réel · la déclaration signée modifiera la fiche';
-  q('#mailTestRecipient').readOnly=!isTest;
-  q('#mailRecipientNote').textContent=isTest?'Tu peux remplacer cette adresse pour le test. La fiche propriétaire ne change pas.':'Pour un envoi réel, le destinataire vient de la fiche propriétaire et ne peut pas être remplacé ici.';
+  q('#mailGmailStatus').textContent=current?`Compte connecté : ${current.email}${createLossLink?'':' · Activez Supabase pour envoyer les déclarations avec ce rappel.'}`:gmail.configured()?'Connecte ton compte Gmail pour envoyer le message depuis cette adresse.':'L’envoi direct nécessite de configurer la connexion Gmail du site. L’aperçu et le téléchargement du message sont disponibles.';
   const equipment=read().equipment.find(row=>row.id===q('#mailSampleEquipment').value),ownerRecipients=equipmentMailRecipients(equipment||{},read().ownerContacts||[]).filter(row=>vgpMailAddressValid(row.email));
-  const validRealRecipient=isTest||ownerRecipients.some(row=>row.email.toLowerCase()===q('#mailTestRecipient').value.trim().toLowerCase());
-  q('#mailSendTest').disabled=busy||photoLoading||!!photoError||!current||!q('#mailSampleEquipment').value||!validRealRecipient||uncertain;
+  const ownerEmail=ownerRecipients[0]?.email||'';
+  if(q('#mailRecipient').value!==ownerEmail)q('#mailRecipient').value=ownerEmail;
+  q('#mailSend').disabled=busy||photoLoading||!!photoError||!current||!createLossLink||!q('#mailSampleEquipment').value||!ownerEmail||uncertain;
  }
  function preview(){
-  connection();q('#mailPreviewRecipient').textContent=q('#mailTestRecipient').value.trim()||'Choisis le matériel ou saisis une adresse';
+  connection();q('#mailPreviewRecipient').textContent=q('#mailRecipient').value.trim()||'Aucune adresse valide sur la fiche propriétaire';
   const id=q('#mailSampleEquipment').value;
   if(id&&photoEquipmentId!==id&&!photoLoading){
    const serial=++previewSerial;photoLoading=true;photoError='';previewSignature='';connection();q('#mailSettingsPreview').hidden=true;q('#mailPreviewEmpty').hidden=false;q('#mailPreviewEmpty').querySelector('p').textContent='Chargement de la photo du matériel…';
@@ -3821,12 +3806,10 @@ function installVgpMail({read,save,canEdit,loadEquipmentPhoto=async()=>undefined
  q('#mailSampleEquipment').onchange=()=>{
   previewSerial++;photoLoading=false;photoError='';photoEquipmentId='';
   const equipment=read().equipment.find(e=>e.id===q('#mailSampleEquipment').value);
-  if(!recipientOverridden||!q('#mailIsTest').checked)q('#mailTestRecipient').value=equipment?equipmentMailRecipients(equipment,read().ownerContacts||[]).find(row=>vgpMailAddressValid(row.email))?.email||'':'';
-  q('#mailTestError').textContent='';q('#mailTestStatus').textContent='';preview();
+  q('#mailRecipient').value=equipment?equipmentMailRecipients(equipment,read().ownerContacts||[]).find(row=>vgpMailAddressValid(row.email))?.email||'':'';
+  q('#mailSendError').textContent='';q('#mailSendStatus').textContent='';preview();
  };
- q('#mailIsTest').onchange=()=>{recipientOverridden=false;const equipment=read().equipment.find(e=>e.id===q('#mailSampleEquipment').value);if(!q('#mailIsTest').checked)q('#mailTestRecipient').value=equipment?equipmentMailRecipients(equipment,read().ownerContacts||[]).find(row=>vgpMailAddressValid(row.email))?.email||'':'';lastSent='';q('#mailTestError').textContent='';q('#mailTestStatus').textContent='';preview();};
- q('#mailTestRecipient').oninput=()=>{recipientOverridden=true;preview();};
- q('#mailTestSender').oninput=()=>{gmail.disconnect();preview();};
+ q('#mailSender').oninput=()=>{gmail.disconnect();preview();};
  q('#mailSubject').oninput=q('#mailBody').oninput=()=>{drafts.set(kind,model());q('#mailTemplateSaved').textContent='Modifications non enregistrées.';preview();};
  form.onsubmit=async event=>{
   event.preventDefault();if(!canEdit()||busy)return;
@@ -3836,30 +3819,30 @@ function installVgpMail({read,save,canEdit,loadEquipmentPhoto=async()=>undefined
   try{if(!await save(next))throw Error('Le modèle n’a pas pu être enregistré.');drafts.delete(kind);cleanForm(form);q('#mailTemplateSaved').textContent='Modèle enregistré.';preview();}catch(error){q('#mailTemplateError').textContent=error.message;}finally{busy=false;q('#mailSaveTemplate').disabled=!canEdit();connection();}
  };
  q('#mailConnectGmail').onclick=async()=>{
-  if(busy)return;busy=true;connection();q('#mailTestError').textContent='';
-  try{await gmail.connect(q('#mailTestSender').value.trim());}catch(error){q('#mailTestError').textContent=error.message;}finally{busy=false;connection();}
+  if(busy)return;busy=true;connection();q('#mailSendError').textContent='';
+  try{await gmail.connect(q('#mailSender').value.trim());}catch(error){q('#mailSendError').textContent=error.message;}finally{busy=false;connection();}
  };
- testForm.onsubmit=async event=>{
+ sendForm.onsubmit=async event=>{
   event.preventDefault();if(busy||uncertain)return;
-  q('#mailTestError').textContent='';q('#mailTestStatus').textContent='';
+  q('#mailSendError').textContent='';q('#mailSendStatus').textContent='';
   try{
-   const initial=await preparedMessage();if(!initial.recipient)throw Error('Renseigne le destinataire du message.');
-   if(!initial.test&&!confirm(`Envoyer ce rappel RÉEL à ${initial.recipient} pour l’équipement ${read().equipment.find(e=>e.id===initial.equipmentId)?.identifier||''} ?\n\nLe message contiendra les deux liens de déclaration. Si le destinataire signe une déclaration, l’équipement sera archivé et un rapport sera créé.`))return;
+   const initial=await preparedMessage();if(!initial.recipient)throw Error('Aucune adresse e-mail valide n’est enregistrée pour le propriétaire de cet équipement.');
+   if(!confirm(`Envoyer ce rappel à ${initial.recipient} pour l’équipement ${read().equipment.find(e=>e.id===initial.equipmentId)?.identifier||''} ?\n\nIl s’agit d’un vrai mail. Il contiendra les formulaires de perte et de mise au rebut. Toute déclaration signée modifiera la fiche et créera un rapport.`))return;
    if(JSON.stringify(initial)!==previewSignature){preview();throw Error('La photo ou la fiche a changé. Relis le nouvel aperçu avant d’envoyer.');}
    const signature=JSON.stringify(initial);if(signature===lastSent)throw Error('Ce message a déjà été envoyé. Modifie le message ou le matériel pour préparer un nouvel envoi.');
-   busy=true;connection();q('#mailTestStatus').textContent='Vérification du matériel avant l’envoi…';await refresh(form);
+   busy=true;connection();q('#mailSendStatus').textContent='Vérification du matériel avant l’envoi…';await refresh(form);
    const current=await preparedMessage();if(JSON.stringify(current)!==signature){preview();throw Error('La fiche ou le destinataire a changé. L’aperçu est actualisé : relis-le avant d’envoyer.');}
-   const ready=await withLossLink(current,true);q('#mailTestStatus').textContent='Envoi du message via Gmail…';const result=await gmail.sendMail(ready,{allowReal:!current.test});lastSent=signature;q('#mailTestStatus').textContent=`${current.test?'Test':'Rappel réel'} envoyé à ${result.recipient} depuis ${current.sender}.`;
-  }catch(error){uncertain=!!error.uncertain;q('#mailTestStatus').textContent='';q('#mailTestError').textContent=error.message;}finally{busy=false;connection();}
+   const ready=await withLossLink(current,true);q('#mailSendStatus').textContent='Envoi du rappel réel via Gmail…';const result=await gmail.sendMail(ready);lastSent=signature;q('#mailSendStatus').textContent=`Rappel envoyé à ${result.recipient} depuis ${current.sender}.`;
+  }catch(error){uncertain=!!error.uncertain;q('#mailSendStatus').textContent='';q('#mailSendError').textContent=error.message;}finally{busy=false;connection();}
  };
  q('#mailDownloadDraft').onclick=async()=>{
-  try{const mail=await withLossLink(await preparedMessage()),draft=buildVgpMailDraft(mail),url=URL.createObjectURL(new Blob([draft],{type:'message/rfc822'})),link=document.createElement('a');link.href=url;link.download=mail.test?'test-rappel-vgp.eml':'rappel-vgp.eml';link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);q('#mailTestStatus').textContent='Message téléchargé avec ses images. Aucun envoi effectué.';}catch(error){q('#mailTestError').textContent=error.message;}
+  try{const mail=await withLossLink(await preparedMessage()),draft=buildVgpMailDraft(mail),url=URL.createObjectURL(new Blob([draft],{type:'message/rfc822'})),link=document.createElement('a');link.href=url;link.download='rappel-vgp.eml';link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);q('#mailSendStatus').textContent='Brouillon téléchargé avec ses images. Aucun envoi effectué.';}catch(error){q('#mailSendError').textContent=error.message;}
  };
  q('#mailCopy').onclick=async()=>{
-  try{const mail=await withLossLink(await preparedMessage());await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([mail.previewHtml],{type:'text/html'}),'text/plain':new Blob([mail.text],{type:'text/plain'})})]);q('#mailTestStatus').textContent='Mail copié. Colle-le dans ta messagerie et vérifie la photo avant l’envoi.';}catch{q('#mailTestError').textContent='La copie mise en forme est indisponible dans ce navigateur. Télécharge le message avec ses images.';}
+  try{const mail=await withLossLink(await preparedMessage());await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([mail.previewHtml],{type:'text/html'}),'text/plain':new Blob([mail.text],{type:'text/plain'})})]);q('#mailSendStatus').textContent='Mail copié. Vérifie son contenu avant de l’envoyer depuis ta messagerie.';}catch{q('#mailSendError').textContent='La copie mise en forme est indisponible dans ce navigateur. Télécharge le message avec ses images.';}
  };
  loadModel();
- return {render(){equipmentOptions();photoEquipmentId='';photoLoading=false;photoError='';previewSerial++;q('#mailSaveTemplate').disabled=!canEdit();if(!q('#mailTestSender').value)q('#mailTestSender').value=accountEmail();preview();}};
+ return {render(){equipmentOptions();photoEquipmentId='';photoLoading=false;photoError='';previewSerial++;q('#mailSaveTemplate').disabled=!canEdit();if(!q('#mailSender').value)q('#mailSender').value=accountEmail();preview();}};
 }
 // Ne jamais conserver les champs d’un formulaire de connexion dans l’adresse.
 {const url=new URL(location.href);let changed=false;for(const key of ['email','password','remember'])if(url.searchParams.has(key)){url.searchParams.delete(key);changed=true;}if(changed)history.replaceState(null,'',url.pathname+url.search+url.hash);}
@@ -3958,12 +3941,10 @@ function prepareInventoryRecovery(){
 inventoryResults.onclick=event=>{const button=event.target.closest('[data-inventory-container]');if(button)containersUI.openInventory(button.dataset.inventoryContainer);};
 const containersUI=installContainersUI({root:$('#containersView'),read:()=>data,save,saveContainers:saveContainerRecords,canEdit:()=>cloud?.role!=='reader',id:uuid,cloud,analyzeFiles:analyzeContainerFiles,analyzeCategoryFiles:analyzeContainerCategoryFiles,actor:accountName,makeReportPdf:buildReportPdf});
 const ownerReturnMailUI=installOwnerReturnMail({getState:()=>data,getDate:today,refreshState:async()=>{if(hasUnsavedForm())throw Error('Enregistrez les modifications de la fiche avant de préparer le mail.');await refreshNamingData();},onClose:()=>$('#prepareOwnerReturnMail')?.focus()});
-const mailTestUrl=new URL(location.href),mailTestDefaults={sender:mailTestUrl.searchParams.get('mailFrom')||'',recipient:mailTestUrl.searchParams.get('mailTo')||''};
-if(mailTestUrl.searchParams.has('mailFrom')||mailTestUrl.searchParams.has('mailTo')){mailTestUrl.searchParams.delete('mailFrom');mailTestUrl.searchParams.delete('mailTo');history.replaceState(null,'',mailTestUrl.pathname+mailTestUrl.search+mailTestUrl.hash);}
 const equipmentPhotoUI=installEquipmentPhoto({cloud,read:()=>data,save,canEdit:()=>cloud?.role!=='reader'});
-const vgpMailUI=installVgpMail({read:()=>data,save,canEdit:()=>cloud?.role!=='reader',loadEquipmentPhoto:id=>equipmentPhotoUI.mailPhoto(id),accountEmail:()=>cloud?.session?.user?.email||'',refresh:form=>refreshNamingData({ignoreForm:form}),cleanForm:form=>dirtyForms.delete(form),gmailClientId:window.VGP_MAIL?.gmailClientId||'',defaults:mailTestDefaults,createLossLink:cloud?async({equipmentId,recipient,test})=>{
- let result;try{result=await cloud.rpc('create_equipment_loss_link',{equipment_id:equipmentId,recipient,for_test:test});}catch(error){if(/create_equipment_loss_link|schema cache|not find the function/i.test(error.message))throw Error('Activez le script Supabase 024 pour ajouter le formulaire de déclaration au mail.');throw error;}
- let scrap;try{scrap=await cloud.rpc('create_equipment_scrap_link',{equipment_id:equipmentId,recipient,for_test:test});}catch(error){if(/create_equipment_scrap_link|schema cache|not find the function/i.test(error.message))throw Error('Activez le script Supabase 025 pour ajouter le formulaire de mise au rebut au mail.');throw error;}
+const vgpMailUI=installVgpMail({read:()=>data,save,canEdit:()=>cloud?.role!=='reader',loadEquipmentPhoto:id=>equipmentPhotoUI.mailPhoto(id),accountEmail:()=>cloud?.session?.user?.email||'',refresh:form=>refreshNamingData({ignoreForm:form}),cleanForm:form=>dirtyForms.delete(form),gmailClientId:window.VGP_MAIL?.gmailClientId||'',createLossLink:cloud?async({equipmentId,recipient})=>{
+ let result;try{result=await cloud.rpc('create_equipment_loss_link',{equipment_id:equipmentId,recipient,for_test:false});}catch(error){if(/create_equipment_loss_link|schema cache|not find the function/i.test(error.message))throw Error('Activez le script Supabase 024 pour ajouter le formulaire de déclaration au mail.');throw error;}
+ let scrap;try{scrap=await cloud.rpc('create_equipment_scrap_link',{equipment_id:equipmentId,recipient,for_test:false});}catch(error){if(/create_equipment_scrap_link|schema cache|not find the function/i.test(error.message))throw Error('Activez le script Supabase 025 pour ajouter le formulaire de mise au rebut au mail.');throw error;}
  return {url:equipmentLossFormUrl(location.href,result.token),scrapUrl:equipmentLossFormUrl(location.href,scrap.token,'scrap'),expiresAt:result.expiresAt<scrap.expiresAt?result.expiresAt:scrap.expiresAt};
 }:null});
 const workspaceNavigation=installWorkspaceNavigation({navigate:setView,openNaming:()=>namingReviewUI.open()});

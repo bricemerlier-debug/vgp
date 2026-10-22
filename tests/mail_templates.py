@@ -37,18 +37,21 @@ with sync_playwright() as p, TemporaryDirectory() as directory:
             sends.append(route.request.post_data_json)
             route.fulfill(json={'id': 'message-test-1'})
         page.route('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', send)
-        page.goto(base + path + '?mailFrom=expediteur%40example.test&mailTo=chef%40example.test#mailSettings')
+        page.goto(base + path + '#mailSettings')
         expect(page.locator('#mailSettingsView')).to_be_visible()
-        assert 'mailFrom=' not in page.url and 'mailTo=' not in page.url
         expect(page.locator('#mailModelCards button')).to_have_count(5)
+        assert page.locator('#mailIsTest').count() == 0
+        assert page.locator('.mail-mode-choice').count() == 0
         assert page.locator('#reminderSimulation').count() == 0
         assert page.locator('#digestForm').count() == 0
         page.locator('#mailSampleEquipment').select_option(seed['equipment'][0]['id'])
-        expect(page.locator('#mailTestRecipient')).to_have_value('chef@example.test')
+        expect(page.locator('#mailRecipient')).to_have_value('responsable@example.test')
+        page.locator('#mailSender').fill('expediteur@example.test')
         expect(page.locator('#mailEquipmentOwner')).to_contain_text('Responsable Test')
         preview = page.frame_locator('#mailSettingsPreview')
         expect(preview.get_by_role('heading', name='Votre matériel à contrôler')).to_be_visible()
         expect(preview.locator('body')).to_contain_text('TEST-VGP-001')
+        expect(preview.locator('body')).not_to_contain_text('MESSAGE DE TEST')
         expect(preview.locator('body')).to_contain_text('21/11/2026')
         assert page.locator('#mailPhotoFile').count() == 0
         expect(preview.get_by_alt_text('Photo du matériel TEST-VGP-001')).to_be_visible()
@@ -74,21 +77,21 @@ with sync_playwright() as p, TemporaryDirectory() as directory:
         file = Path(directory) / 'test.eml'
         event.value.save_as(file)
         mail = BytesParser(policy=policy.default).parsebytes(file.read_bytes())
-        assert str(mail['To']) == 'chef@example.test'
+        assert str(mail['To']) == 'responsable@example.test'
         assert str(mail['From']) == 'expediteur@example.test'
-        assert str(mail['Subject']).startswith('[TEST] Contrôle de Harnais')
+        assert str(mail['Subject']).startswith('Contrôle de Harnais')
         assert 'cid:equipment-photo' in mail.get_body(preferencelist=('html',)).get_content()
         assert len([part for part in mail.walk() if part.get_content_type() == 'image/jpeg']) == 2
         page.locator('.mail-export-options > summary').click()
         if path == '/':
             page.locator('#mailConnectGmail').click()
             expect(page.locator('#mailGmailStatus')).to_contain_text('Compte connecté : expediteur@example.test')
-            page.locator('#mailSendTest').click()
-            expect(page.locator('#mailTestError')).to_contain_text('formulaire de perte nécessite Supabase')
+            assert page.locator('#mailSend').is_disabled()
+            expect(page.locator('#mailGmailStatus')).to_contain_text('Activez Supabase')
             assert not sends
         else:
             expect(page.locator('#mailConnectGmail')).to_be_enabled()
-            expect(page.locator('#mailSendTest')).to_be_disabled()
+            expect(page.locator('#mailSend')).to_be_disabled()
             assert not sends
         page.locator('#mailSettingsView').screenshot(path='/tmp/mails-vgp-desktop.png')
         page.set_viewport_size({'width': 390, 'height': 844})
@@ -99,7 +102,7 @@ with sync_playwright() as p, TemporaryDirectory() as directory:
         expect(page.locator('#mailSubject')).to_have_value('Contrôle de {{nom_equipement}}')
         # L'adresse est reprise de la fiche : aucun contact supplémentaire à créer.
         page.locator('#mailSampleEquipment').select_option(seed['equipment'][0]['id'])
-        expect(page.locator('#mailTestRecipient')).to_have_value('responsable@example.test')
+        expect(page.locator('#mailRecipient')).to_have_value('responsable@example.test')
         page.goto(base + path + '#containers')
         page.reload()
         page.locator('#containerInventoryTab').click()

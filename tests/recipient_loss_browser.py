@@ -31,12 +31,13 @@ def api(route):
     if name == 'read_state': result = state
     elif name == 'tracking_ready': result = True
     elif name == 'read_shift_calendar': result = {'revision': 0, 'rows': [], 'imports': []}
-    elif name == 'create_equipment_loss_link':
+    elif name in ('create_equipment_loss_link', 'create_equipment_scrap_link'):
         assert body['equipment_id'] == equipment_id
         assert body['w'] == workspace
         assert request.headers.get('authorization') == 'Bearer session-fictive'
-        if not body['for_test']: assert body['recipient'] == 'responsable@example.test'
-        token = ('a' if body['for_test'] else 'b') * 64
+        assert body['for_test'] is False
+        assert body['recipient'] == 'responsable@example.test'
+        token = ('b' if name == 'create_equipment_loss_link' else 'c') * 64
         links[token] = {'test': body['for_test'], 'recipient': body['recipient'], 'receipt': None}
         result = {'token': token, 'expiresAt': '2035-01-01T00:00:00Z', 'test': body['for_test']}
     elif name == 'read_equipment_loss_link':
@@ -73,6 +74,7 @@ def api(route):
             route.fulfill(status=503, json={'message': 'Réponse fictive perdue'}, headers=headers)
             return
         result = receipt
+    elif 'equipment_photos?' in url: result = []
     elif 'workspace_state?' in url: result = [{'revision': state['revision']}]
     else: result = None
     route.fulfill(json=copy.deepcopy(result), headers=headers)
@@ -96,47 +98,43 @@ with sync_playwright() as p, TemporaryDirectory() as directory:
     errors = []
     context.on('page', lambda new_page: new_page.on('pageerror', lambda error: errors.append(str(error))))
     page.on('pageerror', lambda error: errors.append(str(error)))
-    page.goto(base + '/?mailFrom=expediteur%40example.test&mailTo=chef%40example.test#mailSettings')
+    page.goto(base + '/#mailSettings')
     expect(page.locator('#mailSettingsView')).to_be_visible()
     page.locator('#mailSampleEquipment').select_option(equipment_id)
     page.locator('#mailConnectGmail').click()
     expect(page.locator('#mailGmailStatus')).to_contain_text('Compte connecté')
-    for is_test in [True, False]:
-        if not is_test:
-            page.locator('#mailIsTest').uncheck()
-            expect(page.locator('#mailTestRecipient')).to_have_value('responsable@example.test')
-            expect(page.locator('#mailTestRecipient')).to_have_attribute('readonly', '')
-        page.locator('#mailSendTest').click()
-        expect(page.locator('#mailTestStatus')).to_contain_text(('Test' if is_test else 'Rappel') + ' envoyé')
-        html = mails[-1].get_body(preferencelist=('html',)).get_content()
-        link_url = re.search(r'href="([^"]+declarer-perte.html#token=[a-f0-9]{64})"', html).group(1)
-        assert ('[TEST]' in str(mails[-1]['Subject'])) == is_test
-        assert 'Déclarer ce matériel perdu' in html
-        assert state['payload']['equipment'][0]['archived'] is False
-        recipient = context.new_page()
-        recipient.goto(link_url)
-        expect(recipient.locator('#lossPanel')).to_be_visible()
-        assert not recipient.locator('input[type=password]').count()
-        assert recipient.locator('.portal-version').count() == 0
-        assert not submissions or is_test is False
-        recipient.locator('#lossSigner').fill('Responsable Test')
-        recipient.locator('#lossDetails').fill('Recherché dans le casier et dans l’atelier sans le retrouver.')
-        recipient.locator('#lossAccepted').check()
-        recipient.locator('#lossSubmit').click()
-        expect(recipient.locator('#lossSubmitError')).to_contain_text('Ajoutez votre signature')
-        recipient.locator('#lossSignWithName').click()
-        if not is_test:
-            recipient.locator('#lossPanel').screenshot(path='/tmp/declaration-perte-formulaire.png')
-        recipient.set_viewport_size({'width': 390, 'height': 844})
-        assert recipient.evaluate('document.documentElement.scrollWidth<=innerWidth')
-        recipient.locator('#lossSubmit').click()
-        expect(recipient.locator('#lossSuccess')).to_be_visible()
-        expect(recipient.locator('#lossSuccessText')).to_contain_text('Aucun matériel' if is_test else 'a été déclaré perdu')
-        assert state['payload']['equipment'][0]['archived'] is not is_test
-        recipient.reload()
-        expect(recipient.locator('#lossSuccess')).to_be_visible()
-        recipient.close()
-    assert len(submissions) == 2 and len(mails) == 2
+    page.on('dialog', lambda dialog: dialog.accept())
+    expect(page.locator('#mailRecipient')).to_have_value('responsable@example.test')
+    expect(page.locator('#mailSend')).to_be_enabled()
+    page.locator('#mailSend').click()
+    expect(page.locator('#mailSendStatus')).to_contain_text('Rappel envoyé')
+    html = mails[-1].get_body(preferencelist=('html',)).get_content()
+    link_url = re.search(r'href="([^"]+declarer-perte.html#token=[a-f0-9]{64})"', html).group(1)
+    assert not str(mails[-1]['Subject']).startswith('[TEST]')
+    assert 'Déclarer ce matériel perdu' in html
+    assert state['payload']['equipment'][0]['archived'] is False
+    recipient = context.new_page()
+    recipient.goto(link_url)
+    expect(recipient.locator('#lossPanel')).to_be_visible()
+    assert not recipient.locator('input[type=password]').count()
+    assert recipient.locator('.portal-version').count() == 0
+    recipient.locator('#lossSigner').fill('responsable_test@goodyear.com')
+    recipient.locator('#lossDetails').fill('Recherché dans le casier et dans l’atelier sans le retrouver.')
+    recipient.locator('#lossAccepted').check()
+    recipient.locator('#lossSubmit').click()
+    expect(recipient.locator('#lossSubmitError')).to_contain_text('Ajoutez votre signature')
+    recipient.locator('#lossSignWithName').click()
+    recipient.locator('#lossPanel').screenshot(path='/tmp/declaration-perte-formulaire.png')
+    recipient.set_viewport_size({'width': 390, 'height': 844})
+    assert recipient.evaluate('document.documentElement.scrollWidth<=innerWidth')
+    recipient.locator('#lossSubmit').click()
+    expect(recipient.locator('#lossSuccess')).to_be_visible()
+    expect(recipient.locator('#lossSuccessText')).to_contain_text('a été déclaré perdu')
+    assert state['payload']['equipment'][0]['archived'] is True
+    recipient.reload()
+    expect(recipient.locator('#lossSuccess')).to_be_visible()
+    recipient.close()
+    assert len(submissions) == 1 and len(mails) == 1
     page.goto(base + '/#equipment/' + equipment_id)
     page.reload()
     expect(page.locator('#equipmentOverview')).to_contain_text('Déclaration introuvable · suivi suspendu')
@@ -149,7 +147,7 @@ with sync_playwright() as p, TemporaryDirectory() as directory:
     assert 'DÉCLARATION D’INTROUVABLE' in text
     assert 'Signature du déclarant' in text
     invalid = context.new_page()
-    invalid.goto(base + '/declarer-perte.html#token=' + 'c' * 64)
+    invalid.goto(base + '/declarer-perte.html#token=' + 'd' * 64)
     expect(invalid.locator('#lossError')).to_contain_text('invalide')
     expect(invalid.locator('#lossPanel')).to_be_hidden()
     invalid.goto(base + '/operateur.html')
@@ -157,4 +155,4 @@ with sync_playwright() as p, TemporaryDirectory() as directory:
     assert invalid.locator('.portal-version').count() == 0
     assert not errors, errors
     browser.close()
-print('PASS déclaration de perte : mail, lien dédié, signature, test sans effet, archivage réel simulé, réponse perdue, PDF et badge opérateur retiré.')
+print('PASS déclaration de perte : envoi réel simulé, lien dédié, signature, archivage, rapport PDF et badge opérateur retiré.')

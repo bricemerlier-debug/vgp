@@ -4,13 +4,11 @@ Installer `supabase/024_recipient_loss_declaration.sql` après le schéma et les
 
 ## Parcours
 
-Dans Mails, préparer le message avec un matériel et son propriétaire. Le mode TEST est coché par défaut. Le désactiver pour préparer un rappel réel au propriétaire : l’adresse est alors reprise de sa fiche et n’est plus librement modifiable.
+Dans Mails, préparer le message avec un matériel et son propriétaire. L’adresse destinataire est reprise de la fiche et ne peut pas être remplacée. Le bouton envoie un vrai rappel après confirmation.
 
 Lors de l’envoi, de la copie ou de l’export du message, le site demande à Supabase un lien destiné à cette personne et à cet équipement. Le lien apparaît dans le bouton **Déclarer ce matériel perdu** et dans la version texte du mail. L’ouverture du formulaire ne modifie rien, y compris si une messagerie analyse automatiquement le lien.
 
-Le destinataire renseigne son nom et ses recherches, dessine sa signature ou signe avec son nom, puis accepte l’attestation et valide. Pour un rappel réel, la fiche passe immédiatement en **Équipement perdu**. Le serveur ajoute un événement `loss-declaration` avec un numéro de rapport, la signature, l’identité déclarée, l’adresse de réception du lien, l’attestation, les recherches et l’heure de Paris. Le rapport PDF existant reprend ces éléments, y compris la signature. Aucun contrôle VGP n’est ajouté. Les échéances ouvertes sont clôturées comme perdues et les rappels de ce matériel sont annulés.
-
-Pour un message TEST, le destinataire peut essayer et signer le formulaire, mais la fiche n’est pas modifiée. La confirmation dit explicitement qu’il s’agit d’un test.
+Le destinataire renseigne son nom et ses recherches, dessine sa signature ou signe avec son nom, puis accepte l’attestation et valide. La fiche passe immédiatement en **Équipement perdu**. Le serveur ajoute un événement `loss-declaration` avec un numéro de rapport, la signature, l’identité déclarée, l’adresse de réception du lien, l’attestation, les recherches et l’heure de Paris. Le rapport PDF existant reprend ces éléments, y compris la signature. Aucun contrôle VGP n’est ajouté. Les échéances ouvertes sont clôturées comme perdues et les rappels de ce matériel sont annulés.
 
 ## Portée du lien
 
@@ -24,4 +22,4 @@ L’enregistrement verrouille le lien et la fiche dans la même transaction. En 
 
 - `node tests/recipient_loss_database.mjs` : droits, lien limité, signature, perte réelle, essai sans effet, idempotence, expiration et réaffectation.
 - `node --test tests/vgp_mail.test.mjs` : bouton dans le HTML et le texte, URL de formulaire, API publique limitée et format du message.
-- `VGP_TEST_PORT=8125 python tests/recipient_loss_browser.py` : parcours mail et formulaire, compte rendu, mode test et affichage mobile, avec tous les services distants interceptés.
+- `VGP_TEST_PORT=8125 python tests/recipient_loss_browser.py` : parcours d’envoi réel simulé, formulaire signé, rapport et affichage mobile, avec tous les services distants interceptés.

@@ -17,8 +17,8 @@ import {sectorZones,sectorLabel,sectorChoices} from './sectors.mjs';
 import {ownerMergeSearch,ownerServiceOptions} from './personnel.mjs?v=050';
 import {installPersonnelOperations} from './personnel-ui.mjs';
 import {installWorkspaceNavigation} from './workspace-navigation.mjs?v=042';
-import {installVgpMail} from './vgp-mail-ui.mjs?v=101';
-import {vgpMailPhotoValid,vgpMailDefaultTemplates} from './vgp-mail.mjs?v=101';
+import {installVgpMail} from './vgp-mail-ui.mjs?v=102';
+import {vgpMailPhotoValid,vgpMailDefaultTemplates} from './vgp-mail.mjs?v=102';
 import {equipmentLossFormUrl} from './loss-link-api.mjs?v=095';
 import {reminderCivilDate} from './reminder-dates.mjs';
 import {installMaintenanceKpi} from './maintenance-kpi-ui.mjs';
@@ -134,12 +134,10 @@ function prepareInventoryRecovery(){
 inventoryResults.onclick=event=>{const button=event.target.closest('[data-inventory-container]');if(button)containersUI.openInventory(button.dataset.inventoryContainer);};
 const containersUI=installContainersUI({root:$('#containersView'),read:()=>data,save,saveContainers:saveContainerRecords,canEdit:()=>cloud?.role!=='reader',id:uuid,cloud,analyzeFiles:analyzeContainerFiles,analyzeCategoryFiles:analyzeContainerCategoryFiles,actor:accountName,makeReportPdf:buildReportPdf});
 const ownerReturnMailUI=installOwnerReturnMail({getState:()=>data,getDate:today,refreshState:async()=>{if(hasUnsavedForm())throw Error('Enregistrez les modifications de la fiche avant de préparer le mail.');await refreshNamingData();},onClose:()=>$('#prepareOwnerReturnMail')?.focus()});
-const mailTestUrl=new URL(location.href),mailTestDefaults={sender:mailTestUrl.searchParams.get('mailFrom')||'',recipient:mailTestUrl.searchParams.get('mailTo')||''};
-if(mailTestUrl.searchParams.has('mailFrom')||mailTestUrl.searchParams.has('mailTo')){mailTestUrl.searchParams.delete('mailFrom');mailTestUrl.searchParams.delete('mailTo');history.replaceState(null,'',mailTestUrl.pathname+mailTestUrl.search+mailTestUrl.hash);}
 const equipmentPhotoUI=installEquipmentPhoto({cloud,read:()=>data,save,canEdit:()=>cloud?.role!=='reader'});
-const vgpMailUI=installVgpMail({read:()=>data,save,canEdit:()=>cloud?.role!=='reader',loadEquipmentPhoto:id=>equipmentPhotoUI.mailPhoto(id),accountEmail:()=>cloud?.session?.user?.email||'',refresh:form=>refreshNamingData({ignoreForm:form}),cleanForm:form=>dirtyForms.delete(form),gmailClientId:window.VGP_MAIL?.gmailClientId||'',defaults:mailTestDefaults,createLossLink:cloud?async({equipmentId,recipient,test})=>{
- let result;try{result=await cloud.rpc('create_equipment_loss_link',{equipment_id:equipmentId,recipient,for_test:test});}catch(error){if(/create_equipment_loss_link|schema cache|not find the function/i.test(error.message))throw Error('Activez le script Supabase 024 pour ajouter le formulaire de déclaration au mail.');throw error;}
- let scrap;try{scrap=await cloud.rpc('create_equipment_scrap_link',{equipment_id:equipmentId,recipient,for_test:test});}catch(error){if(/create_equipment_scrap_link|schema cache|not find the function/i.test(error.message))throw Error('Activez le script Supabase 025 pour ajouter le formulaire de mise au rebut au mail.');throw error;}
+const vgpMailUI=installVgpMail({read:()=>data,save,canEdit:()=>cloud?.role!=='reader',loadEquipmentPhoto:id=>equipmentPhotoUI.mailPhoto(id),accountEmail:()=>cloud?.session?.user?.email||'',refresh:form=>refreshNamingData({ignoreForm:form}),cleanForm:form=>dirtyForms.delete(form),gmailClientId:window.VGP_MAIL?.gmailClientId||'',createLossLink:cloud?async({equipmentId,recipient})=>{
+ let result;try{result=await cloud.rpc('create_equipment_loss_link',{equipment_id:equipmentId,recipient,for_test:false});}catch(error){if(/create_equipment_loss_link|schema cache|not find the function/i.test(error.message))throw Error('Activez le script Supabase 024 pour ajouter le formulaire de déclaration au mail.');throw error;}
+ let scrap;try{scrap=await cloud.rpc('create_equipment_scrap_link',{equipment_id:equipmentId,recipient,for_test:false});}catch(error){if(/create_equipment_scrap_link|schema cache|not find the function/i.test(error.message))throw Error('Activez le script Supabase 025 pour ajouter le formulaire de mise au rebut au mail.');throw error;}
  return {url:equipmentLossFormUrl(location.href,result.token),scrapUrl:equipmentLossFormUrl(location.href,scrap.token,'scrap'),expiresAt:result.expiresAt<scrap.expiresAt?result.expiresAt:scrap.expiresAt};
 }:null});
 const workspaceNavigation=installWorkspaceNavigation({navigate:setView,openNaming:()=>namingReviewUI.open()});
