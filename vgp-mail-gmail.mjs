@@ -1,4 +1,4 @@
-import {buildVgpMailDraft,vgpMailAddressValid} from './vgp-mail.mjs?v=100';
+import {buildVgpMailDraft,vgpMailAddressValid} from './vgp-mail.mjs?v=101';
 
 // Le compte est autorisé par Google ; aucun mot de passe ni jeton n'est sauvegardé.
 export function createVgpGmail({clientId='',browser=globalThis,fetcher=(...args)=>fetch(...args),now=()=>Date.now()}={}){
@@ -34,8 +34,8 @@ export function createVgpGmail({clientId='',browser=globalThis,fetcher=(...args)
    if(!mail.test)throw Error('Seuls les messages de test peuvent être envoyés depuis cet écran.');
    return this.sendMail(mail);
   },
-  async sendMail(mail){
-   if(mail.test!==true)throw Error('Envoi réel désactivé : seuls les messages de test sont autorisés.');
+  async sendMail(mail,{allowReal=false}={}){
+   if(mail.test!==true&&!(mail.test===false&&allowReal))throw Error('Confirme le mode d’envoi réel avant de transmettre ce message.');
    if(!active()||session.email.toLowerCase()!==mail.sender.toLowerCase())throw Error('Connecte le compte Gmail choisi pour envoyer ce message.');
    const mime=buildVgpMailDraft(mail).replace('X-Unsent: 1\r\n','');let raw='';for(const byte of new TextEncoder().encode(mime))raw+=String.fromCharCode(byte);
    const body={raw:btoa(raw).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')},controller=new AbortController();

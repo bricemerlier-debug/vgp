@@ -4,7 +4,7 @@ L’onglet Mails affiche les cinq modèles enregistrés (J−30, J−14, J−7, 
 
 Le destinataire du test peut être remplacé sans modifier la fiche propriétaire. Le test porte `[TEST]` dans son objet et une indication visible dans son contenu. Il n’enregistre aucun contrôle et ne prépare aucun envoi automatique.
 
-Le mode TEST est verrouillé : aucun rappel réel ne peut être envoyé depuis cet écran. Les nouveaux mails comportent un bouton vers un formulaire de déclaration de perte propre à ce matériel. Activer d’abord `supabase/024_recipient_loss_declaration.sql` : [fonctionnement et vérifications](declaration-perte.md). Une signature depuis un lien TEST ne change pas la fiche ; depuis un rappel réel, la déclaration signée enregistre immédiatement le matériel comme perdu.
+Le mode TEST est sélectionné par défaut. Le mode réel est manuel, demande une confirmation et envoie uniquement au propriétaire associé à l’équipement. Les deux liens du mail ouvrent des formulaires de perte et de mise au rebut. Avec les scripts Supabase 024, 025 et 026 installés, une déclaration réelle signée archive l’équipement, crée un rapport PDF consultable dans l’historique des contrôles et associe le déclarant à une fiche contrôleur. Une validation depuis un mail TEST ne modifie aucune fiche. Aucun rappel automatique n’est activé.
 
 La photo déjà enregistrée sur l’équipement dans `mailPhoto` est automatiquement intégrée ; aucun ajout de photo n’est demandé dans Mails. Le logo et la photo sont joints au message avec des références CID pour qu’ils restent dans le mail sans URL d’image temporaire. L’aperçu affiche ces mêmes images. Les modèles personnalisés sont conservés ; les anciens modèles livrés par défaut sont remplacés par leur version simplifiée seulement s’ils n’ont pas été modifiés.
 
@@ -30,19 +30,19 @@ Pour préremplir un test, un lien peut contenir `?mailFrom=adresse&mailTo=adress
 
 ## Relances en retard
 
-Le modèle « Contrôle en retard » reprend le logo, la photo et le lien de déclaration de perte. La règle du planificateur prévoit J+7, J+14, J+21, etc., après l’échéance courante. Chaque semaine a une clé distincte : une nouvelle exécution le même jour ne double pas l’envoi. Aucun rattrapage des semaines passées. Un nouveau contrôle recalcule le cycle ; un archivage (perte ou rebut) annule les relances.
+Le modèle « Contrôle en retard » reprend le logo, la photo et les deux liens de déclaration. La règle du planificateur prévoit J+7, J+14, J+21, etc., après l’échéance courante. Chaque semaine a une clé distincte : une nouvelle exécution le même jour ne double pas l’envoi. Aucun rattrapage des semaines passées. Un nouveau contrôle recalcule le cycle ; un archivage (perte ou rebut) annule les relances.
 
 Le worker actuel reste un simulateur : aucun envoi récurrent réel ne fonctionne en arrière-plan. La connexion Gmail dans le navigateur permet des envois manuels uniquement. Le futur service de production doit exécuter quotidiennement le plan et supporter les étapes négatives (−7, −14, etc.) ; la contrainte SQL initiale des étapes ne les accepte pas encore.
 
-Les mails ne contiennent aucun bouton ni lien vers la fiche interne du matériel. Le lien personnel de déclaration de perte reste disponible.
+Les mails ne contiennent aucun bouton ni lien vers la fiche interne du matériel. Les liens personnels de perte et de mise au rebut restent disponibles.
 
-Depuis MAJ 091, le transport Gmail refuse aussi tout message dont `test` n’est pas strictement vrai. Seul un clic explicite sur « Envoyer le test » envoie un message TEST au destinataire saisi. Aucun envoi automatique activé.
+Le transport Gmail refuse un message réel sans autorisation explicite du mode réel dans l’écran Mails. Le bouton d’envoi réel affiche une confirmation avant l’envoi. Aucun envoi automatique ou récurrent n’est activé.
 
 ## Déclaration de mise au rebut — MAJ 095
 
 Un second encart propose « Déclarer la mise au rebut », avec la même présentation que la perte. Son formulaire distinct demande identité, motif/circonstances, signature et attestation. Le lien est secret, limité au matériel et au destinataire, valable 35 jours et à usage unique. Il nécessite l’installation de `supabase/025_recipient_scrap_declaration.sql` dans le SQL Editor (en plus du 024 pour la perte). Les deux liens sont préparés avant l’envoi ; en absence du 025, l’écran signale l’activation manquante et n’envoie rien.
 
-Le mode TEST reste verrouillé : une validation ne modifie aucune fiche. La fonction serveur prévoit un archivage avec motif « Mis au rebut » et rapport signé pour une activation réelle ultérieure ; aucun envoi réel n’est activé par cette mise à jour.
+En mode réel, la déclaration signée archive l’équipement avec le motif « Mis au rebut » et crée le rapport signé. Le rapport est visible et téléchargeable dans l’historique des contrôles. En mode TEST, aucune fiche n’est modifiée.
 
 ## Identité du déclarant et fiche contrôleur — MAJ 096
 
@@ -50,4 +50,4 @@ Installer `supabase/026_recipient_declaration_controller.sql` après 024 et 025.
 
 Hors test, la déclaration crée ou réutilise une fiche contrôleur par adresse, ou complète une fiche du même nom sans e-mail. Un homonyme ayant une autre adresse reste distinct. Le rapport signé porte son identifiant de contrôleur et apparaît dans sa fiche ainsi que dans l’historique du matériel ; il conserve sa nature de déclaration et ne valide aucune inspection réglementaire. La signature du rapport ne remplace pas la signature permanente du profil. Les nouvelles déclarations sont concernées ; les anciens rapports ne sont pas réattribués.
 
-En mode TEST, aucune fiche contrôleur ni entrée d’historique n’est créée. Les envois restent verrouillés en mode TEST.
+En mode TEST, aucune fiche contrôleur ni entrée d’historique n’est créée. L’envoi réel est une action manuelle confirmée ; les rappels récurrents restent désactivés.

@@ -1,5 +1,5 @@
-import {vgpMailKinds,vgpMailTemplateIssue,vgpMailAddressValid,buildVgpEquipmentMail,buildVgpMailDraft} from './vgp-mail.mjs?v=100';
-import {createVgpGmail} from './vgp-mail-gmail.mjs?v=100';
+import {vgpMailKinds,vgpMailTemplateIssue,vgpMailAddressValid,buildVgpEquipmentMail,buildVgpMailDraft} from './vgp-mail.mjs?v=101';
+import {createVgpGmail} from './vgp-mail-gmail.mjs?v=101';
 import {equipmentName} from './domain.mjs';
 import {equipmentMailRecipients} from './ownership.mjs';
 
@@ -7,7 +7,7 @@ export function installVgpMail({read,save,canEdit,loadEquipmentPhoto=async()=>un
  const host=document.querySelector('#vgpMailWorkspace'),safe=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
  const gmail=createVgpGmail({clientId:gmailClientId}),drafts=new Map(),lossLinks=new Map();let kind='month',busy=false,lastSent='',uncertain=false,photo=undefined,photoEquipmentId='',photoLoading=false,photoError='',previewSerial=0,previewSignature='';
  host.innerHTML=`<section class="mail-model-section"><div class="mail-section-heading"><div><span class="mail-kicker">01 · MESSAGES ENREGISTRÉS</span><h2>Choisir un modèle</h2></div><span class="mail-small-note">Le destinataire vient de la fiche propriétaire.</span></div><div id="mailModelCards" class="mail-model-cards"></div><details class="mail-edit-model"><summary>Modifier le modèle sélectionné</summary><form id="mailTemplateForm"><label>Objet<input id="mailSubject" required maxlength="300"></label><label>Message<textarea id="mailBody" rows="7" required maxlength="10000"></textarea></label><p class="foot">Champs disponibles : {{nom_proprietaire}}, {{nom_equipement}}, {{numero_interne}}, {{id_vgp}}, {{date_controle}}, {{secteur}}, {{zone}}.</p><button id="mailSaveTemplate" type="submit">Enregistrer le modèle</button><p id="mailTemplateSaved" role="status"></p><p id="mailTemplateError" class="error" role="alert"></p></form></details></section>
- <div class="mail-workspace-grid"><section class="mail-compose-card"><div class="mail-section-heading"><div><span class="mail-kicker">02 · PRÉPARER UN ENVOI</span><h2>Matériel et destinataire</h2><p>Un seul équipement, un seul destinataire.</p></div></div><form id="mailTestForm"><label>Rechercher un équipement<input id="mailEquipmentSearch" type="search" placeholder="Numéro interne ou nom du matériel…"></label><label>Équipement utilisé pour l’envoi<select id="mailSampleEquipment" data-native-select required></select></label><div id="mailEquipmentOwner" class="mail-owner-hint" role="status"></div><label>Depuis mon compte Gmail<input id="mailTestSender" type="email" required maxlength="254" autocomplete="email" placeholder="ton.adresse@gmail.com"></label><label>Destinataire<input id="mailTestRecipient" type="email" required maxlength="254" placeholder="Adresse du destinataire"></label><p class="foot">Tu peux remplacer cette adresse pour le test. La fiche propriétaire ne change pas.</p><label class="mail-mode-choice"><input id="mailIsTest" type="checkbox" checked disabled><span>Mode test uniquement · aucune fiche modifiée</span></label><p class="mail-test-notice">Le mail porte la mention <strong>TEST</strong>. Aucun contrôle ni rappel automatique n’est créé.</p><div class="mail-send-actions"><button type="button" id="mailConnectGmail" class="secondary">Connecter Gmail</button><button type="submit" id="mailSendTest">Envoyer le test</button></div><p id="mailGmailStatus" class="foot" role="status"></p><p id="mailTestStatus" role="status"></p><p id="mailTestError" class="error" role="alert"></p><details class="mail-export-options"><summary>Autres options</summary><button type="button" id="mailCopy" class="secondary">Copier le mail mis en forme</button><button type="button" id="mailDownloadDraft" class="secondary">Télécharger le message (.eml)</button><p class="foot">Le fichier .eml contient le logo et la photo. Son ouverture en brouillon dépend de ta messagerie.</p></details></form></section>
+ <div class="mail-workspace-grid"><section class="mail-compose-card"><div class="mail-section-heading"><div><span class="mail-kicker">02 · PRÉPARER UN ENVOI</span><h2>Matériel et destinataire</h2><p>Un seul équipement, un seul destinataire.</p></div></div><form id="mailTestForm"><label>Rechercher un équipement<input id="mailEquipmentSearch" type="search" placeholder="Numéro interne ou nom du matériel…"></label><label>Équipement utilisé pour l’envoi<select id="mailSampleEquipment" data-native-select required></select></label><div id="mailEquipmentOwner" class="mail-owner-hint" role="status"></div><label>Depuis mon compte Gmail<input id="mailTestSender" type="email" required maxlength="254" autocomplete="email" placeholder="ton.adresse@gmail.com"></label><label>Destinataire<input id="mailTestRecipient" type="email" required maxlength="254" placeholder="Adresse du destinataire"></label><p id="mailRecipientNote" class="foot">Tu peux remplacer cette adresse pour le test. La fiche propriétaire ne change pas.</p><label class="mail-mode-choice"><input id="mailIsTest" type="checkbox" checked><span>Mode test · aucune fiche modifiée</span></label><p class="mail-test-notice">Le mail porte la mention <strong>TEST</strong>. Aucun contrôle ni rappel automatique n’est créé.</p><div class="mail-send-actions"><button type="button" id="mailConnectGmail" class="secondary">Connecter Gmail</button><button type="submit" id="mailSendTest">Envoyer le test</button></div><p id="mailGmailStatus" class="foot" role="status"></p><p id="mailTestStatus" role="status"></p><p id="mailTestError" class="error" role="alert"></p><details class="mail-export-options"><summary>Autres options</summary><button type="button" id="mailCopy" class="secondary">Copier le mail mis en forme</button><button type="button" id="mailDownloadDraft" class="secondary">Télécharger le message (.eml)</button><p class="foot">Le fichier .eml contient le logo et la photo. Son ouverture en brouillon dépend de ta messagerie.</p></details></form></section>
  <section class="mail-preview-card"><div class="mail-section-heading"><div><span class="mail-kicker">03 · APERÇU DU MAIL</span><h2>Ce que recevra le destinataire</h2></div><span class="mail-test-tag">TEST</span></div><div class="mail-envelope"><p><span>À</span><strong id="mailPreviewRecipient">—</strong></p><p><span>Objet</span><strong id="mailPreviewSubject">—</strong></p></div><div id="mailPreviewEmpty" class="mail-preview-empty"><span aria-hidden="true">✉</span><h3>Ton mail prend forme ici</h3><p>Choisis un équipement pour afficher son rappel avec ses informations et sa photo.</p></div><iframe id="mailSettingsPreview" title="Aperçu du mail de rappel VGP" sandbox="allow-same-origin" hidden></iframe></section></div>`;
  const q=selector=>host.querySelector(selector),form=q('#mailTemplateForm'),testForm=q('#mailTestForm');
  q('#mailTestSender').value=defaults.sender||accountEmail();q('#mailTestRecipient').value=defaults.recipient||'';
@@ -15,7 +15,7 @@ export function installVgpMail({read,save,canEdit,loadEquipmentPhoto=async()=>un
  // Les champs du test sont temporaires, contrairement aux modèles enregistrés.
  for(const event of ['input','change'])testForm.addEventListener(event,e=>e.stopPropagation());
  function model(){return {kind,subject:q('#mailSubject').value,body:q('#mailBody').value};}
- function options(){return {equipmentId:q('#mailSampleEquipment').value,kind,recipient:q('#mailTestRecipient').value.trim(),sender:q('#mailTestSender').value.trim(),test:true,template:model(),siteUrl:location.origin+location.pathname};}
+ function options(){return {equipmentId:q('#mailSampleEquipment').value,kind,recipient:q('#mailTestRecipient').value.trim(),sender:q('#mailTestSender').value.trim(),test:q('#mailIsTest').checked,template:model(),siteUrl:location.origin+location.pathname};}
  function message(lossUrl='',scrapUrl=''){return buildVgpEquipmentMail(read(),{...options(),lossUrl,scrapUrl,equipmentPhoto:photoEquipmentId===q('#mailSampleEquipment').value?photo:undefined});}
  async function preparedMessage(){
   const id=q('#mailSampleEquipment').value;if(!id)return message();
@@ -39,9 +39,18 @@ export function installVgpMail({read,save,canEdit,loadEquipmentPhoto=async()=>un
   const current=gmail.active();q('#mailConnectGmail').disabled=busy||!gmail.configured();
   q('#mailConnectGmail').textContent=current?'Changer de compte Gmail':'Connecter Gmail';
   q('#mailGmailStatus').textContent=current?`Compte connecté : ${current.email}`:gmail.configured()?'Connecte ton compte Gmail pour envoyer le message depuis cette adresse.':'L’envoi direct nécessite de configurer la connexion Gmail du site. L’aperçu et le téléchargement du message sont disponibles.';
-  q('#mailSendTest').textContent=q('#mailIsTest').checked?'Envoyer le test':'Envoyer le rappel';
-  q('.mail-test-tag').textContent=q('#mailIsTest').checked?'TEST':'RAPPEL';
-  q('#mailSendTest').disabled=busy||photoLoading||!!photoError||!current||!q('#mailSampleEquipment').value||uncertain;
+  const isTest=q('#mailIsTest').checked;
+  q('#mailSendTest').textContent=isTest?'Envoyer le test':'Envoyer le rappel réel';
+  q('.mail-test-tag').textContent=isTest?'TEST':'RÉEL';
+  q('.mail-test-tag').classList.toggle('mail-live-tag',!isTest);
+  q('.mail-test-notice').classList.toggle('mail-live-notice',!isTest);
+  q('.mail-test-notice').innerHTML=isTest?'Le mail porte la mention <strong>TEST</strong>. Les déclarations signées ne modifieront aucune fiche. Aucun rappel automatique n’est activé.':'<strong>ENVOI RÉEL</strong> · Le message partira au propriétaire associé. S’il signe l’une des déclarations, la fiche sera archivée et un rapport sera créé. Aucun rappel automatique n’est activé.';
+  q('.mail-mode-choice span').textContent=isTest?'Mode test · aucune fiche modifiée':'Envoi réel · la déclaration signée modifiera la fiche';
+  q('#mailTestRecipient').readOnly=!isTest;
+  q('#mailRecipientNote').textContent=isTest?'Tu peux remplacer cette adresse pour le test. La fiche propriétaire ne change pas.':'Pour un envoi réel, le destinataire vient de la fiche propriétaire et ne peut pas être remplacé ici.';
+  const equipment=read().equipment.find(row=>row.id===q('#mailSampleEquipment').value),ownerRecipients=equipmentMailRecipients(equipment||{},read().ownerContacts||[]).filter(row=>vgpMailAddressValid(row.email));
+  const validRealRecipient=isTest||ownerRecipients.some(row=>row.email.toLowerCase()===q('#mailTestRecipient').value.trim().toLowerCase());
+  q('#mailSendTest').disabled=busy||photoLoading||!!photoError||!current||!q('#mailSampleEquipment').value||!validRealRecipient||uncertain;
  }
  function preview(){
   connection();q('#mailPreviewRecipient').textContent=q('#mailTestRecipient').value.trim()||'Choisis le matériel ou saisis une adresse';
@@ -70,9 +79,10 @@ export function installVgpMail({read,save,canEdit,loadEquipmentPhoto=async()=>un
  q('#mailSampleEquipment').onchange=()=>{
   previewSerial++;photoLoading=false;photoError='';photoEquipmentId='';
   const equipment=read().equipment.find(e=>e.id===q('#mailSampleEquipment').value);
-  if(!recipientOverridden)q('#mailTestRecipient').value=equipment?equipmentMailRecipients(equipment,read().ownerContacts||[]).find(row=>vgpMailAddressValid(row.email))?.email||'':'';
+  if(!recipientOverridden||!q('#mailIsTest').checked)q('#mailTestRecipient').value=equipment?equipmentMailRecipients(equipment,read().ownerContacts||[]).find(row=>vgpMailAddressValid(row.email))?.email||'':'';
   q('#mailTestError').textContent='';q('#mailTestStatus').textContent='';preview();
  };
+ q('#mailIsTest').onchange=()=>{recipientOverridden=false;const equipment=read().equipment.find(e=>e.id===q('#mailSampleEquipment').value);if(!q('#mailIsTest').checked)q('#mailTestRecipient').value=equipment?equipmentMailRecipients(equipment,read().ownerContacts||[]).find(row=>vgpMailAddressValid(row.email))?.email||'':'';lastSent='';q('#mailTestError').textContent='';q('#mailTestStatus').textContent='';preview();};
  q('#mailTestRecipient').oninput=()=>{recipientOverridden=true;preview();};
  q('#mailTestSender').oninput=()=>{gmail.disconnect();preview();};
  q('#mailSubject').oninput=q('#mailBody').oninput=()=>{drafts.set(kind,model());q('#mailTemplateSaved').textContent='Modifications non enregistrées.';preview();};
@@ -92,11 +102,12 @@ export function installVgpMail({read,save,canEdit,loadEquipmentPhoto=async()=>un
   q('#mailTestError').textContent='';q('#mailTestStatus').textContent='';
   try{
    const initial=await preparedMessage();if(!initial.recipient)throw Error('Renseigne le destinataire du message.');
+   if(!initial.test&&!confirm(`Envoyer ce rappel RÉEL à ${initial.recipient} pour l’équipement ${read().equipment.find(e=>e.id===initial.equipmentId)?.identifier||''} ?\n\nLe message contiendra les deux liens de déclaration. Si le destinataire signe une déclaration, l’équipement sera archivé et un rapport sera créé.`))return;
    if(JSON.stringify(initial)!==previewSignature){preview();throw Error('La photo ou la fiche a changé. Relis le nouvel aperçu avant d’envoyer.');}
    const signature=JSON.stringify(initial);if(signature===lastSent)throw Error('Ce message a déjà été envoyé. Modifie le message ou le matériel pour préparer un nouvel envoi.');
    busy=true;connection();q('#mailTestStatus').textContent='Vérification du matériel avant l’envoi…';await refresh(form);
    const current=await preparedMessage();if(JSON.stringify(current)!==signature){preview();throw Error('La fiche ou le destinataire a changé. L’aperçu est actualisé : relis-le avant d’envoyer.');}
-   const ready=await withLossLink(current,true);q('#mailTestStatus').textContent='Envoi du message via Gmail…';const result=await gmail.sendMail(ready);lastSent=signature;q('#mailTestStatus').textContent=`${current.test?'Test':'Rappel'} envoyé à ${result.recipient} depuis ${current.sender}.`;
+   const ready=await withLossLink(current,true);q('#mailTestStatus').textContent='Envoi du message via Gmail…';const result=await gmail.sendMail(ready,{allowReal:!current.test});lastSent=signature;q('#mailTestStatus').textContent=`${current.test?'Test':'Rappel réel'} envoyé à ${result.recipient} depuis ${current.sender}.`;
   }catch(error){uncertain=!!error.uncertain;q('#mailTestStatus').textContent='';q('#mailTestError').textContent=error.message;}finally{busy=false;connection();}
  };
  q('#mailDownloadDraft').onclick=async()=>{
