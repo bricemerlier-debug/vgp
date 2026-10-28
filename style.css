@@ -908,3 +908,14 @@ html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:act
 .hub-cards .hub-card-pending{background:#fbfcfe;cursor:help}
 .hub-cards .hub-card-pending span{color:#627b95}
 @media(prefers-reduced-motion:reduce){html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button{animation:none;transition:none}html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:hover,html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:focus-visible,html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:active{transform:none}.hub-cards .hub-icon,.hub-cards .hub-arrow{transition:none}.hub-cards button:hover .hub-icon,.hub-cards button:focus-visible .hub-icon,.hub-cards button:hover .hub-arrow,.hub-cards button:focus-visible .hub-arrow{transform:none}}
+
+/* Tableau de bord : actions groupées à gauche, suivi du mois dans l'espace libre. */
+@media(min-width:901px){
+ #homeView.hub-show-dashboard .home-goal>div:first-child{display:grid;grid-template-columns:minmax(360px,390px) minmax(0,1fr);grid-template-rows:auto auto auto;column-gap:clamp(18px,3vw,48px);align-items:center}
+ #homeView.hub-show-dashboard .home-controls{grid-column:1;grid-row:1;margin:0}
+ #homeView.hub-show-dashboard .home-goal-actions{grid-column:1;grid-row:2 / span 2;margin:10px 0 0;align-self:start}
+ #homeView.hub-show-dashboard .home-goal .eyebrow{grid-column:2;grid-row:1;align-self:end}
+ #homeView.hub-show-dashboard .home-month-heading{grid-column:2;grid-row:2;width:auto;max-width:none;margin:0;justify-content:flex-start}
+ #homeView.hub-show-dashboard .home-month-heading h2{margin-right:0}
+ #homeView.hub-show-dashboard .home-month-counts{grid-column:2;grid-row:3;width:auto;max-width:none;margin:8px 0 0;justify-content:flex-start}
+}
