@@ -872,3 +872,9 @@ html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards{grid-templ
 html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button{min-height:clamp(230px,24vh,320px)}
 @media(max-width:850px){html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards{grid-template-columns:1fr}}
+
+/* Tableau de bord VGP : même identité que l'espace Contenants. */
+#homeView.hub-show-dashboard .home-goal{border:1px solid #d1e0f0;border-top:5px solid #0057a8;box-shadow:0 8px 24px #00356b0c}
+#homeView.hub-show-dashboard .home-grid .panel{border:1px solid #d1e0f0;box-shadow:0 8px 24px #00356b0c}
+#homeView.hub-show-dashboard .home-controls{margin-top:4px}
+#homeView.hub-show-dashboard .home-priority-filters{background:#f3f7fc;border:1px solid #d5e3f2;border-radius:10px}

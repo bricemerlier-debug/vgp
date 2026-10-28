@@ -9,6 +9,8 @@ document.querySelectorAll('[data-hub-space]').forEach(button => {
 document.querySelector('#hubSpaceClose').addEventListener('click', () => dialog.close());
 document.querySelector('[data-hub-open="containers"]').addEventListener('click', () => document.querySelector('#switchToContainers').click());
 const home = document.querySelector('#homeView');
+const workspace = document.querySelector('#vgpWorkspace');
+home.before(workspace);
 document.querySelectorAll('#homeLogo, [data-view="home"]').forEach(button => button.addEventListener('click', () => home.classList.remove('hub-show-dashboard')));
 const dashboard = document.createElement('button');
 dashboard.type = 'button';
