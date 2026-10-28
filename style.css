@@ -880,3 +880,7 @@ html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button{min
 #homeView.hub-show-dashboard .home-priority-filters{background:#f3f7fc;border:1px solid #d5e3f2;border-radius:10px}
 .hub-header-title{display:none}
 html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-header-title{display:block;color:#fff;font-size:clamp(24px,2.2vw,36px);font-weight:800;letter-spacing:.08em;line-height:1.1;margin-top:8px;text-align:center}
+
+/* Aligner le titre et le choix de l’année dans le bandeau KPI contenants. */
+#containersView #containerKpiPanel>.toolbar{align-items:center;justify-content:space-between}
+#containersView #containerKpiPanel>.toolbar>div{flex:0 1 auto}
