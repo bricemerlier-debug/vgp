@@ -854,3 +854,11 @@ header .header-engineering-logo{display:block;width:72px;height:72px;object-fit:
  #containerListPanel .container-toolbar>.actions{width:100%;margin-left:0}
 }
 @media(max-width:520px){.workspace-hero{align-items:flex-start;flex-direction:column-reverse}.workspace-hero-brand{align-self:flex-start}.workspace-panel-heading h2{font-size:19px}#containersView .tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Accueil du hub : cartes généreuses et retour visuel au survol. */
+html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .metrology-hub{max-width:1500px;margin:48px auto}
+html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:24px}
+html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button{min-height:270px;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button b{font-size:26px}
+html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:hover,html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:focus-visible{transform:translateY(-7px) scale(1.015);box-shadow:0 16px 30px #00356b26}
+@media(prefers-reduced-motion:reduce){html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button{transition:none}html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:hover,html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:focus-visible{transform:none}}
