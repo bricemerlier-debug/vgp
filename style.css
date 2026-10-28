@@ -269,6 +269,7 @@ button.material-sort-header{display:inline-flex;align-items:center;justify-conte
 .header-metric.header-metric-complete{background:#d5eddf;border-color:#19734c;color:#155139}.header-metric.header-metric-warning{background:#ffedba;border-color:#b77800;color:#704900}.header-metric.header-metric-low{background:#fbd8d3;border-color:#c3382d;color:#85241d}.header-metric span{color:inherit}@media(max-width:1380px){.header-metric{min-width:54px;padding:6px 8px}.header-progress{gap:6px;margin-right:0}.header-settings{gap:8px}}@media(max-width:700px){.header-settings{flex-wrap:wrap}.header-settings .header-progress{flex-basis:100%;justify-content:center;margin-bottom:4px}.header-left .brand{align-self:end}.header-metric{min-width:58px}.header-progress .header-metric span{display:block}}
 
 .site-mode-switch{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;max-width:1440px;margin:18px auto -12px;padding:0 24px}
+.site-mode-switch{display:none}
 .site-mode-switch button{min-width:160px;min-height:44px;border:2px solid transparent;border-radius:9px;font-weight:750;box-shadow:0 3px 10px #00356b17}
 #switchToVgp{background:#0057a8;color:#fff}
 #switchToContainers{background:#ffda00;color:#00356b}
@@ -862,3 +863,4 @@ html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button{min
 html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button b{font-size:26px}
 html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:hover,html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:focus-visible{transform:translateY(-7px) scale(1.015);box-shadow:0 16px 30px #00356b26}
 @media(prefers-reduced-motion:reduce){html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button{transition:none}html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:hover,html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:focus-visible{transform:none}}
+.hub-cards .hub-icon{width:120px;height:120px;object-fit:contain;display:block;pointer-events:none}
