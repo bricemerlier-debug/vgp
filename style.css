@@ -884,3 +884,27 @@ html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-header-title{dis
 /* Aligner le titre et le choix de l’année dans le bandeau KPI contenants. */
 #containersView #containerKpiPanel>.toolbar{align-items:center;justify-content:space-between}
 #containersView #containerKpiPanel>.toolbar>div{flex:0 1 auto}
+
+@media(min-width:901px){
+ #homeView .home-goal .home-month-heading,#homeView .home-goal .home-month-counts{width:max-content;max-width:100%;margin-left:auto;margin-right:auto}
+}
+/* Interaction du hub : couleurs des modules et mouvements sobres. */
+.hub-cards button:nth-child(1){--hub-accent:#0057a8}
+.hub-cards button:nth-child(2){--hub-accent:#d4ad00}
+.hub-cards button:nth-child(3){--hub-accent:#a74230}
+.hub-cards button:nth-child(4){--hub-accent:#16765b}
+.hub-cards button:nth-child(5){--hub-accent:#674c91}
+.hub-cards button:nth-child(6){--hub-accent:#006e83}
+.hub-cards button:nth-child(7){--hub-accent:#9a5a08}
+html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button{position:relative;overflow:hidden;border:1px solid #d3e1ee;border-top:4px solid var(--hub-accent);border-radius:14px;box-shadow:0 5px 16px #00356b0d;background:#fff;cursor:pointer;animation:hub-enter .5s ease both;animation-delay:calc((var(--hub-order,0))*55ms);transition:transform 250ms ease,box-shadow 250ms ease,border-color 250ms ease,background-color 250ms ease}
+.hub-cards button:nth-child(1){--hub-order:0}.hub-cards button:nth-child(2){--hub-order:1}.hub-cards button:nth-child(3){--hub-order:2}.hub-cards button:nth-child(4){--hub-order:3}.hub-cards button:nth-child(5){--hub-order:4}.hub-cards button:nth-child(6){--hub-order:5}.hub-cards button:nth-child(7){--hub-order:6}
+@keyframes hub-enter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:hover,html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:focus-visible{transform:translateY(-6px) scale(1.02);border-color:var(--hub-accent);box-shadow:0 18px 34px #00356b22,0 5px 15px color-mix(in srgb,var(--hub-accent) 20%,transparent)}
+html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:active{transform:translateY(-2px) scale(.99)}
+.hub-cards .hub-icon{transition:transform 250ms ease}
+.hub-cards button:hover .hub-icon,.hub-cards button:focus-visible .hub-icon{transform:translateY(-4px) scale(1.045)}
+.hub-cards .hub-arrow{display:inline-block;font-style:normal;transition:transform 250ms ease}
+.hub-cards button:hover .hub-arrow,.hub-cards button:focus-visible .hub-arrow{transform:translateX(5px)}
+.hub-cards .hub-card-pending{background:#fbfcfe;cursor:help}
+.hub-cards .hub-card-pending span{color:#627b95}
+@media(prefers-reduced-motion:reduce){html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button{animation:none;transition:none}html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:hover,html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:focus-visible,html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:active{transform:none}.hub-cards .hub-icon,.hub-cards .hub-arrow{transition:none}.hub-cards button:hover .hub-icon,.hub-cards button:focus-visible .hub-icon,.hub-cards button:hover .hub-arrow,.hub-cards button:focus-visible .hub-arrow{transform:none}}
