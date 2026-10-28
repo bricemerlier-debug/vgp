@@ -10,8 +10,12 @@ document.querySelector('#hubSpaceClose').addEventListener('click', () => dialog.
 document.querySelector('[data-hub-open="vgp"]').addEventListener('click', () => document.querySelector('#switchToVgp').click());
 document.querySelector('[data-hub-open="containers"]').addEventListener('click', () => document.querySelector('#switchToContainers').click());
 const home = document.querySelector('#homeView');
-const dashboard = document.querySelector('#hubDashboard');
+document.querySelectorAll('#homeLogo, [data-view="home"]').forEach(button => button.addEventListener('click', () => home.classList.remove('hub-show-dashboard')));
+const dashboard = document.createElement('button');
+dashboard.type = 'button';
+dashboard.textContent = 'Tableau de bord VGP';
 dashboard.addEventListener('click', () => {
-  const shown = home.classList.toggle('hub-show-dashboard');
-  dashboard.textContent = shown ? 'Masquer le tableau de bord VGP' : 'Afficher le tableau de bord VGP';
+  document.querySelector('#homeLogo').click();
+  if (!home.hidden) home.classList.add('hub-show-dashboard');
 });
+document.querySelector('.site-mode-switch').append(dashboard);
