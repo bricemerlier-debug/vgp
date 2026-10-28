@@ -223,6 +223,17 @@ export function containerWeeklyAgenda(containers,weekDate=containerCivilToday(),
  const entries=days.flatMap(day=>day.entries),completed=entries.filter(entry=>entry.done).length;
  return {start,end:days[6].date,days,total:entries.length,completed,pending:entries.length-completed,overdue,unknown};
 }
+// Échelle commune à toutes les années présentes dans les interventions.
+export function containerKpiScale(containers){
+ const counts=new Map(); let max=0;
+ for(const container of containers)for(const intervention of container.interventions||[]){
+  const date=String(intervention.date||'');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date))continue;
+  const month=Number(date.slice(5,7));if(month<1||month>12)continue;
+  const key=date.slice(0,7),count=(counts.get(key)||0)+1;counts.set(key,count);max=Math.max(max,count);
+ }
+ return Math.max(4,Math.ceil(max/4)*4);
+}
 export function containerAnnualActivity(containers,year){
  const months=Array.from({length:12},(_,index)=>({month:index+1,actions:[],preventive:0,other:0,due:0}));
  for(const container of containers){
@@ -680,7 +691,7 @@ export function installContainersUI({root,read,save,saveContainers,canEdit,id,cl
   const previousTotal=containerAnnualActivity(state(),kpiYear-1).reduce((n,m)=>n+m.actions.length,0),difference=total-previousTotal;
   $('#containerKpiComparison').textContent=`${kpiYear-1} : ${previousTotal} intervention${previousTotal===1?'':'s'} · Écart : ${difference>0?'+':''}${difference}`;
   $('#containerKpiPreviousYear').disabled=kpiYear<=1900;$('#containerKpiNextYear').disabled=kpiYear>=9999;
-  const max=Math.max(1,...months.map(m=>m.actions.length));
+  const max=containerKpiScale(state());
   const ticks=[0,Math.ceil(max/4),Math.ceil(max/2),Math.ceil(max*3/4),max].filter((v,i,a)=>a.indexOf(v)===i).sort((a,b)=>a-b);
   const y=count=>220-count/max*170;
   const points=months.map((m,i)=>`${55+i*65},${y(m.actions.length)}`).join(' ');
