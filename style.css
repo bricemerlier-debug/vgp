@@ -921,23 +921,6 @@ html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:act
 }
 
 
-/* Cartes Goodyear et équipe en poste du hub. */
-.hub-cards .hub-card-brand,.hub-cards .hub-card-shift{min-height:270px;padding:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border:1px solid #d3e1ee;border-top:4px solid #0057a8;border-radius:14px;background:#fff;color:#003b75;text-align:center;box-shadow:0 5px 16px #00356b0d;animation:hub-enter .5s ease both}
-.hub-cards .hub-card-brand{border-top-color:#0057a8;--hub-order:4}
-.hub-cards .hub-card-brand b,.hub-cards .hub-card-shift strong{font-size:23px;color:#003b75}
-.hub-cards .hub-card-brand span,.hub-cards .hub-card-shift .header-shift-caption,.hub-cards .hub-card-shift .header-shift-hours{font-size:13px;color:#52739a}
-.hub-cards .hub-brand-logo{display:block;width:min(90%,300px);height:82px;object-fit:contain}
-.hub-cards .hub-card-shift{border-top-color:#0057a8;--hub-order:8}
-.hub-cards .hub-card-shift [role=status]{display:flex;flex-direction:column;align-items:center;gap:9px}
-.hub-cards .hub-shift-nav{display:flex;justify-content:center;gap:8px;margin-top:4px}
-.hub-cards .hub-shift-nav button{min-height:36px;padding:6px 12px;border:1px solid #cadbed;border-radius:8px;background:#edf3f9;color:#003b75}
-.hub-cards .hub-shift-nav button:disabled{opacity:.5}
-html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards{grid-template-columns:repeat(3,minmax(0,1fr))}
-@media(max-width:900px){html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:700px){.hub-cards .hub-card-brand,.hub-cards .hub-card-shift{min-height:230px;padding:22px}.hub-cards .hub-card-brand b,.hub-cards .hub-card-shift strong{font-size:20px}}
-@media(max-width:520px){html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards{grid-template-columns:1fr}}
-@media(prefers-reduced-motion:reduce){.hub-cards .hub-card-brand,.hub-cards .hub-card-shift{animation:none}}
-
 /* Écran de connexion : accueil immersif, formulaire simple et responsive. */
 .cloud-locked{min-height:100vh;background:radial-gradient(ellipse at 78% 22%,#e5eef8 0,transparent 38%),#f3f6fa}
 #authGate[hidden],#loginForm[hidden],#passwordForm[hidden]{display:none!important}

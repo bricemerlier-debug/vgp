@@ -13,19 +13,14 @@ export function installShiftCalendar({cloud=null,onChange=()=>{}}={}){
   if(headerSlotKey!==slotKey){headerOffset=0;headerSlotKey=slotKey;}
   let slot=current;for(let n=0;n<headerOffset;n++)slot=shiftNextSlot(slot);
   const row=shiftOccupant(state.rows,slot),status=shiftSlotState(state.rows,slot);
-  const content=`<span class="header-shift-caption">${headerOffset?'Prochaine relève · +'+headerOffset+' poste'+(headerOffset>1?'s':''):'Actuellement en poste'}</span><strong>${row?'Équipe '+safe(row.team):status==='off'?'Aucune équipe prévue':'Planning non renseigné'}</strong><span class="header-shift-hours">${safe(SHIFT_CODES[slot.code])} · ${hourFmt(slot.start)}–${hourFmt(slot.end)} · ${safe(dateFmt(slot.date))}</span>`;
-  for(const prefix of ['headerShift','hubShift']){
-   qs('#'+prefix+'Content').innerHTML=content;
-   qs('#'+prefix+'Previous').disabled=headerOffset===0;
-   qs('#'+prefix+'Next').disabled=headerOffset===21;
-   qs('#'+prefix+'Live').disabled=headerOffset===0;
-  }
+  qs('#headerShiftContent').innerHTML=`<span class="header-shift-caption">${headerOffset?'Prochaine relève · +'+headerOffset+' poste'+(headerOffset>1?'s':''):'Actuellement en poste'}</span><strong>${row?'Équipe '+safe(row.team):status==='off'?'Aucune équipe prévue':'Planning non renseigné'}</strong><span class="header-shift-hours">${safe(SHIFT_CODES[slot.code])} · ${hourFmt(slot.start)}–${hourFmt(slot.end)} · ${safe(dateFmt(slot.date))}</span>`;
+  qs('#headerShiftPrevious').disabled=headerOffset===0;
+  qs('#headerShiftNext').disabled=headerOffset===21;
+  qs('#headerShiftLive').disabled=headerOffset===0;
  }
- for(const prefix of ['headerShift','hubShift']){
-  qs('#'+prefix+'Previous').onclick=()=>{if(headerOffset>0)headerOffset--;renderHeader();};
-  qs('#'+prefix+'Next').onclick=()=>{if(headerOffset<21)headerOffset++;renderHeader();};
-  qs('#'+prefix+'Live').onclick=()=>{headerOffset=0;renderHeader();};
- }
+ qs('#headerShiftPrevious').onclick=()=>{if(headerOffset>0)headerOffset--;renderHeader();};
+ qs('#headerShiftNext').onclick=()=>{if(headerOffset<21)headerOffset++;renderHeader();};
+ qs('#headerShiftLive').onclick=()=>{headerOffset=0;renderHeader();};
  function renderCurrent(){
   const current=shiftCurrent(state.rows),p=shiftParisParts(),stamp=state.revision+'|'+p.date+'|'+p.hour+'|'+p.minute;if(stamp===clockKey)return;clockKey=stamp;renderHeader(current);onChange(state.rows);
  }
