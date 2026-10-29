@@ -26,7 +26,7 @@ import {installMaintenanceKpi} from './maintenance-kpi-ui.mjs';
 import {installApaveActionImport} from './apave-actions-import.mjs';
 import {installNamingReview} from './nomenclature-ui.mjs';
 import {installEquipmentMaintenance} from './maintenance-ui.mjs';
-import {installShiftCalendar} from './shift-calendar-ui.mjs?v=122';
+import {installShiftCalendar} from './shift-calendar-ui.mjs?v=123';
 import {extractApavePdf,apaveSuggestedResult,apaveStates,matchApaveRecords,apavePageLabel,applyApaveImport,apaveDataValid} from './apave.mjs';
 import {goodyearReportLogo} from './assets/report-logo.mjs';
 import {lifecycleCandidates,applyLifecycleImport} from './lifecycle-import.mjs';
@@ -57,6 +57,7 @@ fillSectorOptions($('#homePrioritySector'),'Tous les secteurs',{includeNoSector:
 fillSectorOptions($('#equipmentForm').elements.sector,'Choisir un secteur',{includeNoSector:true});
 let cloud=null, cloudState=null, pendingMigration=null, excelPreview=null;
 if(window.VGP_CLOUD?.enabled){
+ $('#authGate').hidden=false;
  try{validateConfig(window.VGP_CLOUD);cloud=new CloudStore(window.VGP_CLOUD);$('#rememberLogin').checked=cloud.remember;}
  catch(error){$('#authError').textContent=error.message;$('#loginForm').hidden=true;return;}
  try{const linkType=await cloud.acceptLink(location.hash);if(linkType){history.replaceState(null,'',location.pathname+location.search);if(['invite','recovery'].includes(linkType)){
