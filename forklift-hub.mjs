@@ -15,7 +15,7 @@ function openHub(name) {
  panel.querySelector('.close').onclick = () => panel.close();
  panel.querySelectorAll('[data-section]').forEach(button => button.onclick = () => {
   const id = button.dataset.section;
-  if (name === 'choc') { location.href = `choc-chariot.html?rubrique=${id}`; return; }
+  if (name === 'choc') { panel.close(); openChocPage(id); return; }
   panel.close();
   if (name === 'containers') {
    document.querySelector('#switchToContainers').click();
@@ -35,3 +35,22 @@ document.querySelectorAll('[data-hub-space="Choc chariot"]').forEach(button => {
 document.querySelector('[data-hub-open="vgp"]')?.addEventListener('click', event => {event.stopImmediatePropagation(); openHub('vgp');}, true);
 
 document.querySelector('[data-hub-open="containers"]')?.addEventListener('click', event => {event.stopImmediatePropagation(); openHub('containers');}, true);
+
+const chocHome = document.querySelector('#homeView');
+const chocPage = document.createElement('section');
+chocPage.className = 'choc-workspace';
+chocPage.hidden = true;
+chocHome.append(chocPage);
+function openChocPage(id) {
+ const names = {chariots:'Fiche chariot',conducteurs:'Fiche conducteur',kpi:'KPI Choc chariot'};
+ if (!names[id]) return;
+ document.querySelector('#homeLogo').click();
+ chocHome.classList.add('hub-show-dashboard');
+ document.documentElement.classList.add('choc-mode');
+ chocPage.hidden = false;
+ document.querySelector('#headerSiteTitle').textContent = 'Suivi des chocs chariot Goodyear Amiens';
+ chocPage.innerHTML = `<div class="workspace-hero choc-workspace-hero"><div><span class="workspace-hero-kicker">GOODYEAR AMIENS · CHOC CHARIOT</span><h1>Suivi des chocs chariot</h1></div><div class="workspace-hero-brand"><img src="assets/goodyear-logo.jpg" alt="Goodyear"><span>GOODYEAR AMIENS</span></div></div><div class="tabs choc-tabs" role="group" aria-label="Rubriques Choc chariot">${spaces.choc.items.map(([key,title])=>`<button type="button" class="${key === id ? '' : 'secondary'}" data-choc-tab="${key}" aria-pressed="${key === id}">${title}</button>`).join('')}</div><section class="panel choc-sheet"><div class="toolbar"><div><p class="eyebrow">CHOC CHARIOT</p><h2>${names[id]}</h2></div></div><div class="choc-empty"><h3>${id === 'kpi' ? 'Indicateurs' : 'Informations de la fiche'}</h3><p>Le contenu sera défini ultérieurement.</p></div></section>`;
+ chocPage.querySelectorAll('[data-choc-tab]').forEach(button => button.onclick = () => openChocPage(button.dataset.chocTab));
+}
+function leaveChoc() { document.documentElement.classList.remove('choc-mode'); chocPage.hidden = true; }
+document.querySelectorAll('#homeLogo, [data-view], #switchToContainers, #switchToVgp').forEach(button => button.addEventListener('click', leaveChoc, true));
