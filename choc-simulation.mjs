@@ -15,7 +15,7 @@ export const simulatedChocs = Array.from({length: 360}, (_, i) => {
  return {id: `SIM-CHOC-${String(i + 1).padStart(3,'0')}`, vehicleId: chariot.id, driverId: conducteur.id, sector: chariot.sector, level: 1 + ((i * 7 + Math.floor(i / 11)) % 5), date: date.toISOString()};
 });
 
-export function attachChocSimulation(root, type) {
+export function attachChocSimulation(root, type, initialId = null) {
  const items = type === 'chariots' ? simulatedChariots : simulatedConducteurs;
  const grid = root.querySelector('.choc-card-grid');
  const search = root.querySelector('.choc-search input');
@@ -33,7 +33,7 @@ export function attachChocSimulation(root, type) {
    const reference = document.createElement('p'); reference.textContent = item.id;
    const group = document.createElement('p'); group.textContent = type === 'chariots' ? `Secteur : ${item.sector}` : `Équipe : ${item.team}`;
    const badge = document.createElement('p'); badge.className = 'choc-simulation-label'; badge.textContent = 'Fiche de simulation';
-   const button = document.createElement('button'); button.className = 'secondary'; button.type = 'button'; button.textContent = 'Ouvrir la fiche';
+   const button = document.createElement('button'); button.className = 'secondary'; button.type = 'button'; button.dataset.recordId = item.id; button.textContent = 'Ouvrir la fiche';
    button.onclick = () => {results.hidden = true; detail.hidden = false; detail.querySelector('h3').textContent = item.name; detail.querySelector('[data-simulation-id]').textContent = item.id; detail.querySelector('[data-simulation-group]').textContent = type === 'chariots' ? `Secteur : ${item.sector}` : `Équipe : ${item.team}`; const history = detail.querySelector('[data-choc-history]'); const events = simulatedChocs.filter(event => type === 'chariots' ? event.vehicleId === item.id : event.driverId === item.id).sort((a,b) => b.date.localeCompare(a.date)); history.innerHTML = events.length ? events.map(event => `<li><strong>Niveau ${event.level}</strong> · ${new Date(event.date).toLocaleString('fr-FR', {timeZone:'UTC',dateStyle:'short',timeStyle:'short'})} · Secteur ${event.sector} · ${type === 'chariots' ? event.driverId : event.vehicleId}</li>`).join('') : '<li>Aucun choc fictif.</li>'; detail.querySelector('h3').focus();};
    card.append(heading,reference,group,badge,button); grid.append(card);
   }
@@ -41,4 +41,5 @@ export function attachChocSimulation(root, type) {
  search.addEventListener('input', render);
  detail.querySelector('[data-return-cards]').onclick = () => { detail.hidden = true; results.hidden = false; search.focus(); };
  render();
+ if (initialId) grid.querySelector(`[data-record-id="${initialId}"]`)?.click();
 }

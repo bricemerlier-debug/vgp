@@ -1,5 +1,5 @@
-import { attachChocSimulation } from './choc-simulation.mjs?v=3';
-import { chocKpiContent, attachChocKpi } from './choc-kpi.mjs?v=4';
+import { attachChocSimulation } from './choc-simulation.mjs?v=4';
+import { chocKpiContent, attachChocKpi } from './choc-kpi.mjs?v=5';
 const panel = document.createElement('dialog');
 panel.className = 'forklift-space';
 panel.setAttribute('aria-labelledby', 'miniHubTitle');
@@ -43,7 +43,7 @@ const chocPage = document.createElement('section');
 chocPage.className = 'choc-workspace';
 chocPage.hidden = true;
 chocHome.append(chocPage);
-function openChocPage(id) {
+function openChocPage(id, recordId = null) {
  const names = {chariots:'Fiche chariot',conducteurs:'Fiche conducteur',kpi:'KPI Choc chariot'};
  if (!names[id]) return;
  document.querySelector('#homeLogo').click();
@@ -51,9 +51,9 @@ function openChocPage(id) {
  document.documentElement.classList.add('choc-mode');
  chocPage.hidden = false;
  document.querySelector('#headerSiteTitle').textContent = 'Suivi des chocs chariot Goodyear Amiens';
- chocPage.innerHTML = `<div class="workspace-hero choc-workspace-hero"><div><span class="workspace-hero-kicker">GOODYEAR AMIENS · CHOC CHARIOT</span><h1>Suivi des chocs chariot</h1></div><div class="workspace-hero-brand"><img src="assets/goodyear-logo.jpg" alt="Goodyear"><span>GOODYEAR AMIENS</span></div></div><div class="tabs choc-tabs" role="group" aria-label="Rubriques Choc chariot">${spaces.choc.items.map(([key,title])=>`<button type="button" class="${key === id ? '' : 'secondary'}" data-choc-tab="${key}" aria-pressed="${key === id}">${title}</button>`).join('')}</div><p class="choc-portal-link"><a href="portail-operateur-choc.html" target="_blank" rel="noopener">Portail opérateur ↗</a></p><section class="panel choc-sheet">${id === 'kpi' ? chocKpiContent() : `<div class="workspace-panel-heading choc-section-heading"><h2>${id === 'chariots' ? 'Chariots' : 'Conducteurs'}</h2><button type="button" disabled>+ Ajouter ${id === 'chariots' ? 'un chariot' : 'un conducteur'}</button></div><div class="choc-results"><p class="choc-simulation-notice">Simulation : données fictives, sans enregistrement ni connexion Aprolis.</p><label class="choc-search">Rechercher ${id === 'chariots' ? 'un chariot' : 'un conducteur'}<input type="search" placeholder="${id === 'chariots' ? 'Numéro du chariot…' : 'Nom du conducteur…'}"></label><p class="choc-result-count" aria-live="polite"></p><div class="choc-card-grid"></div></div><section class="choc-profile" hidden><button type="button" class="secondary" data-return-cards>← Retour aux fiches</button><h3 tabindex="-1"></h3><p>Identifiant : <strong data-simulation-id></strong></p><p data-simulation-group></p><p class="choc-simulation-notice">Fiche fictive de simulation.</p><h4>Historique des chocs fictifs</h4><p class="foot">Tous les niveaux sont affichés ici ; seuls les niveaux 3 à 5 comptent dans les KPI.</p><ul class="choc-history" data-choc-history></ul></section>`}</section>`;
- if (id === 'chariots' || id === 'conducteurs') attachChocSimulation(chocPage, id);
- if (id === 'kpi') attachChocKpi(chocPage);
+ chocPage.innerHTML = `<div class="workspace-hero choc-workspace-hero"><div><span class="workspace-hero-kicker">GOODYEAR AMIENS · CHOC CHARIOT</span><h1>Suivi des chocs chariot</h1></div><div class="workspace-hero-brand"><img src="assets/goodyear-logo.jpg" alt="Goodyear"><span>GOODYEAR AMIENS</span></div></div><div class="tabs choc-tabs" role="group" aria-label="Rubriques Choc chariot">${spaces.choc.items.map(([key,title])=>`<button type="button" class="${key === id ? '' : 'secondary'}" data-choc-tab="${key}" aria-pressed="${key === id}"><img class="choc-tab-icon" src="assets/forklift/${key}.svg" alt=""><span>${title}</span></button>`).join('')}</div><p class="choc-portal-link"><a href="portail-operateur-choc.html" target="_blank" rel="noopener">Portail opérateur ↗</a></p><section class="panel choc-sheet">${id === 'kpi' ? chocKpiContent() : `<div class="workspace-panel-heading choc-section-heading"><h2>${id === 'chariots' ? 'Chariots' : 'Conducteurs'}</h2><button type="button" disabled>+ Ajouter ${id === 'chariots' ? 'un chariot' : 'un conducteur'}</button></div><div class="choc-results"><p class="choc-simulation-notice">Simulation : données fictives, sans enregistrement ni connexion Aprolis.</p><label class="choc-search">Rechercher ${id === 'chariots' ? 'un chariot' : 'un conducteur'}<input type="search" placeholder="${id === 'chariots' ? 'Numéro du chariot…' : 'Nom du conducteur…'}"></label><p class="choc-result-count" aria-live="polite"></p><div class="choc-card-grid"></div></div><section class="choc-profile" hidden><button type="button" class="secondary" data-return-cards>← Retour aux fiches</button><h3 tabindex="-1"></h3><p>Identifiant : <strong data-simulation-id></strong></p><p data-simulation-group></p><p class="choc-simulation-notice">Fiche fictive de simulation.</p><h4>Historique des chocs fictifs</h4><p class="foot">Tous les niveaux sont affichés ici ; seuls les niveaux 3 à 5 comptent dans les KPI.</p><ul class="choc-history" data-choc-history></ul></section>`}</section>`;
+ if (id === 'chariots' || id === 'conducteurs') attachChocSimulation(chocPage, id, recordId);
+ if (id === 'kpi') attachChocKpi(chocPage, (type, record) => openChocPage(type, record));
  chocPage.querySelectorAll('[data-choc-tab]').forEach(button => button.onclick = () => openChocPage(button.dataset.chocTab));
 }
 function leaveChoc() { document.documentElement.classList.remove('choc-mode'); chocPage.hidden = true; }
