@@ -13,5 +13,9 @@ function render(section) {
 document.querySelectorAll('[data-hub-space="Choc chariot"]').forEach(button => {
  button.classList.remove('hub-card-pending'); button.classList.add('hub-card-active');
  const label = button.querySelector('b + span'); if (label) label.textContent = 'Chariots, conducteurs et KPI →';
- button.addEventListener('click', event => {event.stopImmediatePropagation(); render(); panel.showModal();}, true);
+ button.addEventListener('click', event => {event.stopImmediatePropagation(); location.href = 'choc-chariot.html';}, true);
 });
+document.querySelector('[data-hub-open="vgp"]')?.addEventListener('click', event => {
+ event.stopImmediatePropagation();
+ location.href = 'vgp-hub.html';
+}, true);
