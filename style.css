@@ -960,3 +960,13 @@ html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:act
 @media(max-width:760px){.auth-gate{width:min(540px,calc(100% - 28px));min-height:0;margin:18px auto;grid-template-columns:1fr;border-radius:18px}.auth-showcase{min-height:250px;padding:30px 28px}.auth-showcase-main{gap:20px}.auth-logo{width:min(270px,86%);padding:9px 12px}.auth-showcase h1{max-width:540px;font-size:34px}.auth-content{padding:35px 28px 25px}.auth-form-heading{margin-bottom:24px}.auth-form-heading h2{font-size:29px}.auth-content-footer{margin-top:20px}}
 @media(max-width:420px){.auth-gate{width:calc(100% - 20px);margin:10px auto}.auth-showcase{min-height:230px;padding:26px 20px}.auth-showcase h1{font-size:30px}.auth-content{padding:28px 20px 20px}}
 @media(prefers-reduced-motion:reduce){.auth-gate input:not([type=checkbox]),.auth-gate .auth-submit{transition:none}.auth-gate .auth-submit:hover{transform:none}}
+
+/* Icônes des onglets VGP : SVG natifs, cohérents avec la navigation. */
+#vgpWorkspace .equipment-page-tabs button,
+#vgpWorkspace .vgp-action-tabs button,
+#vgpWorkspace .vgp-dashboard-tab{display:inline-flex;align-items:center;justify-content:center;gap:9px}
+#vgpWorkspace .vgp-tab-icon{width:20px;height:20px;flex:0 0 20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+#vgpWorkspace .vgp-dashboard-tab{min-height:42px;padding:10px 15px;border:1px solid #d4e1ee;border-radius:9px;background:#fff;color:#174674;font-weight:650;cursor:pointer}
+#vgpWorkspace .vgp-dashboard-tab:hover{border-color:#0057a8;color:#0057a8}
+@media(max-width:700px){#vgpWorkspace .equipment-page-tabs button,#vgpWorkspace .vgp-action-tabs button,#vgpWorkspace .vgp-dashboard-tab{gap:6px}#vgpWorkspace .vgp-tab-icon{width:18px;height:18px;flex-basis:18px}}
+@media(min-width:701px){#vgpWorkspace .equipment-page-tabs button,#vgpWorkspace .vgp-action-tabs button,#vgpWorkspace .vgp-dashboard-tab{padding:10px 7px;font-size:13px;gap:5px}#vgpWorkspace .vgp-tab-icon{width:16px;height:16px;flex-basis:16px}}

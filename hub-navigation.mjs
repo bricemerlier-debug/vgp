@@ -30,12 +30,13 @@ dashboard.addEventListener('click', () => {
 document.querySelector('[aria-label="VGP"]').append(dashboard);
 const dashboardTab = document.createElement('button');
 dashboardTab.type = 'button';
+dashboardTab.className = 'vgp-dashboard-tab';
 dashboardTab.id = 'vgpDashboardTab';
 dashboardTab.setAttribute('role', 'tab');
 dashboardTab.setAttribute('aria-controls', 'homeView');
 dashboardTab.setAttribute('aria-selected', 'false');
 dashboardTab.tabIndex = -1;
-dashboardTab.textContent = 'Tableau de bord';
+dashboardTab.innerHTML = '<svg class="vgp-tab-icon" viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="4" width="26" height="24" rx="3"/><path d="M7 22V17h4v5M14 22v-9h4v9M21 22V9h4v13M6 25h20"/></svg><span>Tableau de bord</span>';
 dashboardTab.addEventListener('click', () => dashboard.click());
 document.querySelector('#vgpWorkspace .workspace-tabs').prepend(dashboardTab);
 document.querySelector('#vgpWorkspace').addEventListener('click', event => {
