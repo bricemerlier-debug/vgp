@@ -9,7 +9,7 @@ const spaces = {
 function openHub(name) {
  const space = spaces[name];
  panel.classList.toggle('vgp-mini-hub', name === 'vgp');
- panel.innerHTML = `<div class="dialoghead"><h2 id="miniHubTitle">${space.title}</h2><button type="button" class="close" aria-label="Fermer">×</button></div><p class="eyebrow">ENGINEERING PLANT FLOOR</p><h3>Choisissez votre rubrique</h3><div class="forklift-grid">${space.items.map(([id,title,description]) => `<button type="button" class="forklift-card" data-section="${id}">${name === 'choc' ? `<img class="forklift-icon" src="assets/forklift/${id}.svg" alt="">` : ''}<strong>${title}</strong><span>${description}</span><span aria-hidden="true">→</span></button>`).join('')}</div>${name === 'choc' ? '<p class="foot">Connexion automatique aux capteurs / Aprolis : non configurée.</p>' : ''}`;
+ panel.innerHTML = `<div class="dialoghead"><h2 id="miniHubTitle">${space.title}</h2><button type="button" class="close" aria-label="Fermer">×</button></div><p class="eyebrow">ENGINEERING PLANT FLOOR</p><h3>Choisissez votre rubrique</h3><div class="forklift-grid">${space.items.map(([id,title,description]) => `<button type="button" class="forklift-card" data-section="${id}"><img class="forklift-icon" src="assets/${name === 'choc' ? 'forklift' : 'vgp-hub'}/${id}.svg" alt=""><strong>${title}</strong><span>${description}</span><span aria-hidden="true">→</span></button>`).join('')}</div>${name === 'choc' ? '<p class="foot">Connexion automatique aux capteurs / Aprolis : non configurée.</p>' : ''}`;
  panel.querySelector('.close').onclick = () => panel.close();
  panel.querySelectorAll('[data-section]').forEach(button => button.onclick = () => {
   const id = button.dataset.section;
