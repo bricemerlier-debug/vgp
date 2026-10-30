@@ -970,3 +970,10 @@ html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:act
 #vgpWorkspace .vgp-dashboard-tab:hover{border-color:#0057a8;color:#0057a8}
 @media(max-width:700px){#vgpWorkspace .equipment-page-tabs button,#vgpWorkspace .vgp-action-tabs button,#vgpWorkspace .vgp-dashboard-tab{gap:6px}#vgpWorkspace .vgp-tab-icon{width:18px;height:18px;flex-basis:18px}}
 @media(min-width:701px){#vgpWorkspace .equipment-page-tabs button,#vgpWorkspace .vgp-action-tabs button,#vgpWorkspace .vgp-dashboard-tab{padding:10px 7px;font-size:13px;gap:5px}#vgpWorkspace .vgp-tab-icon{width:16px;height:16px;flex-basis:16px}}
+
+/* Icônes des rubriques Contenants. */
+#containersView .tabs button{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+#containersView .container-tab-icon{width:20px;height:20px;flex:0 0 20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#containersView .container-icon-accent{stroke:#d79d00}
+#containersView .tabs button[aria-selected="true"] .container-icon-accent{stroke:#ffdb00}
+@media(max-width:700px){#containersView .tabs button{gap:5px}#containersView .container-tab-icon{width:18px;height:18px;flex-basis:18px}}
