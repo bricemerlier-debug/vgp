@@ -977,3 +977,4 @@ html:has(#homeView:not([hidden]):not(.hub-show-dashboard)) .hub-cards button:act
 #containersView .container-icon-accent{stroke:#d79d00}
 #containersView .tabs button[aria-selected="true"] .container-icon-accent{stroke:#ffdb00}
 @media(max-width:700px){#containersView .tabs button{gap:5px}#containersView .container-tab-icon{width:18px;height:18px;flex-basis:18px}}
+#containersView img.container-tab-icon{object-fit:contain}
