@@ -1,9 +1,9 @@
-// Les données et les règles de rapprochement des chocs restent à définir avec Aprolis.
+import { sectors, simulatedChocs, simulatedConducteurs } from './choc-simulation.mjs?v=3';
 export function chocKpiContent() {
- return `<div class="workspace-panel-heading"><h2>KPI Choc chariot</h2></div>
- <p class="choc-kpi-intro">Les indicateurs prennent en compte les chocs de niveaux 3, 4 et 5. Les niveaux 1 et 2 sont exclus.</p>
- <div class="choc-kpi-levels" aria-label="Niveaux de choc suivis"><span>Niveau 3</span><span>Niveau 4</span><span>Niveau 5</span></div>
- <div class="choc-kpi-grid"><section class="choc-kpi-block" aria-labelledby="choc-sector-title"><h3 id="choc-sector-title">Chocs par secteur</h3><p>Nombre de chocs par secteur, niveaux 3 à 5.</p><div class="choc-kpi-empty">Aucune donnée disponible pour afficher les secteurs.</div></section>
- <section class="choc-kpi-block" aria-labelledby="choc-driver-title"><h3 id="choc-driver-title">Classement des conducteurs</h3><p>Classement par nombre de chocs de niveaux 3 à 5, du plus élevé au plus faible.</p><div class="choc-kpi-empty">Aucune donnée disponible pour établir le classement.</div></section></div>
- <p class="foot">Données des capteurs / Aprolis : connexion non configurée.</p>`;
+ const counted = simulatedChocs.filter(event => event.level >= 3 && event.level <= 5);
+ const counts = sectors.map(sector => ({sector, count:counted.filter(event => event.sector === sector).length}));
+ const ranking = simulatedConducteurs.map(driver => ({...driver, count:counted.filter(event => event.driverId === driver.id).length})).filter(driver => driver.count > 0).sort((a,b) => b.count-a.count || a.name.localeCompare(b.name,'fr'));
+ return `<div class="workspace-panel-heading"><h2>KPI Choc chariot</h2></div><p class="choc-simulation-notice">Simulation : chocs, chariots et conducteurs fictifs. Aucune connexion Aprolis.</p><p class="choc-kpi-intro">${counted.length} chocs fictifs de niveaux 3, 4 et 5. Les niveaux 1 et 2 sont exclus des KPI.</p><div class="choc-kpi-levels" aria-label="Niveaux de choc suivis"><span>Niveau 3</span><span>Niveau 4</span><span>Niveau 5</span></div>
+ <div class="choc-kpi-grid"><section class="choc-kpi-block"><h3>Chocs par secteur</h3><p>Nombre de chocs fictifs de niveaux 3 à 5.</p><div class="choc-kpi-table-wrap"><table class="choc-kpi-table"><thead><tr><th>Secteur</th><th>Chocs</th></tr></thead><tbody>${counts.map(item=>`<tr><td>${item.sector}</td><td>${item.count}</td></tr>`).join('')}</tbody></table></div></section>
+ <section class="choc-kpi-block"><h3>Classement des conducteurs</h3><p>Par nombre de chocs fictifs de niveaux 3 à 5, du plus élevé au plus faible.</p><div class="choc-kpi-table-wrap"><table class="choc-kpi-table"><thead><tr><th>Rang</th><th>Conducteur fictif</th><th>Équipe</th><th>Chocs</th></tr></thead><tbody>${ranking.map((item,i)=>`<tr><td>${i+1}</td><td>${item.name}</td><td>${item.team}</td><td>${item.count}</td></tr>`).join('')}</tbody></table></div></section></div><p class="foot">Données des capteurs / Aprolis : connexion non configurée.</p>`;
 }
